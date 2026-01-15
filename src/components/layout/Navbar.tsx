@@ -12,7 +12,7 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white">
       {/* --- Main Header --- */}
-      <div className="container mx-auto flex items-center justify-between gap-10 px-6 py-4">
+      <div className="container mx-auto flex items-center justify-between gap-10 py-4">
         {/* 1. Logo Section */}
         <Link href="/" className="flex shrink-0 flex-col -space-y-1.5">
           <span className="text-primary text-[28px] font-bold tracking-tighter">CAYRE</span>
@@ -28,7 +28,7 @@ export default function Navbar() {
             <input
               type="text"
               placeholder="Search for items or brands"
-              className="h-11 w-full rounded-xl border border-slate-200 bg-[#f9fafb] pr-4 pl-12 text-sm transition-all outline-none placeholder:text-slate-400 focus:bg-white focus:ring-1 focus:ring-slate-300"
+              className="h-11 w-full rounded-md border border-slate-200 bg-[#f9fafb] pr-4 pl-12 text-sm transition-all outline-none placeholder:text-slate-400 focus:bg-white focus:ring-1 focus:ring-slate-300"
             />
           </div>
         </div>
@@ -105,7 +105,7 @@ export default function Navbar() {
       </div>
 
       {/* --- Category Bar (Polished) --- */}
-      {mode === 'home' && (
+      {(mode === 'home' || mode === 'guest') && (
         <nav className="border-t border-slate-100 bg-white">
           <ul className="container mx-auto flex h-12 items-center gap-10 px-6">
             {['Woman', 'Men', 'Kids', 'Home', 'Electronics', 'About Us'].map((item) => (
