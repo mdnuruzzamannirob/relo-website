@@ -107,7 +107,7 @@ export default function Navbar() {
       {/* --- Category Bar (Polished) --- */}
       {(mode === 'home' || mode === 'guest') && (
         <nav className="border-t border-slate-100 bg-white">
-          <ul className="container mx-auto flex h-12 items-center gap-10 px-6">
+          <ul className="container mx-auto flex h-12 items-center gap-10">
             {['Woman', 'Men', 'Kids', 'Home', 'Electronics', 'About Us'].map((item) => (
               <li key={item}>
                 <Link
