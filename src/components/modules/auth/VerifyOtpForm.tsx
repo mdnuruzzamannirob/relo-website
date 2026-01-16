@@ -1,13 +1,14 @@
 'use client';
 
+import ButtonComp from '@/components/shared/ButtonComp';
 import Logo from '@/components/shared/Logo';
-import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 
 const VerifyOtpForm = () => {
   const router = useRouter();
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
+  const isLoading = false;
 
   useEffect(() => {
     inputsRef.current[0]?.focus();
@@ -32,7 +33,7 @@ const VerifyOtpForm = () => {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-119px)] items-center justify-center py-16">
+    <div className="flex min-h-[calc(100vh-119px)] items-center justify-center py-14">
       <div className="border-brand-100 w-full max-w-120 rounded-xl border p-8 shadow-sm">
         <div className="mb-5 flex flex-col items-center text-center">
           <Logo />
@@ -60,9 +61,15 @@ const VerifyOtpForm = () => {
             ))}
           </div>
 
-          <Button type="submit" size="lg" className="h-11 w-full">
+          <ButtonComp
+            type="submit"
+            loading={isLoading}
+            loadingText="Verifying..."
+            size="lg"
+            className="h-11 w-full"
+          >
             Verify
-          </Button>
+          </ButtonComp>
         </form>
 
         <p className="mt-5 text-center text-sm text-slate-500">

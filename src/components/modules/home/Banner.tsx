@@ -1,6 +1,8 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
 import Image from 'next/image';
+import Link from 'next/link';
 
 const Banner = () => {
   return (
@@ -28,13 +30,13 @@ const Banner = () => {
 
           {/* Right Side: Buttons */}
           <div className="flex w-full flex-col gap-3 md:w-65">
-            <button className="bg-primary w-full rounded-xl py-3.5 font-semibold text-white transition-opacity hover:opacity-95">
-              Sell Now
-            </button>
+            <Button className="h-13 w-full rounded-xl text-base">Sell Now</Button>
 
-            <button className="border-primary text-primary w-full rounded-xl border py-3.5 font-semibold transition hover:bg-slate-100">
-              Learn how it works
-            </button>
+            <Link href="/how-it-works">
+              <Button variant="outline" className="border-primary h-13 w-full rounded-xl text-base">
+                Learn how it works
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

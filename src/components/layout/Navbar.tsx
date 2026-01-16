@@ -8,7 +8,7 @@ import Link from 'next/link';
 import Logo from '../shared/Logo';
 
 export default function Navbar() {
-  const mode: string = 'guest'; //'guest' | 'home' | 'dashboard
+  const mode: string = 'home'; //'guest' | 'home' | 'dashboard
   const nav = ['Woman', 'Men', 'Kids', 'Home', 'Electronics', 'About Us'];
 
   return (
@@ -96,11 +96,11 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             <Link href="/sign-in">
               <Button size="lg" variant="ghost">
-                Login
+                Sign In
               </Button>
             </Link>
             <Link href="/sign-up">
-              <Button size="lg">Sign up</Button>
+              <Button size="lg">Sign Up</Button>
             </Link>
           </div>
         )}

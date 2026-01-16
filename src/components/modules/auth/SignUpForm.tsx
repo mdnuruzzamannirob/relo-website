@@ -1,5 +1,6 @@
 'use client';
 
+import ButtonComp from '@/components/shared/ButtonComp';
 import Logo from '@/components/shared/Logo';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -9,6 +10,7 @@ import { useRouter } from 'next/navigation';
 
 const SignUpForm = () => {
   const router = useRouter();
+  const isLoading = false;
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -16,7 +18,7 @@ const SignUpForm = () => {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-119px)] items-center justify-center py-16">
+    <div className="flex min-h-[calc(100vh-119px)] items-center justify-center py-14">
       <div className="border-brand-100 w-full max-w-120 rounded-xl border p-8 shadow-sm">
         {/* Title */}
         <div className="mb-5 flex flex-col items-center text-center">
@@ -109,9 +111,15 @@ const SignUpForm = () => {
           </label>
 
           {/* Sign Up */}
-          <Button type="submit" size="lg" className="h-11 w-full">
+          <ButtonComp
+            type="submit"
+            loading={isLoading}
+            loadingText="Signing up..."
+            size="lg"
+            className="h-11 w-full"
+          >
             Sign Up
-          </Button>
+          </ButtonComp>
         </form>
 
         {/* Divider */}
