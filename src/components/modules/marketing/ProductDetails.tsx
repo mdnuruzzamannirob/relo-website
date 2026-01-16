@@ -12,6 +12,11 @@ const product = {
   images: [
     'https://images.unsplash.com/photo-1584917865442-de89df76afd3',
     'https://images.unsplash.com/photo-1591561954557-26941169b49e',
+    'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab',
+    'https://images.unsplash.com/photo-1581655353564-df123a1eb820',
+    'https://images.unsplash.com/photo-1434389677669-e08b4cac3105',
+    'https://images.unsplash.com/photo-1618354691373-d851c5c3a990',
+    'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c',
   ],
   meta: [
     { label: 'Size', value: 'M' },

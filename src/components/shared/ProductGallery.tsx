@@ -3,6 +3,13 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import ImageZoomPreview from './ImageZoomPreview';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { FreeMode } from 'swiper/modules';
+
+import 'swiper/css';
+import 'swiper/css/free-mode';
+
+import { cn } from '@/lib/utils/cn';
 
 interface Props {
   images: string[];
@@ -23,20 +30,22 @@ export default function ProductGallery({ images, title }: Props) {
         <Image src={images[active]} alt={title} fill priority className="object-cover" />
       </div>
 
-      {/* THUMBNAILS (ALWAYS BELOW) */}
-      <div className="mt-4 flex w-full gap-3 overflow-x-auto">
+      {/* THUMBNAILS SWIPER */}
+      <Swiper modules={[FreeMode]} spaceBetween={12} slidesPerView="auto" freeMode className="mt-4">
         {images.map((img, i) => (
-          <button
-            key={img}
-            onClick={() => setActive(i)}
-            className={`relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border ${
-              active === i ? 'border-primary ring-primary ring-2' : 'border-brand-100'
-            }`}
-          >
-            <Image src={img} alt="" fill className="object-cover" />
-          </button>
+          <SwiperSlide key={img} className="w-24!">
+            <button
+              onClick={() => setActive(i)}
+              className={cn(
+                'relative size-24 overflow-hidden rounded-lg border-4 transition',
+                active === i ? 'border-primary' : 'border-transparent',
+              )}
+            >
+              <Image src={img} alt="" fill className="object-cover" />
+            </button>
+          </SwiperSlide>
         ))}
-      </div>
+      </Swiper>
 
       {/* MODAL */}
       {open && <ImageZoomPreview images={images} index={active} onClose={() => setOpen(false)} />}
