@@ -1,5 +1,15 @@
+import VerifyOtpForm from '@/components/modules/auth/VerifyOtpForm';
+
+export const metadata = {
+  title: 'Verify Otp',
+  description: 'Verify Otp',
+};
 const VerifyOtpPage = () => {
-  return <div className="">VerifyOtpPage</div>;
+  return (
+    <>
+      <VerifyOtpForm />
+    </>
+  );
 };
 
 export default VerifyOtpPage;

@@ -5,10 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 const SignInForm = () => {
+  const router = useRouter();
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    router.push('/');
   };
 
   return (
@@ -104,7 +108,7 @@ const SignInForm = () => {
             href="/sign-up"
             className="text-primary cursor-pointer font-medium transition hover:underline"
           >
-            Register
+            Sign Up
           </Link>
         </p>
       </div>
