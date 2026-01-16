@@ -84,14 +84,14 @@ export default function PopularCategories() {
   return (
     <section className="app-container w-full py-10">
       {/* Title */}
-      <h2 className="mb-6 text-xl font-semibold text-slate-800">Most popular categories</h2>
+      <h2 className="text-primary mb-6 text-xl font-semibold">Most popular categories</h2>
 
       {/* Category Pills */}
       <div className="mb-10 flex flex-wrap gap-3">
         {categories.map((item) => (
           <button
             key={item}
-            className="border-brand-100 rounded-full border px-4 py-1.5 text-sm text-slate-500 transition hover:bg-slate-100"
+            className="border-brand-100 hover:bg-brand-50 rounded-full border px-4 py-1.5 text-sm text-slate-500 transition"
           >
             {item}
           </button>

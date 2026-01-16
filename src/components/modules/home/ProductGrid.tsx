@@ -72,7 +72,7 @@ const ProductGrid = () => {
   return (
     <section className="bg-brand-50 min-h-screen py-10">
       <div className="app-container">
-        <h1 className="mb-8 text-center text-3xl font-bold text-slate-800">Our Collection</h1>
+        <h1 className="text-primary mb-8 text-center text-3xl font-semibold">Our Collection</h1>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:gap-8 lg:grid-cols-3">
           {products.map((item) => (

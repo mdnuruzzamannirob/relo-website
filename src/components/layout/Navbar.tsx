@@ -78,7 +78,7 @@ export default function Navbar() {
                   ].map((item) => (
                     <button
                       key={item.label}
-                      className="hover:bg-brand-50 flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm text-slate-500 transition hover:text-slate-800"
+                      className="hover:bg-brand-50 hover:text-primary flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm text-slate-500 transition"
                     >
                       <item.icon className="size-4" />
                       {item.label}

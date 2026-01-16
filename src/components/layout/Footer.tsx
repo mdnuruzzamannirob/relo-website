@@ -18,18 +18,18 @@ export default function Footer() {
 
         {/* Help */}
         <div>
-          <h3 className="mb-4 font-semibold text-slate-800">Help</h3>
+          <h3 className="text-primary mb-4 font-semibold">Help</h3>
           <ul className="space-y-3 text-sm text-slate-500">
-            <li className="w-fit cursor-pointer font-medium transition hover:text-slate-800">
+            <li className="hover:text-primary w-fit cursor-pointer font-medium transition">
               Help Center
             </li>
-            <li className="w-fit cursor-pointer font-medium transition hover:text-slate-800">
+            <li className="hover:text-primary w-fit cursor-pointer font-medium transition">
               Selling guide
             </li>
-            <li className="w-fit cursor-pointer font-medium transition hover:text-slate-800">
+            <li className="hover:text-primary w-fit cursor-pointer font-medium transition">
               Buying guide
             </li>
-            <li className="w-fit cursor-pointer font-medium transition hover:text-slate-800">
+            <li className="hover:text-primary w-fit cursor-pointer font-medium transition">
               How it works
             </li>
           </ul>
@@ -37,18 +37,18 @@ export default function Footer() {
 
         {/* Legal */}
         <div>
-          <h3 className="mb-4 font-semibold text-slate-800">Legal</h3>
+          <h3 className="text-primary mb-4 font-semibold">Legal</h3>
           <ul className="space-y-3 text-sm text-slate-500">
-            <li className="w-fit cursor-pointer font-medium transition hover:text-slate-800">
+            <li className="hover:text-primary w-fit cursor-pointer font-medium transition">
               About Us
             </li>
-            <li className="w-fit cursor-pointer font-medium transition hover:text-slate-800">
+            <li className="hover:text-primary w-fit cursor-pointer font-medium transition">
               Privacy Policy
             </li>
-            <li className="w-fit cursor-pointer font-medium transition hover:text-slate-800">
+            <li className="hover:text-primary w-fit cursor-pointer font-medium transition">
               Terms & Condition
             </li>
-            <li className="w-fit cursor-pointer font-medium transition hover:text-slate-800">
+            <li className="hover:text-primary w-fit cursor-pointer font-medium transition">
               Trust & safety
             </li>
           </ul>
@@ -56,7 +56,7 @@ export default function Footer() {
 
         {/* Social */}
         <div>
-          <h3 className="mb-4 font-semibold text-slate-800">Connect With Us</h3>
+          <h3 className="text-primary mb-4 font-semibold">Connect With Us</h3>
 
           <p className="mb-5 max-w-xs text-sm text-slate-500">
             Follow our journey through the broken world on social media.
