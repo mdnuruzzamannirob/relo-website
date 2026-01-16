@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Heart, MessageSquare, X } from 'lucide-react';
 import ProductGallery from '@/components/shared/ProductGallery';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 const product = {
   title: 'Woman Bag',
@@ -37,6 +38,8 @@ const product = {
 
 export default function ProductDetails() {
   const [showOffer, setShowOffer] = useState(false);
+
+  const router = useRouter();
 
   return (
     <div className="app-container min-h-[calc(100vh-119px)] pt-8 pb-14">
@@ -75,7 +78,9 @@ export default function ProductDetails() {
 
           {/* Actions */}
           <div className="mb-6 space-y-4">
-            <Button className="h-11 w-full">Buy Now</Button>
+            <Button onClick={() => router.push('/checkout')} className="h-11 w-full">
+              Buy Now
+            </Button>
 
             {!showOffer ? (
               <Button variant="outline" className="h-11 w-full" onClick={() => setShowOffer(true)}>
