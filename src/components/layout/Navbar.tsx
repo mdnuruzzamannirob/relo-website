@@ -36,6 +36,7 @@ export default function Navbar() {
             <Button size="lg" variant="secondary">
               Buy
             </Button>
+
             <Button size="lg" variant="secondary">
               Sell
             </Button>
@@ -93,10 +94,14 @@ export default function Navbar() {
           </div>
         ) : (
           <div className="flex items-center gap-3">
-            <Button size="lg" variant="ghost">
-              Login
-            </Button>
-            <Button size="lg">Sign up</Button>
+            <Link href="/sign-in">
+              <Button size="lg" variant="ghost">
+                Login
+              </Button>
+            </Link>
+            <Link href="/sign-up">
+              <Button size="lg">Sign up</Button>
+            </Link>
           </div>
         )}
       </div>

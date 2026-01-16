@@ -4,7 +4,7 @@ import Image from 'next/image';
 
 const Banner = () => {
   return (
-    <section className="relative flex h-full max-h-200 min-h-[calc(100vh-131.5px)] w-full items-end overflow-hidden">
+    <section className="relative flex h-full max-h-200 min-h-[calc(100vh-119px)] w-full items-end overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0">
         <Image
