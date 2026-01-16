@@ -3,8 +3,9 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Heart, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Heart, MessageSquare, X } from 'lucide-react';
 import ProductGallery from '@/components/shared/ProductGallery';
+import { useState } from 'react';
 
 const product = {
   title: 'Woman Bag',
@@ -25,7 +26,7 @@ const product = {
     { label: 'Location', value: 'New York, NY' },
   ],
   description:
-    'Stylish and versatile women’s bag in excellent condition, perfect for everyday use or special occasions. Designed with spacious compartments to keep your essentials organized while adding a classy touch to any outfit.',
+    'Stylish and versatile women’s bag in excellent condition, perfect for everyday use or special occasions. Designed with spacious compartments to keep your essentials organized while adding a classy touch to any outfit. Stylish and versatile women’s bag in excellent condition, perfect for everyday use or special occasions. Designed with spacious compartments to keep your essentials organized while adding a classy touch to any outfit.',
   seller: {
     name: 'Sarah Johnson',
     avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
@@ -35,6 +36,8 @@ const product = {
 };
 
 export default function ProductDetails() {
+  const [showOffer, setShowOffer] = useState(false);
+
   return (
     <div className="app-container min-h-[calc(100vh-119px)] pt-8 pb-14">
       {/* Back */}
@@ -50,7 +53,7 @@ export default function ProductDetails() {
         <ProductGallery title={product.title} images={product.images} />
 
         {/* RIGHT: Details */}
-        <div className="border-brand-100 rounded-xl border p-6">
+        <div className="border-brand-100 h-fit rounded-xl border p-6">
           {/* Price & Wishlist */}
           <div className="mb-4 flex items-start justify-between">
             <span className="text-primary text-xl font-semibold">${product.price}</span>
@@ -71,11 +74,31 @@ export default function ProductDetails() {
           </div>
 
           {/* Actions */}
-          <div className="mb-6 space-y-3">
-            <Button className="w-full">Buy Now</Button>
-            <Button variant="outline" className="w-full">
-              Make an offer
-            </Button>
+          <div className="mb-6 space-y-4">
+            <Button className="h-11 w-full">Buy Now</Button>
+
+            {!showOffer ? (
+              <Button variant="outline" className="h-11 w-full" onClick={() => setShowOffer(true)}>
+                Make an offer
+              </Button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  placeholder="Your offer"
+                  className="border-brand-100 focus:bg-brand-50/50 h-11 w-full rounded-md border px-4 text-sm transition-all outline-none placeholder:text-slate-400 focus:ring-1 focus:ring-slate-300"
+                />
+                <Button className="h-11 px-5">Send</Button>
+
+                <button
+                  onClick={() => setShowOffer(false)}
+                  className="hover:text-primary rounded-md p-2 text-slate-400 transition"
+                  aria-label="Cancel offer"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Description */}
