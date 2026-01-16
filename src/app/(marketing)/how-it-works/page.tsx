@@ -39,14 +39,12 @@ export default function HowItWorks() {
   return (
     <div className="app-container min-h-[calc(100vh-119px)] pt-8 pb-14">
       {/* Back Button */}
-      <div className="mb-6">
-        <Link href="/">
-          <Button>
-            <ArrowLeft className="mr-1 size-4" />
-            Back
-          </Button>
-        </Link>
-      </div>
+      <Link href="/" className="mb-6 block w-fit">
+        <Button>
+          <ArrowLeft className="mr-1 size-4" />
+          Back
+        </Button>
+      </Link>
 
       <h1 className="text-primary mb-6 text-2xl font-semibold">How It Works</h1>
 
