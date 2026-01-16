@@ -14,8 +14,8 @@ export interface Product {
 
 const ProductCard = ({ product }: { product: Product }) => {
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-xl border border-slate-200 bg-white">
-      <div className="relative h-64 w-full overflow-hidden rounded-t-xl bg-slate-50">
+    <div className="border-brand-100 flex h-full flex-col overflow-hidden rounded-xl border bg-white">
+      <div className="bg-brand-50 relative h-64 w-full overflow-hidden rounded-t-xl">
         <Image
           src={product.image}
           alt={product.name}
@@ -23,7 +23,7 @@ const ProductCard = ({ product }: { product: Product }) => {
           height={300}
           className="size-full object-cover transition-transform duration-300 hover:scale-105"
         />
-        <button className="absolute top-4 right-4 rounded-full bg-white/80 p-1.5 text-slate-400 transition-colors hover:text-red-500">
+        <button className="absolute top-4 right-4 rounded-full bg-white/80 p-1.5 text-slate-500 transition-colors hover:text-red-500">
           <Heart size={18} />
         </button>
       </div>

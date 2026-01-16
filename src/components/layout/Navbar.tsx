@@ -5,21 +5,18 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import Link from 'next/link';
+import Logo from '../shared/Logo';
 
 export default function Navbar() {
   const mode: string = 'guest'; //'guest' | 'home' | 'dashboard
+  const nav = ['Woman', 'Men', 'Kids', 'Home', 'Electronics', 'About Us'];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white">
+    <header className="border-brand-100 sticky top-0 z-50 w-full border-b bg-white">
       {/* --- Main Header --- */}
-      <div className="container mx-auto flex items-center justify-between gap-10 py-4">
+      <div className="app-container flex items-center justify-between gap-10 py-4">
         {/* 1. Logo Section */}
-        <Link href="/" className="flex shrink-0 flex-col -space-y-1.5">
-          <span className="text-primary text-[28px] font-bold tracking-tighter">CAYRE</span>
-          <span className="text-[9px] font-bold tracking-[0.2em] text-slate-400 uppercase">
-            Cayman Resellers
-          </span>
-        </Link>
+        <Logo />
 
         {/* 2. Search Bar */}
         <div className="flex-1">
@@ -28,7 +25,7 @@ export default function Navbar() {
             <input
               type="text"
               placeholder="Search for items or brands"
-              className="h-11 w-full rounded-md border border-slate-200 bg-[#f9fafb] pr-4 pl-12 text-sm transition-all outline-none placeholder:text-slate-400 focus:bg-white focus:ring-1 focus:ring-slate-300"
+              className="border-brand-100 bg-brand-50 h-11 w-full rounded-md border pr-4 pl-12 text-sm transition-all outline-none placeholder:text-slate-400 focus:bg-white focus:ring-1 focus:ring-slate-300"
             />
           </div>
         </div>
@@ -47,7 +44,7 @@ export default function Navbar() {
             <Popover>
               <PopoverTrigger asChild>
                 <button className="flex items-center gap-1.5 rounded-full p-1 transition-colors hover:bg-neutral-100 focus:outline-none">
-                  <Avatar className="h-10 w-10 border border-slate-100 shadow-sm">
+                  <Avatar className="border-brand-100 h-10 w-10 border shadow-sm">
                     <AvatarImage src="https://github.com/shadcn.png" />
                     <AvatarFallback className="bg-slate-100 text-xs">JD</AvatarFallback>
                   </Avatar>
@@ -57,7 +54,7 @@ export default function Navbar() {
               <PopoverContent align="end" className="w-64 rounded-xl p-0">
                 {/* User Info */}
                 <div className="flex items-center gap-2 border-b p-3">
-                  <Avatar className="size-10 min-w-10 border border-slate-100 shadow-sm">
+                  <Avatar className="border-brand-100 size-10 min-w-10 border shadow-sm">
                     <AvatarImage src="https://github.com/shadcn.png" />
                     <AvatarFallback className="bg-slate-100 text-xs">JD</AvatarFallback>
                   </Avatar>
@@ -104,18 +101,18 @@ export default function Navbar() {
         )}
       </div>
 
-      {/* --- Category Bar (Polished) --- */}
+      {/* Category Bar */}
       {(mode === 'home' || mode === 'guest') && (
-        <nav className="border-t border-slate-100 bg-white">
-          <ul className="container mx-auto flex h-12 items-center gap-10">
-            {['Woman', 'Men', 'Kids', 'Home', 'Electronics', 'About Us'].map((item) => (
-              <li key={item}>
+        <nav className="border-brand-50 border-t bg-white">
+          <ul className="app-container flex h-10 items-center gap-5">
+            {nav?.map((item) => (
+              <li key={item} className="relative flex h-full items-center">
                 <Link
                   href="#"
-                  className="group relative text-[14px] font-medium text-slate-500 transition-colors hover:text-black"
+                  className="group hover:text-primary relative flex h-full w-full items-center px-2 text-[14px] font-medium text-slate-500 transition-colors"
                 >
                   {item}
-                  <span className="absolute -bottom-3.75 left-0 h-0.5 w-0 bg-[#0f3443] transition-all group-hover:w-full" />
+                  <span className="bg-primary absolute bottom-0 left-0 h-0.5 w-full scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
                 </Link>
               </li>
             ))}

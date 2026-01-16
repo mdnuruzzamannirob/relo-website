@@ -1,6 +1,18 @@
 'use client';
 
 import ProductCard, { Product } from '@/components/shared/ProductCard';
+import { Button } from '@/components/ui/button';
+
+const categories = [
+  "Women's Bags & Wallets",
+  "Women's Clothes",
+  "Women's Shoes & Trainers",
+  "Men's Trainers",
+  "Women's Outerwear",
+  "Men's Tops & T-shirts",
+  "Women's Jeans",
+  "Women's Handbags",
+];
 
 const products: Product[] = [
   {
@@ -68,20 +80,35 @@ const products: Product[] = [
   },
 ];
 
-const ProductGrid = () => {
+export default function PopularCategories() {
   return (
-    <section className="bg-brand-50 min-h-screen py-10">
-      <div className="app-container">
-        <h1 className="mb-8 text-center text-3xl font-bold text-slate-800">Our Collection</h1>
+    <section className="app-container w-full py-10">
+      {/* Title */}
+      <h2 className="mb-6 text-xl font-semibold text-slate-800">Most popular categories</h2>
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:gap-8 lg:grid-cols-3">
-          {products.map((item) => (
-            <ProductCard key={item.id} product={item} />
-          ))}
-        </div>
+      {/* Category Pills */}
+      <div className="mb-10 flex flex-wrap gap-3">
+        {categories.map((item) => (
+          <button
+            key={item}
+            className="border-brand-100 rounded-full border px-4 py-1.5 text-sm text-slate-500 transition hover:bg-slate-100"
+          >
+            {item}
+          </button>
+        ))}
+      </div>
+
+      {/* Product Cards */}
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {products.slice(0, 6).map((product) => (
+          <ProductCard key={product.id} product={product} />
+        ))}
+      </div>
+
+      {/* See all */}
+      <div className="mt-10 flex justify-center">
+        <Button size="lg">See all items</Button>
       </div>
     </section>
   );
-};
-
-export default ProductGrid;
+}

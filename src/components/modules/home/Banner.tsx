@@ -17,7 +17,7 @@ const Banner = () => {
       </div>
 
       {/* Content Container */}
-      <div className="relative z-10 container mx-auto flex h-full items-end pb-10 md:pb-16">
+      <div className="app-container relative z-10 flex h-full items-end pb-10 md:pb-16">
         {/* Horizontal Card Design */}
         <div className="flex w-full max-w-140 flex-col items-center justify-between gap-5 rounded-xl bg-white p-8 shadow-xl md:flex-row">
           {/* Left Side: Text */}
