@@ -10,6 +10,23 @@ import Logo from '../shared/Logo';
 export default function Navbar() {
   const mode: string = 'home'; //'guest' | 'home' | 'dashboard
   const nav = ['Woman', 'Men', 'Kids', 'Home', 'Electronics', 'About Us'];
+  const userNav = [
+    {
+      label: 'Buyer Dashboard',
+      href: '/buyer/overview',
+      icon: LayoutDashboard,
+    },
+    {
+      label: 'Seller Dashboard',
+      href: '/seller/overview',
+      icon: LayoutDashboard,
+    },
+    {
+      label: 'Settings',
+      href: '/settings',
+      icon: Settings,
+    },
+  ];
 
   return (
     <header className="border-brand-100 sticky top-0 z-50 w-full border-b bg-white">
@@ -72,21 +89,24 @@ export default function Navbar() {
 
                 {/* Menu Items */}
                 <div className="space-y-1 p-3">
-                  {[
-                    { label: 'Buyer Dashboard', icon: LayoutDashboard },
-                    { label: 'Seller Dashboard', icon: LayoutDashboard },
-                    { label: 'Settings', icon: Settings },
-                  ].map((item) => (
-                    <button
+                  {userNav.map((item) => (
+                    <Link
                       key={item.label}
+                      href={item.href}
                       className="hover:bg-brand-50 hover:text-primary flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm text-slate-500 transition"
                     >
                       <item.icon className="size-4" />
                       {item.label}
-                    </button>
+                    </Link>
                   ))}
-                  <button className="text-destructive flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm transition hover:bg-red-50">
-                    <LogOut className="size-4" /> Sign out
+
+                  {/* Sign out */}
+                  <button
+                    type="button"
+                    className="text-destructive flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm transition hover:bg-red-50"
+                  >
+                    <LogOut className="size-4" />
+                    Sign out
                   </button>
                 </div>
               </PopoverContent>
