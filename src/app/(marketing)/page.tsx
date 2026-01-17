@@ -1,6 +1,6 @@
-import Banner from '@/components/modules/home/Banner';
-import PopularCategories from '@/components/modules/home/PopularCategories';
-import ProductGrid from '@/components/modules/home/ProductGrid';
+import Banner from '@/components/modules/marketing/Banner';
+import PopularCategories from '@/components/modules/marketing/PopularCategories';
+import ProductGrid from '@/components/modules/marketing/ProductGrid';
 
 const HomePage = () => {
   return (

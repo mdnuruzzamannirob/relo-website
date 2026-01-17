@@ -5,8 +5,12 @@ import { ArrowLeft, CreditCard, Lock } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useState } from 'react';
+import OrderConfirmedModal from './OrderConfirmedModal';
 
 export default function CheckoutFrom() {
+  const [orderSuccess, setOrderSuccess] = useState(false);
+
   return (
     <div className="app-container min-h-[calc(100vh-119px)] pt-8 pb-14">
       {/* Back */}
@@ -165,13 +169,17 @@ export default function CheckoutFrom() {
             <span>$50.00</span>
           </div>
 
-          <Button className="w-full">Place Order</Button>
+          <Button className="w-full" onClick={() => setOrderSuccess(true)}>
+            Place Order
+          </Button>
 
           <p className="mt-3 text-center text-xs text-slate-500">
-            You won’t be charged until the seller ships the item.
+            You won&apos;t be charged until the seller ships the item.
           </p>
         </div>
       </div>
+
+      <OrderConfirmedModal open={orderSuccess} onOpenChange={setOrderSuccess} />
     </div>
   );
 }
