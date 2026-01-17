@@ -6,10 +6,21 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import Link from 'next/link';
 import Logo from '../shared/Logo';
+import { usePathname } from 'next/navigation';
 
 export default function Navbar() {
+  const pathname = usePathname();
+
   const mode: string = 'home'; //'guest' | 'home' | 'dashboard
-  const nav = ['Woman', 'Men', 'Kids', 'Home', 'Electronics', 'About Us'];
+  const nav = [
+    { label: 'Woman', href: '/woman' },
+    { label: 'Men', href: '/men' },
+    { label: 'Kids', href: '/kids' },
+    { label: 'Home', href: '/home' },
+    { label: 'Electronics', href: '/electronics' },
+    { label: 'About Us', href: '/about-us' },
+  ];
+
   const userNav = [
     {
       label: 'Buyer Dashboard',
@@ -89,16 +100,24 @@ export default function Navbar() {
 
                 {/* Menu Items */}
                 <div className="space-y-1 p-3">
-                  {userNav.map((item) => (
-                    <Link
-                      key={item.label}
-                      href={item.href}
-                      className="hover:bg-brand-50 hover:text-primary flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm text-slate-500 transition"
-                    >
-                      <item.icon className="size-4" />
-                      {item.label}
-                    </Link>
-                  ))}
+                  {userNav.map((item) => {
+                    const isActive = pathname.startsWith(item.href);
+
+                    return (
+                      <Link
+                        key={item.label}
+                        href={item.href}
+                        className={`flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm transition ${
+                          isActive
+                            ? 'bg-primary text-white'
+                            : 'hover:bg-brand-50 hover:text-primary text-slate-500'
+                        }`}
+                      >
+                        <item.icon className="size-4" />
+                        {item.label}
+                      </Link>
+                    );
+                  })}
 
                   {/* Sign out */}
                   <button
@@ -130,17 +149,31 @@ export default function Navbar() {
       {(mode === 'home' || mode === 'guest') && (
         <nav className="border-brand-50 border-t bg-white">
           <ul className="app-container flex h-10 items-center gap-5">
-            {nav?.map((item) => (
-              <li key={item} className="relative flex h-full items-center">
-                <Link
-                  href="#"
-                  className="group hover:text-primary relative flex h-full w-full items-center px-2 text-[14px] font-medium text-slate-500 transition-colors"
-                >
-                  {item}
-                  <span className="bg-primary absolute bottom-0 left-0 h-0.5 w-full scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
-                </Link>
-              </li>
-            ))}
+            {nav?.map((item) => {
+              const isActive = pathname === item.href;
+
+              return (
+                <li key={item.label} className="relative flex h-full items-center">
+                  <Link
+                    href={item.href}
+                    className={`group relative flex h-full items-center px-2 text-[14px] font-medium transition-colors ${
+                      isActive ? 'text-primary bg-brand-50' : 'hover:text-primary text-slate-500'
+                    }`}
+                  >
+                    {item.label}
+
+                    {/* underline */}
+                    <span
+                      className={`absolute bottom-0 left-0 h-0.5 w-full transition-transform duration-300 ${
+                        isActive
+                          ? 'bg-primary scale-x-100'
+                          : 'bg-primary scale-x-0 group-hover:scale-x-100'
+                      }`}
+                    />
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </nav>
       )}
