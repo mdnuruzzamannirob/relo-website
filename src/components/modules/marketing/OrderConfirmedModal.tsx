@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Download } from 'lucide-react';
+import { Download, Package } from 'lucide-react';
 
 interface Props {
   open: boolean;
@@ -13,14 +13,14 @@ interface Props {
 export default function OrderConfirmedModal({ open, onOpenChange }: Props) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full max-w-2xl rounded-xl p-0 sm:max-w-2xl">
+      <DialogContent className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-xl p-0 pb-4 sm:max-w-2xl">
         {/* Header */}
         <DialogHeader className="flex flex-row items-center justify-between border-b px-6 py-4">
           <DialogTitle className="text-lg font-semibold">Order Confirmed</DialogTitle>
         </DialogHeader>
 
         {/* Body */}
-        <div className="space-y-6 px-6 py-6">
+        <div className="custom-scrollbar flex-1 space-y-6 overflow-y-auto px-6 py-6">
           {/* Receipt */}
           <div className="bg-primary space-y-4 rounded-xl p-4 text-white">
             <div className="mb-3 flex items-center justify-between text-sm">
@@ -67,26 +67,62 @@ export default function OrderConfirmedModal({ open, onOpenChange }: Props) {
           </div>
 
           {/* Download buttons */}
-          <div className="grid grid-cols-2 gap-3">
-            <Button className="h-11 gap-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <Button variant="outline" className="border-primary text-primary h-11 gap-2">
               <Download className="size-4" />
               Download QR
             </Button>
-            <Button variant="outline" className="border-primary h-11 gap-2">
+            <Button className="h-11 gap-2">
               <Download className="size-4" />
               Download Money Receipt
             </Button>
           </div>
 
           {/* Next steps */}
-          <div className="rounded-lg bg-slate-50 p-4 text-sm text-slate-600">
-            <p className="mb-2 font-medium text-slate-900">Next Steps:</p>
-            <ul className="list-disc space-y-1 pl-4">
-              <li>Seller will be notified to deposit the item</li>
-              <li>You’ll receive a pickup notification</li>
-              <li>Scan QR at locker to collect item</li>
-              <li>Confirm receipt in your orders</li>
+          <div className="bg-brand-100 rounded-lg p-4">
+            <p className="text-primary mb-3 flex items-center gap-2 text-sm font-medium">
+              <Package size={16} /> Next Steps:
+            </p>
+
+            <ul className="ml-5.5 space-y-2 text-sm text-slate-600">
+              <li className="flex items-start gap-2">
+                <span className="mt-1 size-2 rounded-full bg-slate-400" />
+                <p>Seller will be notified to deposit the item in the locker</p>
+              </li>
+
+              <li className="flex items-start gap-2">
+                <span className="mt-1 size-2 rounded-full bg-slate-400" />
+                <p>You’ll receive a notification when the item is ready</p>
+              </li>
+
+              <li className="flex items-start gap-2">
+                <span className="mt-1 size-2 rounded-full bg-slate-400" />
+                <p>Go to the locker location and scan your QR code</p>
+              </li>
+
+              <li className="flex items-start gap-2">
+                <span className="mt-1 size-2 rounded-full bg-slate-400" />
+                <p>Collect your item and confirm receipt in your orders</p>
+              </li>
             </ul>
+          </div>
+
+          {/* Info */}
+          <div className="bg-brand-50 space-y-2 rounded-lg p-4 text-xs text-slate-500">
+            <div className="flex items-center gap-2">
+              <span className="size-2 rounded-full bg-green-500" />
+              <p>Estimated pickup availability: 24-48 hours</p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="size-2 rounded-full bg-blue-500" />
+              <p>Payment is held securely until you confirm receipt</p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="size-2 rounded-full bg-purple-500" />
+              <p>You have 7 days to pick up your item</p>
+            </div>
           </div>
 
           {/* Footer */}
