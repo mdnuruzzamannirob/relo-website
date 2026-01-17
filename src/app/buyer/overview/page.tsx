@@ -87,7 +87,7 @@ const OverviewPage = () => {
       </div>
 
       {/* Notifications */}
-      <div className="border-brand-100 rounded-xl border bg-white p-4">
+      <div className="border-brand-100 space-y-3 rounded-xl border bg-white p-4">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Bell size={18} className="text-primary" />
@@ -116,7 +116,7 @@ const OverviewPage = () => {
       </div>
 
       {/* Recent Orders */}
-      <div className="border-brand-100 rounded-xl border bg-white p-4">
+      <div className="border-brand-100 space-y-3 rounded-xl border bg-white p-4">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-primary font-medium">Recent Orders</h3>
           <Button size="sm" variant="link">

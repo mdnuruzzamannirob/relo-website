@@ -10,7 +10,7 @@ function OrderItem({
   statusClass: string;
 }) {
   return (
-    <div className="border-brand-100 mb-3 flex items-center justify-between rounded-lg border p-3">
+    <div className="border-brand-100 flex items-center justify-between rounded-lg border p-3">
       <div className="flex items-center gap-3">
         <div className="bg-brand-50 size-14 rounded-md" />
         <div>
