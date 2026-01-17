@@ -11,7 +11,7 @@ import { usePathname } from 'next/navigation';
 export default function Navbar() {
   const pathname = usePathname();
 
-  const mode: string = 'home'; //'guest' | 'home' | 'dashboard
+  const mode: string = 'dashboard'; //'guest' | 'home' | 'dashboard
   const nav = [
     { label: 'Woman', href: '/woman' },
     { label: 'Men', href: '/men' },
@@ -61,13 +61,16 @@ export default function Navbar() {
         {/* 3. Right Actions */}
         {mode === 'home' || mode === 'dashboard' ? (
           <div className="flex items-center gap-3">
-            <Button size="lg" variant="secondary">
-              Buy
-            </Button>
-
-            <Button size="lg" variant="secondary">
-              Sell
-            </Button>
+            <Link href="/buyer/overview">
+              <Button size="lg" variant="secondary">
+                Buy
+              </Button>
+            </Link>
+            <Link href="/seller/overview">
+              <Button size="lg" variant="secondary">
+                Sell
+              </Button>
+            </Link>
 
             {/* Profile Popover Implementation */}
             <Popover>
@@ -109,7 +112,7 @@ export default function Navbar() {
                         href={item.href}
                         className={`flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm transition ${
                           isActive
-                            ? 'bg-primary text-white'
+                            ? 'text-primary bg-brand-50 font-medium'
                             : 'hover:bg-brand-50 hover:text-primary text-slate-500'
                         }`}
                       >
