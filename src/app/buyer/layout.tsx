@@ -48,10 +48,10 @@ export default function BuyerLayout({ children }: BuyerLayoutProps) {
   ];
 
   return (
-    <div className="bg-brand-50 min-h-screen">
-      <div className="app-container relative flex min-h-[calc(100vh-81px)] gap-8 pt-8 pb-14">
+    <div className="bg-brand-50">
+      <div className="app-container flex min-h-[calc(100vh-81px)] gap-8 pt-8 pb-14">
         {/* Sidebar */}
-        <aside className="border-brand-100 sticky top-28.25 w-65 rounded-xl border bg-white p-6">
+        <aside className="border-brand-100 sticky top-28.25 h-fit w-65 rounded-xl border bg-white p-6">
           {/* User */}
           <div className="mb-10 flex items-center gap-3">
             <div className="bg-brand-50 h-11 w-11 rounded-full" />
