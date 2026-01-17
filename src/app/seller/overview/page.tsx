@@ -1,7 +1,7 @@
 import StatCard from '@/components/shared/StatCard';
 import ActivityItem from '@/components/modules/seller/ActivityItem';
 import { Button } from '@/components/ui/button';
-import { DollarSign, Package, Clock, Boxes } from 'lucide-react';
+import { DollarSign, Package, Clock, Boxes, Activity } from 'lucide-react';
 
 export const metadata = {
   description: 'Seller Overview page',
@@ -50,7 +50,9 @@ const OverviewPage = () => {
 
       {/* Recent Activity */}
       <div className="border-brand-100 space-y-3 rounded-xl border bg-white p-4">
-        <h3 className="text-primary mb-4 font-medium">Recent Activity</h3>
+        <h3 className="text-primary mb-4 flex items-center gap-2 font-medium">
+          <Activity size={18} className="text-primary" /> Recent Activity
+        </h3>
 
         <ActivityItem
           color="green"
