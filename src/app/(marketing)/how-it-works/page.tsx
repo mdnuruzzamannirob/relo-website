@@ -1,67 +1,39 @@
-import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
+import { InfoPage } from '@/components/shared/InfoPage';
 
-const HOW_IT_WORKS_SECTIONS = [
-  {
-    title: 'For Buyers',
-    items: [
-      'Browse items from verified sellers in your area',
-      'Purchase items securely through our platform',
-      'Receive a QR code and locker location via email',
-      'Pick up your item at your convenience within 48 hours',
-      'Rate and review your experience',
-    ],
-  },
-  {
-    title: 'For Sellers',
-    items: [
-      'List your items with photos and descriptions',
-      'Receive purchase notifications when items sell',
-      'Get assigned a locker location near you',
-      'Drop off the item and confirm deposit via QR code',
-      'Receive payment once buyer confirms pickup',
-    ],
-  },
-  {
-    title: 'Safety Features',
-    items: [
-      'QR code verification for secure access',
-      'Video surveillance at all locker locations',
-      'Buyer protection guarantee',
-      'Verified user reviews and ratings',
-      '24/7 customer support',
-    ],
-  },
-];
+export const metadata = {
+  title: 'How It Works',
+  description: 'How It Works',
+};
+
+const HOW_IT_WORKS_HTML = `
+<h5>For Buyers</h5>
+<ul>
+  <li>Browse items from verified sellers in your area</li>
+  <li>Purchase items securely through our platform</li>
+  <li>Receive a QR code and locker location via email</li>
+  <li>Pick up your item at your convenience within 48 hours</li>
+  <li>Rate and review your experience</li>
+</ul>
+
+<h5>For Sellers</h5>
+<ul>
+  <li>List your items with photos and descriptions</li>
+  <li>Receive purchase notifications when items sell</li>
+  <li>Get assigned a locker location near you</li>
+  <li>Drop off the item and confirm deposit via QR code</li>
+  <li>Receive payment once buyer confirms pickup</li>
+</ul>
+
+<h5>Safety Features</h5>
+<ul>
+  <li>QR code verification for secure access</li>
+  <li>Video surveillance at all locker locations</li>
+  <li>Buyer protection guarantee</li>
+  <li>Verified user reviews and ratings</li>
+  <li>24/7 customer support</li>
+</ul>
+`;
 
 export default function HowItWorks() {
-  return (
-    <div className="app-container min-h-[calc(100vh-119px)] pt-8 pb-14">
-      {/* Back Button */}
-      <Link href="/" className="mb-6 block w-fit">
-        <Button>
-          <ArrowLeft className="mr-1 size-4" />
-          Back
-        </Button>
-      </Link>
-
-      <h1 className="text-primary mb-6 text-2xl font-semibold">How It Works</h1>
-
-      {/* Card */}
-      <div className="border-brand-100 rounded-xl border p-8">
-        {HOW_IT_WORKS_SECTIONS.map((section) => (
-          <section key={section.title} className="mb-8 last:mb-0">
-            <h2 className="text-primary mb-3 text-lg font-semibold">{section.title}</h2>
-
-            <ul className="list-disc space-y-2 pl-10 text-slate-500">
-              {section.items.map((item, index) => (
-                <li key={index}>{item}</li>
-              ))}
-            </ul>
-          </section>
-        ))}
-      </div>
-    </div>
-  );
+  return <InfoPage title="How It Works" html={HOW_IT_WORKS_HTML} />;
 }

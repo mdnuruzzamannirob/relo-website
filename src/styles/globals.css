@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Poppins:wght@100;200;300;400;500;600;700;800;900&family=Roboto:wght@100;300;400;500;700;900&family=Open+Sans:wght@300;400;500;600;700;800&family=Lato:wght@100;300;400;700;900&family=Montserrat:wght@100;200;300;400;500;600;700;800;900&family=Nunito:wght@200;300;400;500;600;700;800;900&family=Raleway:wght@100;200;300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&family=Merriweather:wght@300;400;500;700;900&family=EB+Garamond:wght@400;500;600;700;800&display=swap");
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -182,4 +184,110 @@
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: rgba(100, 116, 139, 0.4) transparent;
+}
+
+
+/* --- Editor --- */
+.Prose {
+  @apply outline-none text-slate-500;
+  font-family: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+}
+
+/* Headings */
+.Prose h1 {
+  @apply text-5xl font-black my-3 text-primary;
+}
+
+.Prose h2 {
+  @apply text-4xl font-extrabold my-2.5 text-primary;
+}
+
+.Prose h3 {
+  @apply text-3xl font-bold my-2 text-primary;
+}
+
+.Prose h4 {
+  @apply text-2xl font-semibold my-1.5 text-primary;
+}
+
+.Prose h5 {
+  @apply text-xl font-medium my-1 text-primary;
+}
+
+.Prose h6 {
+  @apply text-lg font-medium my-0.5 text-primary;
+}
+
+/* Blockquote */
+.Prose blockquote {
+  @apply border-l-4 border-primary pl-4 py-2 italic bg-brand-50 text-slate-500 rounded-r-lg my-4;
+}
+
+/* Lists */
+.Prose ol {
+  @apply list-decimal ml-5 pl-5 my-5 space-y-2;
+}
+
+.Prose ol ol,
+.Prose ul ul,
+.Prose ol ul,
+.Prose ul ol {
+  @apply ml-5 mt-2 mb-0;
+}
+
+.Prose ol ol {
+  list-style-type: lower-alpha;
+}
+
+.Prose ol ol ol {
+  list-style-type: lower-roman;
+}
+
+.Prose ul {
+  @apply list-disc ml-5 pl-5 my-5 space-y-2;
+}
+
+/* Task Lists */
+.Prose ul[data-type="taskList"] {
+  @apply list-none p-0 ml-2;
+}
+
+.Prose ul[data-type="taskList"] li {
+  @apply flex items-start gap-3 my-2;
+}
+
+.Prose ul[data-type="taskList"] input[type="checkbox"] {
+  @apply mt-1.5 size-4 rounded border-brand-100 text-primary focus:ring-primary;
+}
+
+/* Alignment */
+.Prose [style*="text-align: justify"] {
+  text-align: justify;
+}
+
+.Prose [style*="text-align: center"] {
+  text-align: center;
+}
+
+.Prose [style*="text-align: right"] {
+  text-align: right;
+}
+
+.Prose img[style*="text-align: left"] {
+  margin-left: 0;
+  margin-right: auto;
+  display: block;
+}
+
+.Prose img[style*="text-align: center"] {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+
+.Prose img[style*="text-align: right"] {
+  margin-left: auto;
+  margin-right: 0;
+  display: block;
 }
