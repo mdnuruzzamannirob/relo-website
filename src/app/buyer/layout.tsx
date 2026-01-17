@@ -53,7 +53,7 @@ export default function BuyerLayout({ children }: BuyerLayoutProps) {
         {/* Sidebar */}
         <aside className="border-brand-100 sticky top-28.25 h-fit w-65 rounded-xl border bg-white p-6">
           {/* User */}
-          <div className="mb-10 flex items-center gap-3">
+          <div className="border-brand-50 mb-5 flex items-center gap-3 border-b pb-5">
             <div className="bg-brand-50 h-11 w-11 rounded-full" />
             <div>
               <p className="text-primary text-sm font-semibold">John Doe</p>
