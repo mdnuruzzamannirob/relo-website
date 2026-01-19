@@ -1,5 +1,5 @@
 import Notification from '@/components/modules/buyer/Notification';
-import OrderItem from '@/components/modules/buyer/OrderItem';
+import OrderItem, { type OrderItemData } from '@/components/modules/buyer/OrderItem';
 import HeaderBar from '@/components/shared/HeaderBar';
 import StatCard from '@/components/shared/StatCard';
 import { Button } from '@/components/ui/button';
@@ -51,6 +51,33 @@ const notifications = [
     description: 'Your payment for Apple AirPods Pro is pending. Complete it within 24 hours',
     time: '3 days ago',
     isRead: true,
+  },
+];
+
+const orders: OrderItemData[] = [
+  {
+    title: 'Woman Bag',
+    price: '$89.99',
+    status: 'Completed',
+    color: 'green',
+    seller: 'Sarah Johnson',
+    orderDate: '2025-01-02',
+  },
+  {
+    title: 'Woman Shirt',
+    price: '$36.00',
+    status: 'Ready for Pickup',
+    color: 'orange',
+    seller: 'Michael Brown',
+    orderDate: '2025-01-03',
+  },
+  {
+    title: 'Men t-shirt',
+    price: '$30.00',
+    status: 'Processing',
+    color: 'blue',
+    seller: 'David Smith',
+    orderDate: '2025-01-04',
   },
 ];
 
@@ -123,26 +150,9 @@ const OverviewPage = () => {
           </Button>
         </div>
 
-        <OrderItem
-          title="Woman Bag"
-          price="$89.99"
-          status="Completed"
-          statusClass="bg-green-50 text-green-600 border border-green-100"
-        />
-
-        <OrderItem
-          title="Woman Shirt"
-          price="$36.00"
-          status="Ready for Pickup"
-          statusClass="bg-orange-50 text-orange-600 border border-orange-100"
-        />
-
-        <OrderItem
-          title="Men t-shirt"
-          price="$30.00"
-          status="Processing"
-          statusClass="bg-blue-50 text-blue-600 border border-blue-100"
-        />
+        {orders.map((order) => (
+          <OrderItem key={order.title} order={order} />
+        ))}
       </div>
     </section>
   );

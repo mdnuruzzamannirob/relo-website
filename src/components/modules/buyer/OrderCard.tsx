@@ -8,6 +8,7 @@ import { Order, OrderAction } from '@/app/buyer/my-orders/page';
 import { MapPin, Package, Star, CheckCircle2, AlertTriangle, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useRouter } from 'next/navigation';
+import StatusBadge from '@/components/shared/StatusBadge';
 
 const labelMap: Record<OrderAction, string> = {
   contact: 'Contact Seller',
@@ -57,23 +58,11 @@ export default function OrderCard({ order }: { order: Order }) {
   const statusBadge = () => {
     switch (order.status) {
       case 'processing':
-        return (
-          <span className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-xs text-blue-600">
-            Processing
-          </span>
-        );
+        return <StatusBadge label="Processing" color="blue" size="sm" />;
       case 'ready':
-        return (
-          <span className="rounded-full border border-orange-100 bg-orange-50 px-3 py-1 text-xs text-orange-600">
-            Ready for Pickup
-          </span>
-        );
+        return <StatusBadge label="Ready for Pickup" color="orange" size="sm" />;
       case 'completed':
-        return (
-          <span className="rounded-full border border-green-100 bg-green-50 px-3 py-1 text-xs text-green-600">
-            Completed
-          </span>
-        );
+        return <StatusBadge label="Completed" color="green" size="sm" />;
       default:
         return null;
     }
@@ -162,8 +151,6 @@ export default function OrderCard({ order }: { order: Order }) {
           </div>
         </div>
       </div>
-
-      {/* --- Shadcn UI Modals --- */}
 
       {/* Review Modal */}
       <Dialog open={open === 'review'} onOpenChange={() => setOpen(null)}>
