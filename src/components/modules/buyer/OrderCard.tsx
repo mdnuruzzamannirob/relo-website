@@ -7,17 +7,27 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Order, OrderAction } from '@/app/buyer/my-orders/page';
 import { MapPin, Package } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { useRouter } from 'next/navigation';
+
+const labelMap: Record<OrderAction, string> = {
+  contact: 'Contact Seller',
+  cancel: 'Cancel Order',
+  qr: 'View QR Code',
+  confirm: 'Confirm Receipt',
+  review: 'Write Review',
+};
+
+const getOrderActions = (order: Order): OrderAction[] => {
+  if (order.status === 'processing') return ['contact', 'cancel'];
+  if (order.status === 'ready') return ['qr', 'confirm', 'contact'];
+  if (order.status === 'completed') return order.isReviewed ? ['contact'] : ['review', 'contact'];
+  return [];
+};
 
 export default function OrderCard({ order }: { order: Order }) {
   const [open, setOpen] = useState<OrderAction | null>(null);
 
-  const getOrderActions = (order: Order): OrderAction[] => {
-    if (order.status === 'processing') return ['contact', 'cancel'];
-    if (order.status === 'ready') return ['qr', 'confirm', 'contact'];
-    if (order.status === 'completed') return order.isReviewed ? ['contact'] : ['review', 'contact'];
-    return [];
-  };
-
+  const router = useRouter();
   const actions = getOrderActions(order);
 
   const statusBadge = () => {
@@ -119,7 +129,13 @@ export default function OrderCard({ order }: { order: Order }) {
                         ? 'border-red-600 text-red-600 hover:bg-red-50'
                         : '',
                 )}
-                onClick={() => setOpen(action)}
+                onClick={() => {
+                  if (action === 'contact') {
+                    router.push('/buyer/messages');
+                  } else {
+                    setOpen(action);
+                  }
+                }}
               >
                 {labelMap[action]}
               </Button>
@@ -162,11 +178,3 @@ export default function OrderCard({ order }: { order: Order }) {
     </>
   );
 }
-
-const labelMap: Record<OrderAction, string> = {
-  contact: 'Contact Seller',
-  cancel: 'Cancel Order',
-  qr: 'View QR Code',
-  confirm: 'Confirm Receipt',
-  review: 'Write Review',
-};
