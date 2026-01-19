@@ -170,7 +170,7 @@ export default function OrderCard({ order }: { order: Order }) {
               </div>
             </div>
             <div className="space-y-2">
-              <p className="text-sm font-semibold text-slate-700">Rating</p>
+              <p className="text-sm font-semibold text-slate-700">Your Rating</p>
               <div className="flex justify-center gap-1">
                 {[1, 2, 3, 4, 5].map((s) => (
                   <Star
