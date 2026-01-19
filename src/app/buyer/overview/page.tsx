@@ -1,12 +1,13 @@
 import Notification from '@/components/modules/buyer/Notification';
-import OrderItem from '@/components/modules/buyer/OrderItem';
+import OrderItem, { type OrderItemData } from '@/components/modules/buyer/OrderItem';
+import HeaderBar from '@/components/shared/HeaderBar';
 import StatCard from '@/components/shared/StatCard';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Bell, CheckCircle, Clock, Package } from 'lucide-react';
 
 export const metadata = {
+  title: 'Overview - Buyer Dashboard',
   description: 'Buyer Overview page',
-  title: 'Buyer Overview - Buyer Dashboard',
 };
 
 // This data can come from API/Backend
@@ -53,16 +54,41 @@ const notifications = [
   },
 ];
 
+const orders: OrderItemData[] = [
+  {
+    title: 'Woman Bag',
+    price: '$89.99',
+    status: 'Completed',
+    color: 'green',
+    seller: 'Sarah Johnson',
+    orderDate: '2025-01-02',
+  },
+  {
+    title: 'Woman Shirt',
+    price: '$36.00',
+    status: 'Ready for Pickup',
+    color: 'orange',
+    seller: 'Michael Brown',
+    orderDate: '2025-01-03',
+  },
+  {
+    title: 'Men t-shirt',
+    price: '$30.00',
+    status: 'Processing',
+    color: 'blue',
+    seller: 'David Smith',
+    orderDate: '2025-01-04',
+  },
+];
+
 const OverviewPage = () => {
   return (
-    <section className="bg-brand-50 space-y-6">
+    <section className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-primary text-2xl font-semibold">Welcome back, John Doe!</h1>
-        <p className="text-sm text-slate-500">
-          Here&apos;s what&apos;s happening with your purchases
-        </p>
-      </div>
+      <HeaderBar
+        title="Welcome back, John Doe!"
+        description=" Here's what's happening with your purchases"
+      />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -124,26 +150,9 @@ const OverviewPage = () => {
           </Button>
         </div>
 
-        <OrderItem
-          title="Woman Bag"
-          price="$89.99"
-          status="Completed"
-          statusClass="bg-green-50 text-green-600 border border-green-100"
-        />
-
-        <OrderItem
-          title="Woman Shirt"
-          price="$36.00"
-          status="Ready for Pickup"
-          statusClass="bg-orange-50 text-orange-600 border border-orange-100"
-        />
-
-        <OrderItem
-          title="Men t-shirt"
-          price="$30.00"
-          status="Processing"
-          statusClass="bg-blue-50 text-blue-600 border border-blue-100"
-        />
+        {orders.map((order) => (
+          <OrderItem key={order.title} order={order} />
+        ))}
       </div>
     </section>
   );
