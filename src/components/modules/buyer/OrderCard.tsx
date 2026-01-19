@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Order, OrderAction } from '@/app/buyer/my-orders/page';
-import { MapPin, Package } from 'lucide-react';
+import { MapPin, Package, Star, CheckCircle2, AlertTriangle, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useRouter } from 'next/navigation';
 
@@ -26,9 +26,33 @@ const getOrderActions = (order: Order): OrderAction[] => {
 
 export default function OrderCard({ order }: { order: Order }) {
   const [open, setOpen] = useState<OrderAction | null>(null);
+  const [rating, setRating] = useState(5);
+  const [loading, setLoading] = useState(false);
 
   const router = useRouter();
   const actions = getOrderActions(order);
+
+  // --- API Handlers ---
+  const handleCancel = async () => {
+    setLoading(true);
+    // API Call: await fetch('/api/orders/cancel', { ... })
+    setLoading(false);
+    setOpen(null);
+  };
+
+  const handleConfirm = async () => {
+    setLoading(true);
+    // API Call: await fetch('/api/orders/confirm', { ... })
+    setLoading(false);
+    setOpen(null);
+  };
+
+  const handleSubmitReview = async () => {
+    setLoading(true);
+    // API Call: await fetch('/api/reviews', { ... })
+    setLoading(false);
+    setOpen(null);
+  };
 
   const statusBadge = () => {
     switch (order.status) {
@@ -109,7 +133,6 @@ export default function OrderCard({ order }: { order: Order }) {
             </div>
           )}
 
-          {/* Action buttons */}
           <div className="flex w-full gap-4">
             {actions.map((action) => (
               <Button
@@ -129,13 +152,9 @@ export default function OrderCard({ order }: { order: Order }) {
                         ? 'border-red-600 text-red-600 hover:bg-red-50'
                         : '',
                 )}
-                onClick={() => {
-                  if (action === 'contact') {
-                    router.push('/buyer/messages');
-                  } else {
-                    setOpen(action);
-                  }
-                }}
+                onClick={() =>
+                  action === 'contact' ? router.push('/buyer/messages') : setOpen(action)
+                }
               >
                 {labelMap[action]}
               </Button>
@@ -144,35 +163,141 @@ export default function OrderCard({ order }: { order: Order }) {
         </div>
       </div>
 
-      {/* Modals */}
-      <Dialog open={open === 'cancel'} onOpenChange={() => setOpen(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Cancel Order?</DialogTitle>
-          </DialogHeader>
-          <Button className="mt-2 w-full bg-red-600 text-white">Confirm Cancel</Button>
-        </DialogContent>
-      </Dialog>
+      {/* --- Shadcn UI Modals --- */}
 
-      <Dialog open={open === 'confirm'} onOpenChange={() => setOpen(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirm Pickup</DialogTitle>
-          </DialogHeader>
-          <Button className="mt-2 w-full bg-green-600 text-white">Confirm</Button>
-        </DialogContent>
-      </Dialog>
-
+      {/* Review Modal */}
       <Dialog open={open === 'review'} onOpenChange={() => setOpen(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Write Review</DialogTitle>
+        <DialogContent className="max-w-md rounded-2xl p-6">
+          <DialogHeader className="border-b pb-4">
+            <DialogTitle className="text-primary text-xl font-bold">Write a Review</DialogTitle>
           </DialogHeader>
-          <textarea
-            placeholder="Your review..."
-            className="mt-2 w-full rounded border border-slate-200 p-2"
-          />
-          <Button className="bg-brand-600 mt-2 w-full text-white">Submit</Button>
+          <div className="mt-4 space-y-6">
+            <div className="flex items-center gap-4 rounded-xl bg-slate-50 p-4">
+              {/* Next.js Image used here */}
+              <div className="relative size-14 shrink-0 overflow-hidden rounded-lg">
+                <Image src={order.image} alt={order.title} fill className="object-cover" />
+              </div>
+              <div>
+                <h4 className="font-bold text-slate-800">{order.title}</h4>
+                <p className="text-xs text-slate-500">Seller: {order.seller}</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm font-semibold text-slate-700">Rating</p>
+              <div className="flex justify-center gap-1">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <Star
+                    key={s}
+                    className={cn(
+                      'size-8 cursor-pointer transition-all',
+                      s <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-slate-200',
+                    )}
+                    onClick={() => setRating(s)}
+                  />
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm font-semibold text-slate-700">Your Review</p>
+              <textarea
+                placeholder="Share your experience..."
+                className="border-brand-100 bg-brand-50 h-11 min-h-25 w-full rounded-md border p-3 text-sm transition-all outline-none placeholder:text-slate-400 focus:bg-white focus:ring-1 focus:ring-slate-300 focus:outline-none"
+              />
+            </div>
+            <div className="flex gap-4">
+              <Button variant="outline" className="h-10 flex-1" onClick={() => setOpen(null)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSubmitReview} disabled={loading} className="h-10 flex-1">
+                {loading ? 'Submitting...' : 'Submit Review'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirm Receipt Modal */}
+      <Dialog open={open === 'confirm'} onOpenChange={() => setOpen(null)}>
+        <DialogContent className="max-w-md rounded-2xl p-6 text-center">
+          <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-50">
+            <CheckCircle2 className="size-10 text-emerald-500" />
+          </div>
+          <DialogHeader>
+            <DialogTitle className="text-primary text-center text-xl font-semibold">
+              Confirm Receipt?
+            </DialogTitle>
+            <p className="text-center text-sm text-slate-500">
+              Did you successfully receive your item from the locker?
+            </p>
+          </DialogHeader>
+          <div className="mt-4 space-y-4">
+            <div className="flex items-center justify-between rounded-xl bg-slate-50 p-4 text-left">
+              <div className="flex items-center gap-3">
+                <Image
+                  src={order.image}
+                  alt={order.title}
+                  width={40}
+                  height={40}
+                  className="size-10 shrink-0 overflow-hidden rounded-lg object-cover"
+                />
+
+                <div>
+                  <p className="text-sm font-bold text-slate-800">{order.title}</p>
+                  <p className="text-[10px] text-slate-500">{order.seller}</p>
+                </div>
+              </div>
+              <p className="text-primary font-bold">${order.price}</p>
+            </div>
+            <div className="flex gap-3 rounded-lg border border-amber-100 bg-amber-50 p-3 text-left">
+              <AlertTriangle className="size-4 shrink-0 text-amber-600" />
+              <p className="text-xs text-amber-800">
+                By confirming, you acknowledge that payment will be released to the seller.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="h-10 flex-1" onClick={() => setOpen(null)}>
+                Not received
+              </Button>
+              <Button
+                onClick={handleConfirm}
+                disabled={loading}
+                className="h-10 flex-1 bg-green-600 text-white hover:bg-green-700"
+              >
+                {loading ? 'Confirming...' : 'Confirm Receipt'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* --- CANCEL ORDER MODAL --- */}
+      <Dialog open={open === 'cancel'} onOpenChange={() => setOpen(null)}>
+        <DialogContent className="max-w-md rounded-[24px] border-none p-8 text-center shadow-2xl">
+          <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-red-50">
+            <Trash2 className="size-10 text-red-500" />
+          </div>
+
+          <DialogHeader>
+            <DialogTitle className="text-primary text-center text-xl font-semibold">
+              Cancel Order?
+            </DialogTitle>
+            <p className="text-center text-sm text-slate-500">
+              Are you sure you want to cancel this order? This action cannot be undone.
+            </p>
+          </DialogHeader>
+
+          <div className="flex gap-4">
+            <Button variant="outline" onClick={() => setOpen(null)} className="h-10 flex-1">
+              No, Keep Order
+            </Button>
+            <Button
+              onClick={handleCancel}
+              disabled={loading}
+              className="h-10 flex-1 bg-red-600 text-white hover:bg-red-700"
+            >
+              {loading ? 'Processing...' : 'Yes, Cancel'}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </>
