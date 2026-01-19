@@ -1,0 +1,167 @@
+'use client';
+
+import { useState } from 'react';
+import Image from 'next/image';
+import { Search, Send } from 'lucide-react';
+
+// ------------------
+// Fake Data
+// ------------------
+const conversations = [
+  {
+    id: 'c1',
+    user: {
+      name: 'Sarah Johnson',
+      avatar: 'https://i.pravatar.cc/100?img=47',
+    },
+    product: {
+      title: 'Woman Bag',
+      size: 'M',
+      price: 89.99,
+      image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3',
+    },
+    messages: [
+      {
+        id: 'm1',
+        type: 'offer',
+        price: 62.99,
+        note: 'This is my last price friend',
+        time: '2025-01-10 10:18am',
+        from: 'seller',
+      },
+      {
+        id: 'm2',
+        type: 'text',
+        text: 'Sorry price very high.',
+        time: '2025-01-10 10:20am',
+        from: 'buyer',
+      },
+    ],
+  },
+  {
+    id: 'c2',
+    user: {
+      name: 'Doe Johnson',
+      avatar: 'https://i.pravatar.cc/100?img=32',
+    },
+    product: {
+      title: 'Woman Bag',
+      size: 'L',
+      price: 79.99,
+      image: 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7',
+    },
+    messages: [],
+  },
+];
+
+export default function Messages() {
+  const [activeId, setActiveId] = useState(conversations[0].id);
+  const active = conversations.find((c) => c.id === activeId)!;
+
+  return (
+    <div className="border-brand-100 flex h-150 w-full rounded-xl border bg-white">
+      {/* Sidebar */}
+      <aside className="border-brand-100 w-72 border-r p-3">
+        <div className="border-brand-100 mb-3 flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
+          <Search className="h-4 w-4 text-slate-500" />
+          <input placeholder="Search messages..." className="w-full outline-none" />
+        </div>
+
+        <div className="space-y-1">
+          {conversations.map((c) => (
+            <button
+              key={c.id}
+              onClick={() => setActiveId(c.id)}
+              className={`hover:bg-brand-50 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left ${
+                c.id === activeId ? 'bg-brand-50' : ''
+              }`}
+            >
+              <Image
+                src={c.user.avatar}
+                alt={c.user.name}
+                width={40}
+                height={40}
+                className="rounded-full object-cover"
+              />
+              <div>
+                <p className="text-sm font-medium">{c.user.name}</p>
+                <p className="text-xs text-slate-500">{c.product.title}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      </aside>
+
+      {/* Chat Area */}
+      <main className="flex flex-1 flex-col">
+        {/* Header */}
+        <div className="border-brand-100 flex items-center gap-3 border-b p-4">
+          <Image
+            src={active.user.avatar}
+            alt={active.user.name}
+            width={40}
+            height={40}
+            className="rounded-full object-cover"
+          />
+          <div>
+            <p className="text-sm font-medium">{active.user.name}</p>
+            <p className="text-xs text-slate-500">{active.product.title}</p>
+          </div>
+        </div>
+
+        {/* Product Card */}
+        <div className="p-4">
+          <div className="bg-primary flex items-center justify-between rounded-lg p-3 text-white">
+            <div className="flex items-center gap-3">
+              <Image
+                src={active.product.image}
+                alt="product"
+                width={56}
+                height={56}
+                className="rounded-md object-cover"
+              />
+              <div>
+                <p className="text-sm font-medium">{active.product.title}</p>
+                <p className="text-xs opacity-80">Size: {active.product.size}</p>
+              </div>
+            </div>
+            <p className="text-sm font-semibold">${active.product.price}</p>
+          </div>
+        </div>
+
+        {/* Messages */}
+        <div className="flex-1 space-y-4 overflow-y-auto px-4">
+          {active.messages.map((m) => (
+            <div
+              key={m.id}
+              className={`flex ${m.from === 'buyer' ? 'justify-end' : 'justify-start'}`}
+            >
+              {m.type === 'offer' ? (
+                <div className="bg-brand-50 border-brand-100 w-56 rounded-lg border p-3 text-sm">
+                  <p className="font-medium">$ Offer</p>
+                  <p className="text-lg font-semibold">${m.price}</p>
+                  <p className="text-xs text-slate-500">{m.note}</p>
+                </div>
+              ) : (
+                <div className="bg-primary max-w-xs rounded-lg px-3 py-2 text-sm text-white">
+                  <p>{m.text}</p>
+                  <p className="mt-1 text-[10px] opacity-70">{m.time}</p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Input */}
+        <div className="border-brand-100 border-t p-3">
+          <div className="border-brand-100 flex items-center gap-2 rounded-md border px-3 py-2">
+            <input placeholder="Type here..." className="flex-1 text-sm outline-none" />
+            <button className="bg-primary rounded-md p-2 text-white">
+              <Send className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}

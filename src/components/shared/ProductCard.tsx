@@ -13,7 +13,13 @@ export interface Product {
   image: string;
 }
 
-const ProductCard = ({ product }: { product: Product }) => {
+interface ProductCardProps {
+  product: Product;
+  isLiked?: boolean;
+  onLike?: () => void;
+}
+
+const ProductCard = ({ product, isLiked, onLike }: ProductCardProps) => {
   return (
     <div className="border-brand-100 flex h-full flex-col overflow-hidden rounded-xl border bg-white">
       <Link
@@ -27,8 +33,17 @@ const ProductCard = ({ product }: { product: Product }) => {
           height={300}
           className="size-full object-cover transition-transform duration-300 hover:scale-105"
         />
-        <button className="absolute top-4 right-4 rounded-full bg-white/80 p-1.5 text-slate-500 transition-colors hover:text-red-500">
-          <Heart size={18} />
+
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            onLike?.();
+          }}
+          className="border-brand-50 absolute top-4 right-4 rounded-full border bg-white p-1.5"
+        >
+          <Heart size={18} className={isLiked ? 'fill-red-500 text-red-500' : 'text-slate-400'} />
         </button>
       </Link>
 
@@ -37,6 +52,7 @@ const ProductCard = ({ product }: { product: Product }) => {
           <h3 className="text-primary text-lg font-semibold">{product.name}</h3>
           <span className="text-primary text-lg font-semibold">${product.price}</span>
         </div>
+
         <p className="mb-3 text-sm text-slate-500">Size: {product.size}</p>
 
         <Button size={'lg'} className="mt-auto shrink">
