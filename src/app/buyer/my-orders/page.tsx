@@ -5,6 +5,11 @@ import ReadyForPickupTab from '@/components/modules/buyer/ReadyForPickupTab';
 import HeaderBar from '@/components/shared/HeaderBar';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
+export const metadata = {
+  title: 'My Orders - Buyer Dashboard',
+  description: 'Buyer My Orders page',
+};
+
 export type OrderStatus = 'processing' | 'ready' | 'completed';
 export type OrderAction = 'contact' | 'cancel' | 'qr' | 'confirm' | 'review';
 

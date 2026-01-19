@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, Bell, CheckCircle, Clock, Package } from 'lucide-react';
 
 export const metadata = {
+  title: 'Overview - Buyer Dashboard',
   description: 'Buyer Overview page',
-  title: 'Buyer Overview - Buyer Dashboard',
 };
 
 // This data can come from API/Backend
