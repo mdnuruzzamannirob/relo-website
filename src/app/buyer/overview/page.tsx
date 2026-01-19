@@ -1,5 +1,6 @@
 import Notification from '@/components/modules/buyer/Notification';
 import OrderItem from '@/components/modules/buyer/OrderItem';
+import HeaderBar from '@/components/shared/HeaderBar';
 import StatCard from '@/components/shared/StatCard';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Bell, CheckCircle, Clock, Package } from 'lucide-react';
@@ -55,14 +56,12 @@ const notifications = [
 
 const OverviewPage = () => {
   return (
-    <section className="bg-brand-50 space-y-6">
+    <section className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-primary text-2xl font-semibold">Welcome back, John Doe!</h1>
-        <p className="text-sm text-slate-500">
-          Here&apos;s what&apos;s happening with your purchases
-        </p>
-      </div>
+      <HeaderBar
+        title="Welcome back, John Doe!"
+        description=" Here's what's happening with your purchases"
+      />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
