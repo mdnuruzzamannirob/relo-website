@@ -17,6 +17,7 @@ const EditListingPage = () => {
     lockerSize: 'medium',
     location: 'dhaka',
     description: 'Brand new condition, rarely used.',
+    imageUrl: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab',
   };
 
   return (
