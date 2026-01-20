@@ -48,7 +48,7 @@ const products: Product[] = [
     name: 'Men t-shirt, Pant',
     price: 80,
     size: 'M',
-    image: 'https://images.unsplash.com/photo-1519176373155-901e1da8460d?w=500',
+    image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500',
   },
   {
     id: 6,

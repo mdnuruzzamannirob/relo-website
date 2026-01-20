@@ -4,6 +4,9 @@ import PublishedTab from '@/components/modules/seller/PublishedTab';
 import SoldTab from '@/components/modules/seller/SoldTab';
 import HeaderBar from '@/components/shared/HeaderBar';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 
 export const metadata = {
   title: 'My Listings - Seller Dashboard',
@@ -41,9 +44,13 @@ const MyListingsPage = () => {
       <HeaderBar
         title="My Listings"
         description="Track and manage your products"
-        button={{
-          label: 'New Listing',
-        }}
+        rightContent={
+          <Link href="/seller/my-listings/new-listing">
+            <Button>
+              <Plus /> New Listing
+            </Button>
+          </Link>
+        }
       />
 
       <Tabs defaultValue="all" className="space-y-4">

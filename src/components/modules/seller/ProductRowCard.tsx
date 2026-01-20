@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import StatusBadge from '@/components/shared/StatusBadge';
+import Link from 'next/link';
 
 export type ProductStatus = 'published' | 'sold';
 
@@ -72,9 +73,11 @@ export default function ProductRowCard({ product }: { product: ProductRowData })
 
       {/* Right */}
       <div className="flex flex-col items-end gap-2">
-        <Button size="icon-sm" variant="ghost" onClick={() => handleEdit(id)}>
-          <Pencil className="h-4 w-4 text-slate-500" />
-        </Button>
+        <Link href={`/seller/my-listings/edit-listing?id=${product.id}`}>
+          <Button size="icon-sm" variant="ghost" onClick={() => handleEdit(id)}>
+            <Pencil className="h-4 w-4 text-slate-500" />
+          </Button>
+        </Link>
 
         <Button size="icon-sm" variant="ghost" onClick={() => handleDelete(id)}>
           <Trash2 className="h-4 w-4 text-red-500" />
