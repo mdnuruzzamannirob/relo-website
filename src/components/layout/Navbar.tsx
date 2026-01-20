@@ -1,56 +1,46 @@
 'use client';
 
-import { Search, Settings, LayoutDashboard, LogOut } from 'lucide-react';
+import { Search, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import Link from 'next/link';
 import Logo from '../shared/Logo';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
+import { userNav, nav } from '@/lib/constants/nav-links';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
-  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+  const isAuthenticated = useSyncExternalStore(
+    // Subscribe to storage changes (cross-tab). Same-tab changes rerender via existing state updates.
+    (callback) => {
+      if (typeof window === 'undefined') return () => undefined;
+      const handler = () => callback();
+      window.addEventListener('storage', handler);
+      return () => window.removeEventListener('storage', handler);
+    },
+    // Client snapshot
+    () =>
+      (typeof window !== 'undefined' && localStorage.getItem('isAuthenticated') === 'true') ||
+      false,
+    // Server snapshot keeps SSR deterministic
+    () => false,
+  );
+
   const mode: string = isAuthenticated
     ? pathname.startsWith('/buyer') || pathname.startsWith('/seller')
       ? 'dashboard'
       : 'home'
     : 'guest'; //'guest' | 'home' | 'dashboard
-  const nav = [
-    { label: 'Woman', href: '/woman' },
-    { label: 'Men', href: '/men' },
-    { label: 'Kids', href: '/kids' },
-    { label: 'Home', href: '/home' },
-    { label: 'Electronics', href: '/electronics' },
-    { label: 'About Us', href: '/about-us' },
-  ];
-
-  const userNav = [
-    {
-      label: 'Buyer Dashboard',
-      href: '/buyer/overview',
-      icon: LayoutDashboard,
-    },
-    {
-      label: 'Seller Dashboard',
-      href: '/seller/overview',
-      icon: LayoutDashboard,
-    },
-    {
-      label: 'Settings',
-      href: '/settings',
-      icon: Settings,
-    },
-  ];
 
   return (
     <header className="border-brand-100 sticky top-0 z-50 w-full border-b bg-white">
       {/* --- Main Header --- */}
-      <div className="app-container flex items-center justify-between gap-10 py-4">
+      <div className="app-container flex items-center justify-between gap-3 py-4">
         {/* 1. Logo Section */}
         <Logo />
 
@@ -69,12 +59,12 @@ export default function Navbar() {
         {/* 3. Right Actions */}
         {mode === 'home' || mode === 'dashboard' ? (
           <div className="flex items-center gap-3">
-            <Link href="/buyer/overview">
+            <Link href="/buyer/overview" className="hidden lg:block">
               <Button size="lg" variant={pathname.startsWith('/buyer') ? 'default' : 'secondary'}>
                 Buy
               </Button>
             </Link>
-            <Link href="/seller/overview">
+            <Link href="/seller/overview" className="hidden lg:block">
               <Button size="lg" variant={pathname.startsWith('/seller') ? 'default' : 'secondary'}>
                 Sell
               </Button>
@@ -165,7 +155,7 @@ export default function Navbar() {
       {/* Category Bar */}
       {(mode === 'home' || mode === 'guest') && (
         <nav className="border-brand-50 border-t bg-white">
-          <ul className="app-container flex h-10 items-center gap-5">
+          <ul className="app-container flex h-10 items-center gap-5 overflow-x-auto">
             {nav?.map((item) => {
               const isActive = pathname === item.href;
 
@@ -174,7 +164,7 @@ export default function Navbar() {
                   <Link
                     // href={item.href}
                     href={'/'}
-                    className={`group relative flex h-full items-center px-2 text-[14px] font-medium transition-colors ${
+                    className={`group relative flex h-full items-center px-2 text-[14px] font-medium whitespace-nowrap transition-colors ${
                       isActive ? 'text-primary bg-brand-50' : 'hover:text-primary text-slate-500'
                     }`}
                   >
