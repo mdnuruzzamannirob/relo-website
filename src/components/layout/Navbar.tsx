@@ -78,7 +78,7 @@ export default function Navbar() {
                 {nav?.map((item) => (
                   <Link
                     key={item.label}
-                    href="/"
+                    href={item.href}
                     className={`block rounded-md p-3 text-sm transition-colors ${
                       pathname === item.href
                         ? 'bg-brand-50 text-primary font-medium'
