@@ -11,8 +11,10 @@ import {
   Truck,
   DollarSign,
   Heart,
+  Plus,
 } from 'lucide-react';
 import { NavigationLink } from '@/types';
+import { Button } from '../ui/button';
 
 const navigationLinksByVariant: Record<string, NavigationLink[]> = {
   seller: [
@@ -108,10 +110,18 @@ const Sidebar = ({
         </div>
       </div>
 
+      {variant === 'seller' && (
+        <Link href="/seller/my-listings/new-listing">
+          <Button className="w-full">
+            <Plus /> New Listing
+          </Button>
+        </Link>
+      )}
+
       {/* Menu */}
-      <nav className="space-y-1">
+      <nav className="mt-4 space-y-1">
         {links?.map(({ label, href, icon: Icon }) => {
-          const isActive = pathname === href;
+          const isActive = pathname === href || pathname.includes(href);
 
           return (
             <Link

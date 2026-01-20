@@ -219,7 +219,7 @@ export default function OfferCard({ offer }: { offer: Offer }) {
                 type="number"
                 value={counterPrice}
                 onChange={(e) => setCounterPrice(+e.target.value)}
-                className="border-brand-100 bg-brand-50 mt-1 h-11 w-full rounded-md border p-3 text-sm transition-all outline-none placeholder:text-slate-400 focus:bg-white focus:ring-1 focus:ring-slate-300"
+                className="border-brand-100 focus:bg-brand-50/50 h-11 w-full rounded-md border px-4 text-sm transition-all outline-none placeholder:text-slate-400 focus:ring-1 focus:ring-slate-300"
               />
             </div>
 
@@ -229,7 +229,7 @@ export default function OfferCard({ offer }: { offer: Offer }) {
               </label>
               <textarea
                 placeholder="Explain your counter offer…"
-                className="border-brand-100 bg-brand-50 mt-1 h-11 min-h-25 w-full rounded-md border p-3 text-sm transition-all outline-none placeholder:text-slate-400 focus:bg-white focus:ring-1 focus:ring-slate-300 focus:outline-none"
+                className="border-brand-100 focus:bg-brand-50/50 h-11 min-h-30 w-full resize-none rounded-md border p-3 text-sm transition-all outline-none placeholder:text-slate-400 focus:ring-1 focus:ring-slate-300"
               />
             </div>
 

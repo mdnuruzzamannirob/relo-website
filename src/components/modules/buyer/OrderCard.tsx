@@ -190,7 +190,7 @@ export default function OrderCard({ order }: { order: Order }) {
               <p className="mb-1 block text-sm font-medium text-slate-500">Your Review</p>
               <textarea
                 placeholder="Share your experience..."
-                className="border-brand-100 bg-brand-50 h-11 min-h-25 w-full rounded-md border p-3 text-sm transition-all outline-none placeholder:text-slate-400 focus:bg-white focus:ring-1 focus:ring-slate-300 focus:outline-none"
+                className="border-brand-100 focus:bg-brand-50/50 h-11 min-h-30 w-full resize-none rounded-md border p-3 text-sm transition-all outline-none placeholder:text-slate-400 focus:ring-1 focus:ring-slate-300"
               />
             </div>
             <div className="flex gap-4">
