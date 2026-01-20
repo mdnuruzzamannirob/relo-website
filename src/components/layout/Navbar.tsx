@@ -11,7 +11,7 @@ import { usePathname } from 'next/navigation';
 export default function Navbar() {
   const pathname = usePathname();
 
-  const mode: string = 'dashboard'; //'guest' | 'home' | 'dashboard
+  const mode: string = 'guest'; //'guest' | 'home' | 'dashboard
   const nav = [
     { label: 'Woman', href: '/woman' },
     { label: 'Men', href: '/men' },

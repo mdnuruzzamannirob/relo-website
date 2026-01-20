@@ -132,10 +132,12 @@ export default function ProductDetails() {
               </div>
             </div>
 
-            <Button className="w-full">
-              <MessageSquare className="mr-2 h-4 w-4" />
-              Message seller
-            </Button>
+            <Link href="/chat" passHref>
+              <Button className="w-full">
+                <MessageSquare className="mr-2 h-4 w-4" />
+                Message seller
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
