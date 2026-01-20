@@ -1,29 +1,13 @@
 import { ReactNode } from 'react';
-import { Button } from '@/components/ui/button';
-
-type ButtonConfig = {
-  label: string;
-  onClick?: () => void;
-  variant?: 'default' | 'outline' | 'ghost' | 'destructive';
-  disabled?: boolean;
-  href?: string;
-};
 
 type HeaderBarProps = {
   title: string;
   description?: string;
-  button?: ButtonConfig;
   rightContent?: ReactNode;
   className?: string;
 };
 
-const HeaderBar = ({
-  title,
-  description,
-  button,
-  rightContent,
-  className = '',
-}: HeaderBarProps) => {
+const HeaderBar = ({ title, description, rightContent, className = '' }: HeaderBarProps) => {
   return (
     <div className={`flex items-center justify-between gap-4 ${className}`}>
       {/* Left Side - Title and Description */}
@@ -33,20 +17,7 @@ const HeaderBar = ({
       </div>
 
       {/* Right Side - Button or Custom Content */}
-      <div className="ml-auto">
-        {rightContent ? (
-          rightContent
-        ) : button ? (
-          <Button
-            onClick={button.onClick}
-            disabled={button.disabled}
-            variant={button.variant}
-            className="whitespace-nowrap"
-          >
-            {button.label}
-          </Button>
-        ) : null}
-      </div>
+      <div className="ml-auto">{rightContent && rightContent}</div>
     </div>
   );
 };

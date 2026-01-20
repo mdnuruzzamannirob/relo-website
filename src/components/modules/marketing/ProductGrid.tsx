@@ -36,7 +36,7 @@ const products: Product[] = [
     name: 'Men t-shirt, Pant',
     price: 80,
     size: 'M',
-    image: 'https://images.unsplash.com/photo-1519176373155-901e1da8460d?w=500',
+    image: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=500',
   },
   {
     id: 6,
@@ -57,14 +57,14 @@ const products: Product[] = [
     name: 'Men Shirt, Pant, Watch, Wallet',
     price: 100,
     size: 'L',
-    image: 'https://images.unsplash.com/photo-1617137968427-85924c800a22?w=500',
+    image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500',
   },
   {
     id: 9,
     name: 'Towel',
     price: 15,
     size: 'Long Size',
-    image: 'https://images.unsplash.com/photo-1563814039166-444463d6b1d4?w=500',
+    image: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=500',
   },
 ];
 

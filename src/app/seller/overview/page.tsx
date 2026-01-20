@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { DollarSign, Package, Clock, Boxes, Activity } from 'lucide-react';
 
 export const metadata = {
-  description: 'Seller Overview page',
+  description: 'Overview page',
   title: 'Seller Overview - Seller Dashboard',
 };
 
