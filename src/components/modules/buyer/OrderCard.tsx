@@ -79,9 +79,9 @@ export default function OrderCard({ order }: { order: Order }) {
           className="size-20 min-w-20 rounded-md object-cover"
         />
         <div className="flex-1 space-y-4">
-          <div className="flex flex-1 justify-between border-b pb-4">
+          <div className="border-brand-100 flex flex-1 justify-between border-b pb-4">
             <div className="space-y-1">
-              <p className="text-brand-900 font-medium">{order.title}</p>
+              <p className="text-primary font-medium">{order.title}</p>
               <p className="text-xs text-slate-500">
                 Seller: <span className="text-primary font-medium">{order.seller}</span>
               </p>
@@ -132,7 +132,7 @@ export default function OrderCard({ order }: { order: Order }) {
                     : 'outline'
                 }
                 className={cn(
-                  'h-10 flex-1',
+                  'flex-1',
                   action === 'confirm'
                     ? 'bg-green-600 text-white hover:bg-green-700'
                     : action === 'review'
@@ -156,21 +156,23 @@ export default function OrderCard({ order }: { order: Order }) {
       <Dialog open={open === 'review'} onOpenChange={() => setOpen(null)}>
         <DialogContent className="max-w-md rounded-2xl p-6">
           <DialogHeader className="border-b pb-4">
-            <DialogTitle className="text-primary text-xl font-bold">Write a Review</DialogTitle>
+            <DialogTitle className="text-primary text-lg font-semibold">Write a Review</DialogTitle>
           </DialogHeader>
+
           <div className="mt-4 space-y-6">
             <div className="flex items-center gap-4 rounded-xl bg-slate-50 p-4">
               {/* Next.js Image used here */}
-              <div className="relative size-14 shrink-0 overflow-hidden rounded-lg">
+              <div className="relative size-20 min-w-20 shrink-0 overflow-hidden rounded-lg">
                 <Image src={order.image} alt={order.title} fill className="object-cover" />
               </div>
               <div>
-                <h4 className="font-bold text-slate-800">{order.title}</h4>
+                <h4 className="text-primary font-bold">{order.title}</h4>
                 <p className="text-xs text-slate-500">Seller: {order.seller}</p>
               </div>
             </div>
+
             <div className="space-y-2">
-              <p className="text-sm font-semibold text-slate-700">Your Rating</p>
+              <p className="mb-1 block text-sm font-medium text-slate-500">Your Rating</p>
               <div className="flex justify-center gap-1">
                 {[1, 2, 3, 4, 5].map((s) => (
                   <Star
@@ -185,7 +187,7 @@ export default function OrderCard({ order }: { order: Order }) {
               </div>
             </div>
             <div className="space-y-2">
-              <p className="text-sm font-semibold text-slate-700">Your Review</p>
+              <p className="mb-1 block text-sm font-medium text-slate-500">Your Review</p>
               <textarea
                 placeholder="Share your experience..."
                 className="border-brand-100 bg-brand-50 h-11 min-h-25 w-full rounded-md border p-3 text-sm transition-all outline-none placeholder:text-slate-400 focus:bg-white focus:ring-1 focus:ring-slate-300 focus:outline-none"
@@ -206,9 +208,10 @@ export default function OrderCard({ order }: { order: Order }) {
       {/* Confirm Receipt Modal */}
       <Dialog open={open === 'confirm'} onOpenChange={() => setOpen(null)}>
         <DialogContent className="max-w-md rounded-2xl p-6 text-center">
-          <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-50">
-            <CheckCircle2 className="size-10 text-emerald-500" />
+          <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-green-50">
+            <CheckCircle2 className="size-10 text-green-600" />
           </div>
+
           <DialogHeader>
             <DialogTitle className="text-primary text-center text-xl font-semibold">
               Confirm Receipt?
@@ -229,7 +232,7 @@ export default function OrderCard({ order }: { order: Order }) {
                 />
 
                 <div>
-                  <p className="text-sm font-bold text-slate-800">{order.title}</p>
+                  <p className="text-primary text-sm font-bold">{order.title}</p>
                   <p className="text-[10px] text-slate-500">{order.seller}</p>
                 </div>
               </div>
@@ -241,7 +244,7 @@ export default function OrderCard({ order }: { order: Order }) {
                 By confirming, you acknowledge that payment will be released to the seller.
               </p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-4">
               <Button variant="outline" className="h-10 flex-1" onClick={() => setOpen(null)}>
                 Not received
               </Button>
@@ -259,9 +262,9 @@ export default function OrderCard({ order }: { order: Order }) {
 
       {/* --- CANCEL ORDER MODAL --- */}
       <Dialog open={open === 'cancel'} onOpenChange={() => setOpen(null)}>
-        <DialogContent className="max-w-md rounded-[24px] border-none p-8 text-center shadow-2xl">
+        <DialogContent className="max-w-md rounded-2xl p-6 text-center">
           <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-red-50">
-            <Trash2 className="size-10 text-red-500" />
+            <Trash2 className="size-10 text-red-600" />
           </div>
 
           <DialogHeader>
