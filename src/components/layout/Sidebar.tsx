@@ -96,7 +96,7 @@ const Sidebar = ({
   const links = navigationLinks || navigationLinksByVariant[variant];
 
   return (
-    <aside className="border-brand-100 sticky top-28.25 h-fit w-65 rounded-xl border bg-white p-6">
+    <aside className="border-brand-100 sticky top-28.25 hidden h-fit w-65 rounded-xl border bg-white p-6 lg:block">
       {/* User */}
       <div className="border-brand-50 mb-5 flex items-center gap-3 border-b pb-5">
         <div className="bg-brand-50 h-11 w-11 rounded-full" />
