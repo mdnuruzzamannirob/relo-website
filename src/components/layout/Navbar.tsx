@@ -157,7 +157,7 @@ export default function Navbar() {
                   <div className="space-y-1 p-3">
                     {userNav.map((item) => {
                       const isActive =
-                        item.href === '/' ? pathname === '/' : pathname === item.href;
+                        item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
 
                       return (
                         <Link
@@ -212,7 +212,8 @@ export default function Navbar() {
         <nav className="border-brand-50 hidden border-t bg-white lg:block">
           <ul className="app-container flex h-10 items-center gap-5 overflow-x-auto">
             {nav?.map((item) => {
-              const isActive = item.href === '/' ? pathname === '/' : pathname === item.href;
+              const isActive =
+                item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
 
               return (
                 <li key={item.label} className="relative flex h-full items-center">
