@@ -14,6 +14,7 @@ const SignUpForm = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    localStorage.setItem('isAuthenticated', 'true');
     router.push('/');
   };
 

@@ -6,12 +6,20 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import Link from 'next/link';
 import Logo from '../shared/Logo';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export default function Navbar() {
+  const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
-  const mode: string = 'guest'; //'guest' | 'home' | 'dashboard
+  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+  const mode: string = isAuthenticated
+    ? pathname.startsWith('/buyer') || pathname.startsWith('/seller')
+      ? 'dashboard'
+      : 'home'
+    : 'guest'; //'guest' | 'home' | 'dashboard
   const nav = [
     { label: 'Woman', href: '/woman' },
     { label: 'Men', href: '/men' },
@@ -62,18 +70,18 @@ export default function Navbar() {
         {mode === 'home' || mode === 'dashboard' ? (
           <div className="flex items-center gap-3">
             <Link href="/buyer/overview">
-              <Button size="lg" variant="secondary">
+              <Button size="lg" variant={pathname.startsWith('/buyer') ? 'default' : 'secondary'}>
                 Buy
               </Button>
             </Link>
             <Link href="/seller/overview">
-              <Button size="lg" variant="secondary">
+              <Button size="lg" variant={pathname.startsWith('/seller') ? 'default' : 'secondary'}>
                 Sell
               </Button>
             </Link>
 
             {/* Profile Popover Implementation */}
-            <Popover>
+            <Popover open={isOpen} onOpenChange={setIsOpen}>
               <PopoverTrigger asChild>
                 <button className="flex items-center gap-1.5 rounded-full p-1 transition-colors hover:bg-neutral-100 focus:outline-none">
                   <Avatar className="border-brand-100 h-10 w-10 border shadow-sm">
@@ -108,6 +116,7 @@ export default function Navbar() {
 
                     return (
                       <Link
+                        onClick={() => setIsOpen(false)}
                         key={item.label}
                         href={item.href}
                         className={`flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm transition ${
@@ -124,6 +133,11 @@ export default function Navbar() {
 
                   {/* Sign out */}
                   <button
+                    onClick={() => {
+                      localStorage.removeItem('isAuthenticated');
+                      setIsOpen(false);
+                      router.push('/sign-in');
+                    }}
                     type="button"
                     className="text-destructive flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm transition hover:bg-red-50"
                   >
@@ -158,7 +172,8 @@ export default function Navbar() {
               return (
                 <li key={item.label} className="relative flex h-full items-center">
                   <Link
-                    href={item.href}
+                    // href={item.href}
+                    href={'/'}
                     className={`group relative flex h-full items-center px-2 text-[14px] font-medium transition-colors ${
                       isActive ? 'text-primary bg-brand-50' : 'hover:text-primary text-slate-500'
                     }`}
