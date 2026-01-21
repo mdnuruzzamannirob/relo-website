@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/sheet';
 import Link from 'next/link';
 import Logo from '../shared/Logo';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState, useSyncExternalStore } from 'react';
 import { userNav, nav } from '@/lib/constants/nav-links';
 
@@ -22,6 +22,8 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const category = searchParams.get('category');
 
   const isAuthenticated = useSyncExternalStore(
     (callback) => {
@@ -73,21 +75,26 @@ export default function Navbar() {
               </div>
 
               {/* Mobile Nav Links */}
-              <nav className="flex flex-col gap-1 p-4">
-                <p className="text-xs font-medium text-slate-400 uppercase">Categories</p>
-                {nav?.map((item) => (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    className={`block rounded-md p-3 text-sm transition-colors ${
-                      pathname === item.href
-                        ? 'bg-brand-50 text-primary font-medium'
-                        : 'hover:bg-brand-50 text-slate-600'
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
+              <nav className="flex flex-col gap-1 px-4">
+                {nav?.map((item) => {
+                  const isActive = category
+                    ? item.href.includes(`category=${category}`)
+                    : pathname === item.href;
+
+                  return (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      className={`block rounded-md p-3 text-sm transition-colors ${
+                        isActive
+                          ? 'bg-brand-50 text-primary font-medium'
+                          : 'hover:bg-brand-50 text-slate-600'
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
               </nav>
             </SheetContent>
           </Sheet>
@@ -210,10 +217,11 @@ export default function Navbar() {
 
       {(mode === 'home' || mode === 'guest') && (
         <nav className="border-brand-50 hidden border-t bg-white lg:block">
-          <ul className="app-container flex h-10 items-center gap-5 overflow-x-auto">
+          <ul className="app-container flex h-10 items-center gap-5">
             {nav?.map((item) => {
-              const isActive =
-                item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
+              const isActive = category
+                ? item.href.includes(`category=${category}`)
+                : pathname === item.href;
 
               return (
                 <li key={item.label} className="relative flex h-full items-center">
