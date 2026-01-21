@@ -15,10 +15,27 @@ import {
 import Link from 'next/link';
 import Logo from '../shared/Logo';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useState, useSyncExternalStore } from 'react';
+import { Suspense, useState, useSyncExternalStore } from 'react';
 import { userNav, nav } from '@/lib/constants/nav-links';
 
-export default function Navbar() {
+function NavbarSkeleton() {
+  return (
+    <header className="border-brand-100 sticky top-0 z-50 w-full border-b bg-white">
+      <div className="app-container flex items-center justify-between gap-3 py-4">
+        <div className="h-10 w-24 animate-pulse rounded-md bg-slate-100" />
+        <div className="hidden flex-1 lg:block">
+          <div className="h-11 w-full animate-pulse rounded-md bg-slate-100" />
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="h-10 w-20 animate-pulse rounded-md bg-slate-100" />
+          <div className="h-10 w-20 animate-pulse rounded-md bg-slate-100" />
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function NavbarContent() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
@@ -249,5 +266,13 @@ export default function Navbar() {
         </nav>
       )}
     </header>
+  );
+}
+
+export default function Navbar() {
+  return (
+    <Suspense fallback={<NavbarSkeleton />}>
+      <NavbarContent />
+    </Suspense>
   );
 }
