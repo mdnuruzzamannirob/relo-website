@@ -1,11 +1,4 @@
-import Favorites from '@/components/modules/buyer/Favorites';
-import HeaderBar from '@/components/shared/HeaderBar';
 import { Product } from '@/components/shared/ProductCard';
-
-export const metadata = {
-  title: 'Favorites - Buyer Dashboard',
-  description: 'Buyer Favorites page',
-};
 
 export const products: Product[] = [
   {
@@ -41,7 +34,7 @@ export const products: Product[] = [
     name: 'Men t-shirt, Pant',
     price: 80,
     size: 'M',
-    image: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=500',
+    image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500',
   },
   {
     id: 6,
@@ -50,19 +43,25 @@ export const products: Product[] = [
     size: 'M',
     image: 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=500',
   },
+  {
+    id: 7,
+    name: 'Woman t-shirt',
+    price: 40,
+    size: 'L',
+    image: 'https://images.unsplash.com/photo-1554412933-514a83d2f3c8?w=500',
+  },
+  {
+    id: 8,
+    name: 'Men Shirt, Pant, Watch, Wallet',
+    price: 100,
+    size: 'L',
+    image: 'https://images.unsplash.com/photo-1617137968427-85924c800a22?w=500',
+  },
+  {
+    id: 9,
+    name: 'Towel',
+    price: 15,
+    size: 'Long Size',
+    image: 'https://images.unsplash.com/photo-1563814039166-444463d6b1d4?w=500',
+  },
 ];
-
-const FavoritesPage = () => {
-  return (
-    <section className="space-y-6">
-      <HeaderBar title="Favorites" description="Items you're following" />
-
-      <div className="space-y-4">
-        <h3 className="text-primary font-medium">Saved Items ({products.length || 0})</h3>
-        <Favorites favorites={products} />
-      </div>
-    </section>
-  );
-};
-
-export default FavoritesPage;
