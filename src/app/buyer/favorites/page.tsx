@@ -2,7 +2,12 @@ import Favorites from '@/components/modules/buyer/Favorites';
 import HeaderBar from '@/components/shared/HeaderBar';
 import { Product } from '@/components/shared/ProductCard';
 
-const products: Product[] = [
+export const metadata = {
+  title: 'Favorites - Buyer Dashboard',
+  description: 'Buyer Favorites page',
+};
+
+export const products: Product[] = [
   {
     id: 1,
     name: 'Men t-shirt',
