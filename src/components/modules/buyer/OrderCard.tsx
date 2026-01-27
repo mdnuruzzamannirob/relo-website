@@ -4,11 +4,11 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Order, OrderAction } from '@/app/buyer/my-orders/page';
 import { MapPin, Package, Star, CheckCircle2, AlertTriangle, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useRouter } from 'next/navigation';
 import StatusBadge from '@/components/shared/StatusBadge';
+import { OrderAction, Order } from '@/types';
 
 const labelMap: Record<OrderAction, string> = {
   contact: 'Contact Seller',

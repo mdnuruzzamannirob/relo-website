@@ -1,9 +1,6 @@
-import AllListingsTab from '@/components/modules/seller/AllListingsTab';
+import MyListing from '@/components/modules/seller/MyListing';
 import { ProductRowData } from '@/components/modules/seller/ProductRowCard';
-import PublishedTab from '@/components/modules/seller/PublishedTab';
-import SoldTab from '@/components/modules/seller/SoldTab';
 import HeaderBar from '@/components/shared/HeaderBar';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
@@ -46,30 +43,14 @@ const MyListingsPage = () => {
         description="Track and manage your products"
         rightContent={
           <Link href="/seller/my-listings/new-listing">
-            <Button>
+            <Button className="w-full">
               <Plus /> New Listing
             </Button>
           </Link>
         }
       />
 
-      <Tabs defaultValue="all" className="space-y-4">
-        <TabsList>
-          {[
-            { value: 'all', label: 'All Listings (2)' },
-            { value: 'published', label: 'Published (1)' },
-            { value: 'sold', label: 'Sold (1)' },
-          ].map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value}>
-              {tab.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        <AllListingsTab products={products} />
-        <PublishedTab products={products} />
-        <SoldTab products={products} />
-      </Tabs>
+      <MyListing products={products} />
     </section>
   );
 };
