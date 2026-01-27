@@ -46,16 +46,16 @@ export default function PickupOrderCard({ order }: { order: Order }) {
 
   return (
     <>
-      <div className="border-brand-100 flex gap-4 space-y-4 rounded-xl border bg-white p-4">
+      <div className="border-brand-100 flex flex-col gap-4 rounded-xl border bg-white p-4 sm:flex-row">
         <Image
           src={order.image}
           alt={order.title}
-          width={80}
-          height={80}
-          className="size-20 min-w-20 rounded-md object-cover"
+          width={500}
+          height={500}
+          className="aspect-video w-full rounded-md object-cover sm:h-20 sm:w-20"
         />
         <div className="flex-1 space-y-4">
-          <div className="border-brand-100 flex flex-1 justify-between border-b pb-4">
+          <div className="border-brand-100 flex flex-col gap-2 border-b pb-4 sm:flex-row sm:justify-between">
             <div className="space-y-1">
               <p className="text-primary font-medium">{order.title}</p>
               <p className="text-xs text-slate-500">
@@ -65,20 +65,20 @@ export default function PickupOrderCard({ order }: { order: Order }) {
                 Order ID: <span className="text-primary font-medium">{order.orderCode}</span>
               </p>
             </div>
-            <div className="space-y-1 text-right">
+            <div className="flex items-center justify-between sm:flex-col sm:items-end sm:text-right">
               <p className="text-primary text-lg font-semibold">${order.price}</p>
               {statusBadge()}
             </div>
           </div>
 
-          <div className="grid flex-1 grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <p className="text-xs text-slate-500">Order Date:</p>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <p className="text-xs text-slate-500">Order Date</p>
               <p className="text-primary text-sm font-medium">{order.orderDate}</p>
             </div>
             {order.completedDate && (
-              <div className="space-y-1">
-                <p className="text-xs text-slate-500">Completed Date:</p>
+              <div>
+                <p className="text-xs text-slate-500">Completed Date</p>
                 <p className="text-primary text-sm font-medium">{order.completedDate}</p>
               </div>
             )}
@@ -88,23 +88,23 @@ export default function PickupOrderCard({ order }: { order: Order }) {
           {order.locker && (
             <div className="flex gap-2 rounded-md border border-blue-100 bg-blue-50 p-3 text-sm">
               <Package className="size-5 text-blue-600" />
-              <div className="flex flex-col">
-                <h3 className="mb-1.5 font-medium text-blue-600">Ready for Pickup</h3>
-                <span className="text-blue-500">{order.locker.name}</span>
-                <span className="flex items-center gap-1 text-xs text-blue-500">
+              <div>
+                <p className="mb-1 font-medium text-blue-600">Ready for Pickup</p>
+                <p className="text-blue-500">{order.locker.name}</p>
+                <p className="flex items-center gap-1 text-xs text-blue-500">
                   <MapPin className="size-3" /> {order.locker.address}
-                </span>
+                </p>
               </div>
             </div>
           )}
 
-          <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             {actions.map((action) => (
               <Button
                 key={action}
                 variant={action === 'contact' ? 'outline' : 'default'}
                 className={cn(
-                  'flex-1',
+                  'w-full',
                   action === 'confirm'
                     ? 'bg-green-600 text-white hover:bg-green-700'
                     : action === 'view' && 'bg-brand-600 hover:bg-brand-700 text-white',

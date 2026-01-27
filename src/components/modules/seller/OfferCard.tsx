@@ -49,50 +49,49 @@ export default function OfferCard({ offer }: { offer: Offer }) {
   return (
     <>
       {/* ================= CARD ================= */}
-      <div className="border-brand-100 flex gap-4 space-y-4 rounded-xl border bg-white p-4">
+      <div className="border-brand-100 flex flex-col gap-4 rounded-xl border bg-white p-4 shadow-sm transition-shadow hover:shadow-md md:flex-row md:gap-5 md:p-5">
         <Image
           src={offer.productImage}
           alt={offer.productName}
-          width={80}
-          height={80}
-          className="size-20 min-w-20 rounded-md object-cover"
+          width={500}
+          height={500}
+          className="aspect-video w-full rounded-lg object-cover sm:aspect-square sm:h-28 sm:w-28 md:h-24 md:w-24 lg:h-28 lg:w-28"
         />
-        <div className="flex-1 space-y-4">
-          {' '}
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <h3 className="font-semibold">{offer.productName}</h3>
+        <div className="flex-1 space-y-3 md:space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+            <div className="flex-1 space-y-1.5">
+              <h3 className="text-base font-semibold text-slate-800 sm:text-lg md:text-xl">
+                {offer.productName}
+              </h3>
 
-              <div className="mt-1 flex items-center gap-2 text-sm text-slate-500">
-                {/* <Image
-                  src={offer.buyerAvatar}
-                  alt={''}
-                  width={18}
-                  height={18}
-                  className="bg-brand-50 size-8 min-w-8 rounded-full"
-                /> */}
-                {/* bg image */}
-                <div className="bg-brand-50 size-8 min-w-8 rounded-full"></div>
-                <span className="text-primary font-medium">{offer.buyerName}</span>
-                <span>•</span>
-                <span className="text-xs">{offer.offeredAt}</span>
+              <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500">
+                <div className="bg-brand-50 size-7 min-w-7 rounded-full sm:size-8 sm:min-w-8"></div>
+                <span className="text-primary text-sm font-medium">{offer.buyerName}</span>
+                <span className="hidden text-slate-300 sm:inline">•</span>
+                <span className="text-xs text-slate-400">{offer.offeredAt}</span>
               </div>
             </div>
 
-            <div className="text-right text-sm">
-              <p className="text-xs text-slate-400">Original price</p>
-              <p className="text-primary font-semibold line-through">
-                ${offer.originalPrice.toFixed(2)}
-              </p>
+            <div className="flex items-center justify-between gap-4 sm:flex-col sm:items-end sm:justify-start">
+              <div className="text-left sm:text-right">
+                <p className="text-xs font-medium text-slate-400">Original Price</p>
+                <p className="text-primary text-base font-semibold line-through sm:text-lg">
+                  ${offer.originalPrice.toFixed(2)}
+                </p>
+              </div>
             </div>
           </div>
-          <div className="bg-brand-50 text-primary flex items-center justify-between rounded-lg p-3">
-            <span className="font-medium">Offer Amount</span>
-            <span className="text-lg font-semibold">${offer.offerAmount.toFixed(2)}</span>
+
+          <div className="from-brand-50 to-brand-100/30 flex items-center justify-between rounded-xl bg-linear-to-r p-4 shadow-sm">
+            <span className="text-sm font-semibold text-slate-700 sm:text-base">Offer Amount</span>
+            <span className="text-primary text-xl font-bold sm:text-2xl">
+              ${offer.offerAmount.toFixed(2)}
+            </span>
           </div>
-          <div className="flex flex-col gap-3 sm:flex-row">
+
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3 sm:gap-3">
             <Button
-              className="flex-1 bg-green-600 hover:bg-green-700"
+              className="flex-1 bg-green-600 text-white shadow-sm transition-all hover:bg-green-700 hover:shadow-md"
               onClick={() => setOpen('accept')}
             >
               <CheckCircle2 className="mr-2 size-4" />
@@ -100,7 +99,7 @@ export default function OfferCard({ offer }: { offer: Offer }) {
             </Button>
 
             <Button
-              className="flex-1 bg-slate-800 text-white hover:bg-slate-900"
+              className="flex-1 bg-slate-800 text-white shadow-sm transition-all hover:bg-slate-900 hover:shadow-md"
               onClick={() => setOpen('counter')}
             >
               <MessageSquare className="mr-2 size-4" />
@@ -109,7 +108,7 @@ export default function OfferCard({ offer }: { offer: Offer }) {
 
             <Button
               variant="outline"
-              className="flex-1 border-red-500 text-red-600 hover:bg-red-50"
+              className="flex-1 border-red-200 text-red-600 transition-all hover:border-red-300 hover:bg-red-50 hover:text-red-700"
               onClick={() => setOpen('decline')}
             >
               <XCircle className="mr-2 size-4" />

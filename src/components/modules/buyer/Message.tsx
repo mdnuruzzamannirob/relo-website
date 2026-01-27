@@ -56,12 +56,15 @@ const conversations = [
 
 export default function Messages() {
   const [activeId, setActiveId] = useState(conversations[0].id);
+  const [showChat, setShowChat] = useState(false);
   const active = conversations.find((c) => c.id === activeId)!;
 
   return (
-    <div className="border-brand-100 flex h-150 w-full rounded-xl border bg-white">
+    <div className="border-brand-100 flex h-125 w-full overflow-hidden rounded-xl border bg-white sm:h-150 lg:h-150">
       {/* Sidebar */}
-      <aside className="border-brand-100 w-72 border-r p-3">
+      <aside
+        className={`border-brand-100 w-full shrink-0 border-r p-3 sm:w-80 lg:w-72 ${showChat ? 'hidden sm:block' : 'block'}`}
+      >
         <div className="border-brand-100 mb-3 flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
           <Search className="h-4 w-4 text-slate-500" />
           <input placeholder="Search messages..." className="w-full outline-none" />
@@ -71,7 +74,10 @@ export default function Messages() {
           {conversations.map((c) => (
             <button
               key={c.id}
-              onClick={() => setActiveId(c.id)}
+              onClick={() => {
+                setActiveId(c.id);
+                setShowChat(true);
+              }}
               className={`hover:bg-brand-50 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left ${
                 c.id === activeId ? 'bg-brand-50' : ''
               }`}
@@ -93,9 +99,20 @@ export default function Messages() {
       </aside>
 
       {/* Chat Area */}
-      <main className="flex flex-1 flex-col">
+      <main className={`flex flex-1 flex-col ${showChat ? 'block' : 'hidden sm:flex'}`}>
         {/* Header */}
-        <div className="border-brand-100 flex items-center gap-3 border-b p-4">
+        <div className="border-brand-100 flex items-center gap-3 border-b p-3 sm:p-4">
+          {/* Back button for mobile */}
+          <button onClick={() => setShowChat(false)} className="sm:hidden">
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
           <Image
             src={active.user.avatar}
             alt={active.user.name}
@@ -110,8 +127,8 @@ export default function Messages() {
         </div>
 
         {/* Product Card */}
-        <div className="p-4">
-          <div className="bg-primary flex items-center justify-between rounded-lg p-3 text-white">
+        <div className="p-3 sm:p-4">
+          <div className="bg-primary flex flex-col items-start justify-between gap-2 rounded-lg p-3 text-white sm:flex-row sm:items-center">
             <div className="flex items-center gap-3">
               <Image
                 src={active.product.image}
@@ -125,25 +142,25 @@ export default function Messages() {
                 <p className="text-xs opacity-80">Size: {active.product.size}</p>
               </div>
             </div>
-            <p className="text-sm font-semibold">${active.product.price}</p>
+            <p className="text-sm font-semibold sm:text-base">${active.product.price}</p>
           </div>
         </div>
 
         {/* Messages */}
-        <div className="flex-1 space-y-4 overflow-y-auto px-4">
+        <div className="flex-1 space-y-3 overflow-y-auto px-3 sm:space-y-4 sm:px-4">
           {active.messages.map((m) => (
             <div
               key={m.id}
               className={`flex ${m.from === 'buyer' ? 'justify-end' : 'justify-start'}`}
             >
               {m.type === 'offer' ? (
-                <div className="bg-brand-50 border-brand-100 w-56 rounded-lg border p-3 text-sm">
+                <div className="bg-brand-50 border-brand-100 w-full max-w-xs rounded-lg border p-3 text-sm sm:w-56">
                   <p className="font-medium">$ Offer</p>
                   <p className="text-lg font-semibold">${m.price}</p>
                   <p className="text-xs text-slate-500">{m.note}</p>
                 </div>
               ) : (
-                <div className="bg-primary max-w-xs rounded-lg px-3 py-2 text-sm text-white">
+                <div className="bg-primary max-w-[85%] rounded-lg px-3 py-2 text-sm text-white sm:max-w-xs">
                   <p>{m.text}</p>
                   <p className="mt-1 text-[10px] opacity-70">{m.time}</p>
                 </div>
