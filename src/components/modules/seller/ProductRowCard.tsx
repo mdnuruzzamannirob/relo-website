@@ -30,58 +30,71 @@ export default function ProductRowCard({ product }: { product: ProductRowData })
   };
 
   return (
-    <div className="border-brand-100 flex items-start gap-4 rounded-xl border bg-white p-4">
+    <div className="border-brand-100 flex flex-col gap-4 rounded-xl border bg-white p-4 sm:flex-row">
       {/* Image */}
-      <div className="bg-brand-50 relative h-20 w-20 shrink-0 overflow-hidden rounded-lg">
-        <Image src={image} alt={title} fill className="object-cover" />
-      </div>
+      <Image
+        src={image}
+        alt={title}
+        width={500}
+        height={500}
+        className="aspect-video w-full rounded-md object-cover sm:h-20 sm:w-20"
+      />
 
       {/* Info */}
-      <div className="flex-1 space-y-3">
-        <div className="flex items-center justify-between gap-4">
-          <div className="">
-            <h3 className="mb-1 text-sm font-semibold text-slate-800">{title}</h3>
-
+      <div className="flex-1 space-y-4">
+        {/* HEADER */}
+        <div className="border-brand-100 flex flex-col gap-2 border-b pb-4 sm:flex-row sm:justify-between">
+          <div className="space-y-1">
+            <p className="text-primary font-medium">{title}</p>
             {size && (
               <p className="text-xs text-slate-500">
-                Size: <span className="font-medium">{size}</span>
+                Size: <span className="text-primary font-medium">{size}</span>
               </p>
             )}
             {postedDate && (
               <p className="text-xs text-slate-500">
-                Posted date: <span className="font-medium">{postedDate}</span>
+                Posted: <span className="text-primary font-medium">{postedDate}</span>
               </p>
             )}
           </div>
 
-          <div className="flex flex-col items-end gap-3">
-            <p className="text-sm font-semibold text-slate-800">${price.toFixed(2)}</p>
-
+          <div className="flex items-center justify-between sm:flex-col sm:items-end sm:text-right">
+            <p className="text-primary text-lg font-semibold">${price.toFixed(2)}</p>
             {status && (
               <StatusBadge
                 label={status === 'published' ? 'Published' : 'Sold'}
                 color={status === 'published' ? 'green' : 'purple'}
-                variant="outline"
                 size="sm"
               />
             )}
           </div>
         </div>
 
-        {description && <p className="line-clamp-2 text-xs text-slate-500">{description}</p>}
-      </div>
+        {/* DESCRIPTION */}
+        {description && (
+          <div>
+            <p className="line-clamp-2 text-sm text-slate-600">{description}</p>
+          </div>
+        )}
 
-      {/* Right */}
-      <div className="flex flex-col items-end gap-2">
-        <Link href={`/seller/my-listings/edit-listing?id=${product.id}`}>
-          <Button size="icon-sm" variant="ghost" onClick={() => handleEdit(id)}>
-            <Pencil className="h-4 w-4 text-slate-500" />
+        {/* ACTIONS */}
+        <div className="flex gap-3">
+          <Link href={`/seller/my-listings/edit-listing?id=${product.id}`} className="flex-1">
+            <Button variant="outline" className="w-full flex-1" onClick={() => handleEdit(id)}>
+              <Pencil className="h-4 w-4" />
+              Edit
+            </Button>
+          </Link>
+
+          <Button
+            variant="outline"
+            className="w-full flex-1 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+            onClick={() => handleDelete(id)}
+          >
+            <Trash2 className="h-4 w-4" />
+            Delete
           </Button>
-        </Link>
-
-        <Button size="icon-sm" variant="ghost" onClick={() => handleDelete(id)}>
-          <Trash2 className="h-4 w-4 text-red-500" />
-        </Button>
+        </div>
       </div>
     </div>
   );

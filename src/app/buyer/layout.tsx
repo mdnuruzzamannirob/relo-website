@@ -19,7 +19,7 @@ export default function BuyerLayout({ children }: { children: React.ReactNode })
         <MobileSidebar info={info} variant="buyer" />
 
         {/* Content */}
-        <main className="flex-1 pt-8 lg:pt-0">{children}</main>
+        <main className="w-full flex-1 pt-8 lg:pt-0">{children}</main>
       </div>
     </div>
   );

@@ -1,39 +1,11 @@
-import AllOrdersTab from '@/components/modules/buyer/AllOrdersTab';
-import CompletedTab from '@/components/modules/buyer/CompletedTab';
-import ProcessingTab from '@/components/modules/buyer/ProcessingTab';
-import ReadyForPickupTab from '@/components/modules/buyer/ReadyForPickupTab';
+import MyOrder from '@/components/modules/buyer/MyOrder';
 import HeaderBar from '@/components/shared/HeaderBar';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Order } from '@/types';
 
 export const metadata = {
   title: 'My Orders - Buyer Dashboard',
   description: 'Buyer My Orders page',
 };
-
-export type OrderStatus = 'processing' | 'ready' | 'completed';
-export type OrderAction = 'contact' | 'cancel' | 'qr' | 'confirm' | 'review';
-
-export interface Order {
-  id: string;
-  title: string;
-  seller: string;
-  price: number;
-  orderDate: string;
-  completedDate?: string;
-  status: OrderStatus;
-
-  image: string; // product image
-  orderCode: string;
-
-  // only for ready
-  locker?: {
-    name: string;
-    address: string;
-  };
-
-  // only for completed
-  isReviewed?: boolean;
-}
 
 export const orders: Order[] = [
   {
@@ -83,25 +55,7 @@ const MyOrdersPage = () => {
     <section className="space-y-6">
       <HeaderBar title="My Orders" description="Track and manage your purchases" />
 
-      <Tabs defaultValue="all" className="space-y-4">
-        <TabsList>
-          {[
-            { value: 'all', label: 'All Orders (3)' },
-            { value: 'processing', label: 'Processing (1)' },
-            { value: 'ready', label: 'Ready for Pickup (1)' },
-            { value: 'completed', label: 'Completed (1)' },
-          ].map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value}>
-              {tab.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        <AllOrdersTab orders={orders} />
-        <ProcessingTab orders={orders} />
-        <ReadyForPickupTab orders={orders} />
-        <CompletedTab orders={orders} />
-      </Tabs>
+      <MyOrder orders={orders} />
     </section>
   );
 };
