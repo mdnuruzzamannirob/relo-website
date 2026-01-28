@@ -9,15 +9,17 @@ type HeaderBarProps = {
 
 const HeaderBar = ({ title, description, rightContent, className = '' }: HeaderBarProps) => {
   return (
-    <div className={`flex items-center justify-between gap-4 ${className}`}>
+    <div
+      className={`flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 ${className}`}
+    >
       {/* Left Side - Title and Description */}
-      <div className="flex flex-col gap-1">
-        <h1 className="text-primary text-2xl font-semibold">{title}</h1>
-        {description && <p className="text-sm text-slate-500">{description}</p>}
+      <div className="flex flex-col gap-0.5 sm:gap-1">
+        <h1 className="text-primary text-xl font-semibold sm:text-2xl">{title}</h1>
+        {description && <p className="text-xs text-slate-500 sm:text-sm">{description}</p>}
       </div>
 
       {/* Right Side - Button or Custom Content */}
-      <div className="ml-auto">{rightContent && rightContent}</div>
+      {rightContent && <div className="sm:ml-auto">{rightContent}</div>}
     </div>
   );
 };
