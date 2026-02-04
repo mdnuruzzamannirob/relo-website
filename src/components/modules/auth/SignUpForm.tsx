@@ -3,6 +3,7 @@
 import ButtonComp from '@/components/shared/ButtonComp';
 import Logo from '@/components/shared/Logo';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { signUpSchema, SignUpFormData } from '@/lib/schema/auth';
 import { useSignUpMutation, useGetMeQuery } from '@/store/apis/authApi';
 import { setUser } from '@/store/slices/userSlice';
@@ -12,14 +13,16 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { AlertCircle } from 'lucide-react';
+import { useForm, useController } from 'react-hook-form';
+import { AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 const SignUpForm = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [signUp, { isLoading: isSigningUp }] = useSignUpMutation();
 
@@ -32,10 +35,16 @@ const SignUpForm = () => {
     handleSubmit,
     formState: { errors, isSubmitting },
     watch,
-    reset,
+    control,
   } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
     mode: 'onChange',
+  });
+
+  const { field: agreeTermsField } = useController({
+    name: 'agreeTerms',
+    control,
+    defaultValue: false,
   });
 
   const password = watch('password');
@@ -87,6 +96,7 @@ const SignUpForm = () => {
             <label htmlFor="fullName" className="mb-1 block text-sm font-medium text-slate-500">
               Full name <span className="text-red-500">*</span>
             </label>
+
             <div className="relative">
               <input
                 {...register('fullName')}
@@ -96,6 +106,7 @@ const SignUpForm = () => {
                 disabled={isLoading}
                 className="border-brand-100 focus:bg-brand-50/50 h-11 w-full rounded-md border px-4 text-sm transition-all outline-none placeholder:text-slate-400 focus:ring-1 focus:ring-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
               />
+
               {errors.fullName && (
                 <div className="mt-1 flex items-center gap-1 text-xs text-red-500">
                   <AlertCircle size={14} />
@@ -110,6 +121,7 @@ const SignUpForm = () => {
             <label htmlFor="email" className="mb-1 block text-sm font-medium text-slate-500">
               Email <span className="text-red-500">*</span>
             </label>
+
             <div className="relative">
               <input
                 {...register('email')}
@@ -119,6 +131,7 @@ const SignUpForm = () => {
                 disabled={isLoading}
                 className="border-brand-100 focus:bg-brand-50/50 h-11 w-full rounded-md border px-4 text-sm transition-all outline-none placeholder:text-slate-400 focus:ring-1 focus:ring-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
               />
+
               {errors.email && (
                 <div className="mt-1 flex items-center gap-1 text-xs text-red-500">
                   <AlertCircle size={14} />
@@ -133,17 +146,27 @@ const SignUpForm = () => {
             <label htmlFor="password" className="mb-1 block text-sm font-medium text-slate-500">
               Password <span className="text-red-500">*</span>
             </label>
+
             <div className="relative">
               <input
                 {...register('password')}
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 id="password"
                 placeholder="Create a password"
                 disabled={isLoading}
                 onFocus={() => setIsPasswordFocused(true)}
                 onBlur={() => setIsPasswordFocused(false)}
-                className="border-brand-100 focus:bg-brand-50/50 h-11 w-full rounded-md border px-4 text-sm transition-all outline-none placeholder:text-slate-400 focus:ring-1 focus:ring-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
+                className="border-brand-100 focus:bg-brand-50/50 h-11 w-full rounded-md border px-4 pr-10 text-sm transition-all outline-none placeholder:text-slate-400 focus:ring-1 focus:ring-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
               />
+
+              {/* toggle */}
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute top-2.5 right-2.5 p-1 text-slate-400"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
 
               {errors.password && (
                 <div className="mt-1 flex items-center gap-1 text-xs text-red-500">
@@ -180,15 +203,26 @@ const SignUpForm = () => {
             >
               Confirm password <span className="text-red-500">*</span>
             </label>
+
             <div className="relative">
               <input
                 {...register('confirmPassword')}
-                type="password"
+                type={showConfirmPassword ? 'text' : 'password'}
                 id="confirmPassword"
                 placeholder="Confirm your password"
                 disabled={isLoading}
-                className="border-brand-100 focus:bg-brand-50/50 h-11 w-full rounded-md border px-4 text-sm transition-all outline-none placeholder:text-slate-400 focus:ring-1 focus:ring-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
+                className="border-brand-100 focus:bg-brand-50/50 h-11 w-full rounded-md border px-4 pr-10 text-sm transition-all outline-none placeholder:text-slate-400 focus:ring-1 focus:ring-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
               />
+
+              {/* toggle */}
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute top-2.5 right-2.5 p-1 text-slate-400"
+              >
+                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+
               {errors.confirmPassword && (
                 <div className="mt-1 flex items-center gap-1 text-xs text-red-500">
                   <AlertCircle size={14} />
@@ -200,13 +234,15 @@ const SignUpForm = () => {
 
           {/* Terms */}
           <div>
-            <label className="flex cursor-pointer items-start gap-2 text-sm text-slate-500 select-none">
-              <input
-                {...register('agreeTerms')}
-                type="checkbox"
+            <label className="flex cursor-pointer items-start gap-3 text-sm text-slate-500 select-none">
+              <Checkbox
+                id="agreeTerms"
+                checked={agreeTermsField.value}
+                onCheckedChange={agreeTermsField.onChange}
                 disabled={isLoading}
-                className="mt-0.5"
+                className="size-5"
               />
+
               <span>
                 I agree to the{' '}
                 <Link
