@@ -4,9 +4,7 @@ import ButtonComp from '@/components/shared/ButtonComp';
 import Logo from '@/components/shared/Logo';
 import { Button } from '@/components/ui/button';
 import { signInSchema, SignInFormData } from '@/lib/schema/auth';
-import { useSignInMutation, useGetMeQuery } from '@/store/apis/authApi';
-import { setUser } from '@/store/slices/userSlice';
-import { useAppDispatch } from '@/store/hook';
+import { useSignInMutation } from '@/store/apis/authApi';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -17,11 +15,7 @@ import { AlertCircle } from 'lucide-react';
 
 const SignInForm = () => {
   const router = useRouter();
-  const dispatch = useAppDispatch();
-  const [signIn, { isLoading: isSigningIn }] = useSignInMutation();
-  const { data: userData, isFetching: isFetchingUser } = useGetMeQuery(undefined, {
-    skip: true,
-  });
+  const [signIn, { isLoading: isSigningIn, isSuccess }] = useSignInMutation();
 
   const {
     register,
@@ -32,32 +26,21 @@ const SignInForm = () => {
     mode: 'onChange',
   });
 
-  const isLoading = isSigningIn || isFetchingUser || isSubmitting;
+  const isLoading = isSigningIn || isSubmitting;
 
   useEffect(() => {
-    if (userData) {
-      dispatch(setUser(userData));
+    if (isSuccess) {
       router.push('/buyer/overview');
     }
-  }, [userData, dispatch, router]);
+  }, [isSuccess, router]);
 
-  const onSubmit = async (data: SignInFormData) => {
-    try {
-      const response = await signIn({
-        email: data.email,
-        password: data.password,
-      }).unwrap();
+  const onSubmit = (data: SignInFormData) => {
+    const payload = {
+      email: data.email,
+      password: data.password,
+    };
 
-      // Store user data in global state
-      if (response.user) {
-        dispatch(setUser(response.user));
-      }
-
-      // Redirect to appropriate page
-      router.push('/buyer/overview');
-    } catch (error: any) {
-      console.error('Sign in failed:', error);
-    }
+    signIn(payload);
   };
 
   return (

@@ -9,9 +9,9 @@ export interface User {
 }
 
 export interface AuthResponse {
-  token: string;
-  refreshToken?: string;
-  user: User;
+  success: boolean;
+  message: string;
+  data?: any;
 }
 
 export interface OTPResponse {

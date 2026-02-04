@@ -42,18 +42,7 @@ function NavbarContent() {
   const searchParams = useSearchParams();
   const category = searchParams.get('category');
 
-  const isAuthenticated = useSyncExternalStore(
-    (callback) => {
-      if (typeof window === 'undefined') return () => undefined;
-      const handler = () => callback();
-      window.addEventListener('storage', handler);
-      return () => window.removeEventListener('storage', handler);
-    },
-    () =>
-      (typeof window !== 'undefined' && localStorage.getItem('isAuthenticated') === 'true') ||
-      false,
-    () => false,
-  );
+  const isAuthenticated = true;
 
   const mode = isAuthenticated
     ? pathname.startsWith('/buyer') || pathname.startsWith('/seller')

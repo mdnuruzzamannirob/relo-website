@@ -5,6 +5,7 @@ import Provider from './provider';
 import { cn } from '@/lib/utils/cn';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import { Toaster } from '@/components/ui/sonner';
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -29,6 +30,7 @@ export default function RootLayout({
           <Navbar />
           {children}
           <Footer />
+          <Toaster position="top-center" richColors theme="light" duration={3000} />
         </Provider>
       </body>
     </html>

@@ -6,8 +6,10 @@ import {
   ResetPasswordRequest,
   ChangePasswordRequest,
 } from '@/types/auth';
+import { toast } from 'sonner';
+import { setUser } from '../slices/userSlice';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://10.10.20.2:5007/api/v1';
 
 export const authApi = createApi({
   reducerPath: 'authApi',
@@ -24,50 +26,80 @@ export const authApi = createApi({
   tagTypes: ['User'],
   endpoints: (builder) => ({
     // Sign Up
-    signUp: builder.mutation<AuthResponse, { fullName: string; email: string; password: string }>({
+    signUp: builder.mutation<
+      { success: boolean; message: string },
+      {
+        name: string;
+        email: string;
+        password: string;
+        confirmPassword: string;
+        isAgreement: boolean;
+      }
+    >({
       query: (credentials) => ({
-        url: '/auth/sign-up',
+        url: '/users/register',
         method: 'POST',
         body: credentials,
       }),
-      async onQueryStarted(args, { dispatch, queryFulfilled }) {
+      async onQueryStarted(args, { queryFulfilled }) {
         try {
-          const { data } = await queryFulfilled;
-          localStorage.setItem('authToken', data.token);
-          if (data.refreshToken) {
-            localStorage.setItem('refreshToken', data.refreshToken);
-          }
-        } catch (error) {
-          // Handle error
+          await queryFulfilled;
+          toast.success('Registration successful! Please sign in.');
+        } catch (error: any) {
+          const errorMessage = error?.error?.data?.message || 'Something went wrong';
+          toast.error(errorMessage);
         }
       },
       invalidatesTags: ['User'],
     }),
 
     // Sign In
-    signIn: builder.mutation<AuthResponse, { email: string; password: string }>({
+    signIn: builder.mutation<
+      { success: boolean; message: string; data: { userData: User; token: string } },
+      { email: string; password: string }
+    >({
       query: (credentials) => ({
-        url: '/auth/sign-in',
+        url: '/auth/login',
         method: 'POST',
         body: credentials,
       }),
       async onQueryStarted(args, { dispatch, queryFulfilled }) {
         try {
-          const { data } = await queryFulfilled;
-          localStorage.setItem('authToken', data.token);
-          if (data.refreshToken) {
-            localStorage.setItem('refreshToken', data.refreshToken);
+          const {
+            data: { data },
+          } = await queryFulfilled;
+
+          dispatch(setUser(data?.userData));
+
+          if (data.token) {
+            localStorage.setItem('authToken', data.token);
           }
-        } catch (error) {
-          // Handle error
+
+          toast.success('Sign in successful!');
+        } catch (error: any) {
+          const errorMessage = error?.error?.data?.message || 'Something went wrong';
+          toast.error(errorMessage);
         }
       },
       invalidatesTags: ['User'],
     }),
 
     // Get Current User
-    getMe: builder.query<User, void>({
-      query: () => '/auth/me',
+    getMe: builder.query<{ success: boolean; message: string; data: User }, void>({
+      query: () => ({
+        url: '/auth/me',
+        method: 'GET',
+      }),
+      async onQueryStarted(args, { dispatch, queryFulfilled }) {
+        try {
+          const {
+            data: { data },
+          } = await queryFulfilled;
+          dispatch(setUser(data));
+        } catch (error: any) {
+          console.log(error);
+        }
+      },
       providesTags: ['User'],
     }),
 

@@ -5,36 +5,28 @@ import Logo from '@/components/shared/Logo';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { signUpSchema, SignUpFormData } from '@/lib/schema/auth';
-import { useSignUpMutation, useGetMeQuery } from '@/store/apis/authApi';
-import { setUser } from '@/store/slices/userSlice';
-import { useAppDispatch } from '@/store/hook';
+import { useSignUpMutation } from '@/store/apis/authApi';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { useForm, useController } from 'react-hook-form';
+import { useForm, useController, useWatch } from 'react-hook-form';
 import { AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 const SignUpForm = () => {
   const router = useRouter();
-  const dispatch = useAppDispatch();
 
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const [signUp, { isLoading: isSigningUp }] = useSignUpMutation();
-
-  const { data: userData, isFetching: isFetchingUser } = useGetMeQuery(undefined, {
-    skip: true,
-  });
+  const [signUp, { isLoading: isSigningUp, isSuccess }] = useSignUpMutation();
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    watch,
     control,
   } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
@@ -47,36 +39,30 @@ const SignUpForm = () => {
     defaultValue: false,
   });
 
-  const password = watch('password');
+  const password = useWatch({
+    control,
+    name: 'password',
+    defaultValue: '',
+  });
 
-  const isLoading = isSigningUp || isFetchingUser || isSubmitting;
+  const isLoading = isSigningUp || isSubmitting;
 
   useEffect(() => {
-    if (userData) {
-      dispatch(setUser(userData));
+    if (isSuccess) {
       router.push('/buyer/overview');
     }
-  }, [userData, dispatch, router]);
+  }, [isSuccess, router]);
 
-  const onSubmit = async (data: SignUpFormData) => {
-    try {
-      const response = await signUp({
-        fullName: data.fullName,
-        email: data.email,
-        password: data.password,
-      }).unwrap();
+  const onSubmit = (data: SignUpFormData) => {
+    const payload = {
+      name: data.fullName,
+      email: data.email,
+      password: data.password,
+      confirmPassword: data.confirmPassword,
+      isAgreement: data.agreeTerms,
+    };
 
-      // Store user data in global state
-      if (response.user) {
-        dispatch(setUser(response.user));
-      }
-
-      // Redirect to appropriate page
-      router.push('/buyer/overview');
-    } catch (error: any) {
-      console.error('Sign up failed:', error);
-      // Error is handled by react-hook-form and API
-    }
+    signUp(payload);
   };
 
   return (
