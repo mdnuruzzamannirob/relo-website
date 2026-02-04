@@ -11,14 +11,18 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { AlertCircle } from 'lucide-react';
 
 const SignUpForm = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
+
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+
   const [signUp, { isLoading: isSigningUp }] = useSignUpMutation();
+
   const { data: userData, isFetching: isFetchingUser } = useGetMeQuery(undefined, {
     skip: true,
   });
@@ -35,6 +39,7 @@ const SignUpForm = () => {
   });
 
   const password = watch('password');
+
   const isLoading = isSigningUp || isFetchingUser || isSubmitting;
 
   useEffect(() => {
@@ -135,8 +140,11 @@ const SignUpForm = () => {
                 id="password"
                 placeholder="Create a password"
                 disabled={isLoading}
+                onFocus={() => setIsPasswordFocused(true)}
+                onBlur={() => setIsPasswordFocused(false)}
                 className="border-brand-100 focus:bg-brand-50/50 h-11 w-full rounded-md border px-4 text-sm transition-all outline-none placeholder:text-slate-400 focus:ring-1 focus:ring-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
               />
+
               {errors.password && (
                 <div className="mt-1 flex items-center gap-1 text-xs text-red-500">
                   <AlertCircle size={14} />
@@ -144,20 +152,24 @@ const SignUpForm = () => {
                 </div>
               )}
             </div>
-            <div className="mt-2 space-y-1 text-xs text-slate-500">
-              <p className={password && /[A-Z]/.test(password) ? 'text-green-600' : ''}>
-                ✓ At least one uppercase letter
-              </p>
-              <p className={password && /[a-z]/.test(password) ? 'text-green-600' : ''}>
-                ✓ At least one lowercase letter
-              </p>
-              <p className={password && /[0-9]/.test(password) ? 'text-green-600' : ''}>
-                ✓ At least one number
-              </p>
-              <p className={password && /[!@#$%^&*]/.test(password) ? 'text-green-600' : ''}>
-                ✓ At least one special character (!@#$%^&*)
-              </p>
-            </div>
+
+            {/* Password Rules */}
+            {isPasswordFocused && (
+              <div className="mt-2 space-y-1 text-xs text-slate-500">
+                <p className={password && /[A-Z]/.test(password) ? 'text-green-600' : ''}>
+                  ✓ At least one uppercase letter
+                </p>
+                <p className={password && /[a-z]/.test(password) ? 'text-green-600' : ''}>
+                  ✓ At least one lowercase letter
+                </p>
+                <p className={password && /[0-9]/.test(password) ? 'text-green-600' : ''}>
+                  ✓ At least one number
+                </p>
+                <p className={password && /[!@#$%^&*]/.test(password) ? 'text-green-600' : ''}>
+                  ✓ At least one special character (!@#$%^&*)
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Confirm Password */}
@@ -212,6 +224,7 @@ const SignUpForm = () => {
                 </Link>
               </span>
             </label>
+
             {errors.agreeTerms && (
               <div className="mt-1 flex items-center gap-1 text-xs text-red-500">
                 <AlertCircle size={14} />
@@ -220,7 +233,7 @@ const SignUpForm = () => {
             )}
           </div>
 
-          {/* Sign Up */}
+          {/* Submit */}
           <ButtonComp
             type="submit"
             loading={isLoading}
