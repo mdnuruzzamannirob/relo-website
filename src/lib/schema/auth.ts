@@ -58,11 +58,6 @@ export type OTPVerificationFormData = z.infer<typeof otpVerificationSchema>;
 // Reset Password Schema
 export const resetPasswordSchema = z
   .object({
-    email: z.string().email(),
-    otp: z
-      .string()
-      .min(1, 'OTP is required')
-      .regex(/^\d{6}$/, 'OTP must be 6 digits'),
     newPassword: z
       .string()
       .min(1, 'Password is required')

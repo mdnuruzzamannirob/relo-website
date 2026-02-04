@@ -22,8 +22,7 @@ export interface OTPResponse {
 
 export interface ResetPasswordRequest {
   email: string;
-  otp: string;
-  newPassword: string;
+  password: string;
 }
 
 export interface ChangePasswordRequest {

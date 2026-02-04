@@ -19,6 +19,7 @@ const eslintConfig = defineConfig([
       // Disable some React rules.
       'react/react-in-jsx-scope': 'off',
       'react-hooks/exhaustive-deps': 'off',
+      'react-hooks/set-state-in-effect': 'off',
 
       // Temporary disable some TypeScript rules.
       '@typescript-eslint/no-unused-vars': 'off',

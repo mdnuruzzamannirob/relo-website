@@ -30,7 +30,7 @@ const SignInForm = () => {
 
   useEffect(() => {
     if (isSuccess) {
-      router.push('/buyer/overview');
+      router.push('/');
     }
   }, [isSuccess, router]);
 

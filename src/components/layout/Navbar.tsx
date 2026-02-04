@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, LogOut, Menu, X } from 'lucide-react';
+import { Search, LogOut, Menu, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -15,8 +15,9 @@ import {
 import Link from 'next/link';
 import Logo from '../shared/Logo';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useState, useSyncExternalStore } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { userNav, nav } from '@/lib/constants/nav-links';
+import { useLogoutMutation } from '@/store/apis/authApi';
 
 function NavbarSkeleton() {
   return (
@@ -42,6 +43,8 @@ function NavbarContent() {
   const searchParams = useSearchParams();
   const category = searchParams.get('category');
 
+  const [logout, { isLoading, isSuccess }] = useLogoutMutation();
+
   const isAuthenticated = true;
 
   const mode = isAuthenticated
@@ -49,6 +52,12 @@ function NavbarContent() {
       ? 'dashboard'
       : 'home'
     : 'guest';
+
+  useEffect(() => {
+    if (isSuccess) {
+      router.push('/');
+    }
+  }, [isSuccess, router]);
 
   return (
     <header className="border-brand-100 sticky top-0 z-50 w-full border-b bg-white">
@@ -191,16 +200,21 @@ function NavbarContent() {
 
                     {/* Sign out */}
                     <button
-                      onClick={() => {
-                        localStorage.removeItem('isAuthenticated');
-                        setIsOpen(false);
-                        router.push('/sign-in');
-                      }}
+                      onClick={() => logout()}
                       type="button"
-                      className="text-destructive flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm transition hover:bg-red-50"
+                      disabled={isLoading}
+                      className="text-destructive flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm transition hover:bg-red-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                     >
-                      <LogOut className="size-4" />
-                      Sign out
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="size-4 animate-spin" /> Signing out...
+                        </>
+                      ) : (
+                        <>
+                          <LogOut className="size-4" />
+                          Sign out
+                        </>
+                      )}
                     </button>
                   </div>
                 </PopoverContent>

@@ -49,7 +49,7 @@ const SignUpForm = () => {
 
   useEffect(() => {
     if (isSuccess) {
-      router.push('/buyer/overview');
+      router.push('/sign-in');
     }
   }, [isSuccess, router]);
 

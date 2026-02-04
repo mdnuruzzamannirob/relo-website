@@ -7,7 +7,7 @@ import {
   ChangePasswordRequest,
 } from '@/types/auth';
 import { toast } from 'sonner';
-import { setUser } from '../slices/userSlice';
+import { clearUser, setUser } from '../slices/userSlice';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://10.10.20.2:5007/api/v1';
 
@@ -110,15 +110,62 @@ export const authApi = createApi({
         method: 'POST',
         body,
       }),
+      async onQueryStarted(args, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          sessionStorage.setItem('forgotPasswordEmail', args.email);
+
+          toast.success('OTP sent to your email');
+        } catch (error: any) {
+          const errorMessage = error?.error?.data?.message || 'Failed to send OTP';
+          toast.error(errorMessage);
+        }
+      },
+    }),
+
+    resendOtp: builder.mutation<{ success: boolean; message: string }, { email: string }>({
+      query: (body) => ({
+        url: '/auth/resend-otp',
+        method: 'POST',
+        body,
+      }),
+      async onQueryStarted(args, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          sessionStorage.setItem('forgotPasswordEmail', args.email);
+
+          toast.success('OTP resent to your email');
+        } catch (error: any) {
+          const errorMessage = error?.error?.data?.message || 'Failed to resend OTP';
+          toast.error(errorMessage);
+        }
+      },
     }),
 
     // Verify OTP
-    verifyOTP: builder.mutation<{ valid: boolean }, { email: string; otp: string }>({
+    verifyOTP: builder.mutation<{ success: boolean }, { email: string; verificationCode: string }>({
       query: (body) => ({
         url: '/auth/verify-otp',
         method: 'POST',
         body,
       }),
+      async onQueryStarted(args, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+
+          if (!data?.success) {
+            throw new Error('Invalid OTP. Please try again.');
+          }
+
+          sessionStorage.setItem('resetPasswordEmail', args?.email);
+          sessionStorage.setItem('resetPasswordOTP', args?.verificationCode);
+
+          toast.success('OTP verified successfully');
+        } catch (error: any) {
+          const errorMessage = error?.error?.data?.message || 'OTP verification failed';
+          toast.error(errorMessage);
+        }
+      },
     }),
 
     // Reset Password
@@ -128,6 +175,20 @@ export const authApi = createApi({
         method: 'POST',
         body,
       }),
+      async onQueryStarted(args, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+
+          sessionStorage.removeItem('forgotPasswordEmail');
+          sessionStorage.removeItem('resetPasswordEmail');
+          sessionStorage.removeItem('resetPasswordOTP');
+
+          toast.success('Password reset successfully');
+        } catch (error: any) {
+          const errorMessage = error?.error?.data?.message || 'Password reset failed';
+          toast.error(errorMessage);
+        }
+      },
     }),
 
     // Change Password
@@ -149,12 +210,17 @@ export const authApi = createApi({
       async onQueryStarted(args, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
+
+          dispatch(clearUser());
           localStorage.removeItem('authToken');
           localStorage.removeItem('refreshToken');
           // Clear user cache
           dispatch(authApi.util.resetApiState());
-        } catch (error) {
-          // Handle error
+
+          toast.success('Logout successful');
+        } catch (error: any) {
+          const errorMessage = error?.error?.data?.message || 'Logout failed';
+          toast.error(errorMessage);
         }
       },
       invalidatesTags: ['User'],
@@ -167,6 +233,7 @@ export const {
   useSignInMutation,
   useGetMeQuery,
   useForgotPasswordMutation,
+  useResendOtpMutation,
   useVerifyOTPMutation,
   useResetPasswordMutation,
   useChangePasswordMutation,

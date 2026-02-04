@@ -8,26 +8,34 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { AlertCircle } from 'lucide-react';
+import { useForm, useWatch } from 'react-hook-form';
+import { AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 const ResetPasswordForm = () => {
   const router = useRouter();
   const [email, setEmail] = useState<string>('');
   const [otp, setOtp] = useState<string>('');
-  const [resetPassword, { isLoading }] = useResetPasswordMutation();
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [resetPassword, { isLoading, isSuccess }] = useResetPasswordMutation();
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    watch,
+    control,
   } = useForm<ResetPasswordFormData>({
     resolver: zodResolver(resetPasswordSchema),
     mode: 'onChange',
   });
 
-  const newPassword = watch('newPassword');
+  const newPassword = useWatch({
+    control,
+    name: 'newPassword',
+    defaultValue: '',
+  });
 
   useEffect(() => {
     const storedEmail = sessionStorage.getItem('resetPasswordEmail');
@@ -42,25 +50,20 @@ const ResetPasswordForm = () => {
     setOtp(storedOTP);
   }, [router]);
 
+  useEffect(() => {
+    if (isSuccess) {
+      router.push('/sign-in');
+    }
+  }, [isSuccess, router]);
+
   const onSubmit = async (data: ResetPasswordFormData) => {
     if (!email || !otp) return;
 
-    try {
-      await resetPassword({
-        email,
-        otp,
-        newPassword: data.newPassword,
-      }).unwrap();
-
-      // Clear session storage
-      sessionStorage.removeItem('resetPasswordEmail');
-      sessionStorage.removeItem('resetPasswordOTP');
-      sessionStorage.removeItem('forgotPasswordEmail');
-
-      router.push('/sign-in');
-    } catch (error: any) {
-      console.error('Password reset failed:', error);
-    }
+    const payload = {
+      email,
+      password: data.newPassword,
+    };
+    resetPassword(payload);
   };
 
   return (
@@ -80,12 +83,24 @@ const ResetPasswordForm = () => {
             <div className="relative">
               <input
                 {...register('newPassword')}
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 id="newPassword"
                 placeholder="Enter new password"
                 disabled={isLoading || isSubmitting}
+                onFocus={() => setIsPasswordFocused(true)}
+                onBlur={() => setIsPasswordFocused(false)}
                 className="border-brand-100 focus:bg-brand-50/50 h-11 w-full rounded-md border px-4 text-sm transition-all outline-none placeholder:text-slate-400 focus:ring-1 focus:ring-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
               />
+
+              {/* toggle */}
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute top-2.5 right-2.5 p-1 text-slate-400"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+
               {errors.newPassword && (
                 <div className="mt-1 flex items-center gap-1 text-xs text-red-500">
                   <AlertCircle size={14} />
@@ -93,20 +108,25 @@ const ResetPasswordForm = () => {
                 </div>
               )}
             </div>
-            <div className="mt-2 space-y-1 text-xs text-slate-500">
-              <p className={newPassword && /[A-Z]/.test(newPassword) ? 'text-green-600' : ''}>
-                ✓ At least one uppercase letter
-              </p>
-              <p className={newPassword && /[a-z]/.test(newPassword) ? 'text-green-600' : ''}>
-                ✓ At least one lowercase letter
-              </p>
-              <p className={newPassword && /[0-9]/.test(newPassword) ? 'text-green-600' : ''}>
-                ✓ At least one number
-              </p>
-              <p className={newPassword && /[!@#$%^&*]/.test(newPassword) ? 'text-green-600' : ''}>
-                ✓ At least one special character (!@#$%^&*)
-              </p>
-            </div>
+
+            {isPasswordFocused && (
+              <div className="mt-2 space-y-1 text-xs text-slate-500">
+                <p className={newPassword && /[A-Z]/.test(newPassword) ? 'text-green-600' : ''}>
+                  ✓ At least one uppercase letter
+                </p>
+                <p className={newPassword && /[a-z]/.test(newPassword) ? 'text-green-600' : ''}>
+                  ✓ At least one lowercase letter
+                </p>
+                <p className={newPassword && /[0-9]/.test(newPassword) ? 'text-green-600' : ''}>
+                  ✓ At least one number
+                </p>
+                <p
+                  className={newPassword && /[!@#$%^&*]/.test(newPassword) ? 'text-green-600' : ''}
+                >
+                  ✓ At least one special character (!@#$%^&*)
+                </p>
+              </div>
+            )}
           </div>
 
           <div>
@@ -119,12 +139,22 @@ const ResetPasswordForm = () => {
             <div className="relative">
               <input
                 {...register('confirmPassword')}
-                type="password"
+                type={showConfirmPassword ? 'text' : 'password'}
                 id="confirmPassword"
                 placeholder="Confirm new password"
                 disabled={isLoading || isSubmitting}
                 className="border-brand-100 focus:bg-brand-50/50 h-11 w-full rounded-md border px-4 text-sm transition-all outline-none placeholder:text-slate-400 focus:ring-1 focus:ring-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
               />
+
+              {/* toggle */}
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute top-2.5 right-2.5 p-1 text-slate-400"
+              >
+                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+
               {errors.confirmPassword && (
                 <div className="mt-1 flex items-center gap-1 text-xs text-red-500">
                   <AlertCircle size={14} />

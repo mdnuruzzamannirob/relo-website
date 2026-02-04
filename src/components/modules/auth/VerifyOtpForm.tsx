@@ -2,7 +2,7 @@
 
 import ButtonComp from '@/components/shared/ButtonComp';
 import Logo from '@/components/shared/Logo';
-import { useVerifyOTPMutation } from '@/store/apis/authApi';
+import { useResendOtpMutation, useVerifyOTPMutation } from '@/store/apis/authApi';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
@@ -11,8 +11,15 @@ const VerifyOtpForm = () => {
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
   const [email, setEmail] = useState<string>('');
   const [otpValues, setOtpValues] = useState<string[]>(Array(6).fill(''));
-  const [verifyOTP, { isLoading }] = useVerifyOTPMutation();
+  const [verifyOTP, { isLoading, isSuccess }] = useVerifyOTPMutation();
+  const [resend, { isLoading: isResending }] = useResendOtpMutation();
   const [resendTimer, setResendTimer] = useState(0);
+
+  useEffect(() => {
+    if (isSuccess) {
+      router.push('/reset-password');
+    }
+  }, [isSuccess, router]);
 
   useEffect(() => {
     const storedEmail = sessionStorage.getItem('forgotPasswordEmail');
@@ -43,6 +50,22 @@ const VerifyOtpForm = () => {
     }
   };
 
+  const handlePaste = (e: React.ClipboardEvent) => {
+    const pastedData = e.clipboardData.getData('text').slice(0, 6).split('');
+    const digitsOnly = pastedData.filter((char) => /^\d$/.test(char));
+
+    if (digitsOnly.length > 0) {
+      const newOtpValues = [...otpValues];
+      digitsOnly.forEach((digit, idx) => {
+        if (idx < 6) newOtpValues[idx] = digit;
+      });
+      setOtpValues(newOtpValues);
+
+      const lastIndex = Math.min(digitsOnly.length - 1, 5);
+      inputsRef.current[lastIndex]?.focus();
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
     if (e.key === 'Backspace' && !e.currentTarget.value && index > 0) {
       inputsRef.current[index - 1]?.focus();
@@ -57,19 +80,19 @@ const VerifyOtpForm = () => {
       return;
     }
 
-    try {
-      await verifyOTP({
-        email,
-        otp,
-      }).unwrap();
+    const payload = {
+      email,
+      verificationCode: otp,
+    };
 
-      // Store email and OTP for reset password form
-      sessionStorage.setItem('resetPasswordEmail', email);
-      sessionStorage.setItem('resetPasswordOTP', otp);
-      router.push('/reset-password');
-    } catch (error: any) {
-      console.error('OTP verification failed:', error);
-    }
+    verifyOTP(payload);
+  };
+
+  const handleResendOtp = async () => {
+    if (!email || resendTimer !== 0) return;
+
+    resend({ email });
+    setResendTimer(60);
   };
 
   return (
@@ -95,9 +118,11 @@ const VerifyOtpForm = () => {
                 inputMode="numeric"
                 maxLength={1}
                 value={otpValues[index]}
+                autoComplete="one-time-code"
+                onPaste={handlePaste}
                 onChange={(e) => handleChange(e.target.value, index)}
                 onKeyDown={(e) => handleKeyDown(e, index)}
-                disabled={isLoading}
+                disabled={isLoading || isResending}
                 className="border-brand-100 h-11 w-11 rounded-md border text-center text-lg font-medium transition outline-none focus:ring-1 focus:ring-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
               />
             ))}
@@ -123,12 +148,7 @@ const VerifyOtpForm = () => {
                 ? 'text-primary cursor-pointer hover:underline'
                 : 'cursor-not-allowed text-slate-400'
             }`}
-            onClick={() => {
-              if (resendTimer === 0 && email) {
-                // Call resend OTP API
-                setResendTimer(60);
-              }
-            }}
+            onClick={handleResendOtp}
           >
             {resendTimer > 0 ? `Resend OTP in ${resendTimer}s` : 'Resend OTP'}
           </span>

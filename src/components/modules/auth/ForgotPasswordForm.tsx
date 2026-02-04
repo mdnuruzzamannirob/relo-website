@@ -9,10 +9,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { AlertCircle } from 'lucide-react';
+import { useEffect } from 'react';
 
 const ForgotPasswordForm = () => {
   const router = useRouter();
-  const [forgotPassword, { isLoading }] = useForgotPasswordMutation();
+  const [forgotPassword, { isLoading, isSuccess }] = useForgotPasswordMutation();
 
   const {
     register,
@@ -23,18 +24,18 @@ const ForgotPasswordForm = () => {
     mode: 'onChange',
   });
 
-  const onSubmit = async (data: ForgotPasswordFormData) => {
-    try {
-      await forgotPassword({
-        email: data.email,
-      }).unwrap();
-
-      // Store email in sessionStorage to pass to OTP form
-      sessionStorage.setItem('forgotPasswordEmail', data.email);
+  useEffect(() => {
+    if (isSuccess) {
       router.push('/verify-otp');
-    } catch (error: any) {
-      console.error('Forgot password request failed:', error);
     }
+  }, [isSuccess, router]);
+
+  const onSubmit = async (data: ForgotPasswordFormData) => {
+    const payload = {
+      email: data.email,
+    };
+
+    forgotPassword(payload);
   };
 
   return (
