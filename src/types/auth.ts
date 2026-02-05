@@ -1,9 +1,13 @@
 export interface User {
   id: string;
-  fullName: string;
+  name: string;
   email: string;
-  role: 'buyer' | 'seller' | 'admin';
-  isVerified: boolean;
+  role: 'USER';
+  status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
+  type: 'BUYER' | 'SELLER';
+  profileImage?: string;
+  phone?: string | null;
+  location?: string | null;
   createdAt: string;
   updatedAt: string;
 }

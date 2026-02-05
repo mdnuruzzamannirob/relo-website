@@ -15,53 +15,67 @@ import {
 import Link from 'next/link';
 import Logo from '../shared/Logo';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { userNav, nav } from '@/lib/constants/nav-links';
 import { useLogoutMutation } from '@/store/apis/authApi';
+import { useAppSelector } from '@/store/hook';
 
-function NavbarSkeleton() {
+/* Utils */
+const getInitials = (fullName?: string): string => {
+  if (!fullName) return 'U';
+
+  return fullName
+    .trim()
+    .split(' ')
+    .map((p) => p[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+};
+
+/* Avatar Skeleton */
+function AvatarSkeleton() {
   return (
-    <header className="border-brand-100 sticky top-0 z-50 w-full border-b bg-white">
-      <div className="app-container flex items-center justify-between gap-3 py-4">
-        <div className="h-10 w-24 animate-pulse rounded-md bg-slate-100" />
-        <div className="hidden flex-1 lg:block">
-          <div className="h-11 w-full animate-pulse rounded-md bg-slate-100" />
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="h-10 w-20 animate-pulse rounded-md bg-slate-100" />
-          <div className="h-10 w-20 animate-pulse rounded-md bg-slate-100" />
-        </div>
-      </div>
-    </header>
+    <div className="flex items-center gap-3">
+      <div className="h-10 w-20 animate-pulse rounded-md bg-slate-200" />
+      <div className="h-10 w-20 animate-pulse rounded-md bg-slate-200" />
+      <div className="h-10 w-10 animate-pulse rounded-full bg-slate-200" />
+    </div>
   );
 }
 
-function NavbarContent() {
-  const [isOpen, setIsOpen] = useState(false);
+export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
+
   const category = searchParams.get('category');
 
-  const [logout, { isLoading, isSuccess }] = useLogoutMutation();
+  const [isOpen, setIsOpen] = useState(false);
+  const [hasHydrated, setHasHydrated] = useState(false);
 
-  const isAuthenticated = true;
+  const { user, isAuthenticated, isLoading } = useAppSelector((state) => state.user);
+  const [logout, { isLoading: isLogoutLoading, isSuccess }] = useLogoutMutation();
 
-  const mode = isAuthenticated
-    ? pathname.startsWith('/buyer') || pathname.startsWith('/seller')
-      ? 'dashboard'
-      : 'home'
-    : 'guest';
+  const showAuthSkeleton = !hasHydrated || isLoading;
 
+  /* Redirect after logout */
   useEffect(() => {
     if (isSuccess) {
       router.push('/');
     }
   }, [isSuccess, router]);
 
+  useEffect(() => {
+    setHasHydrated(true);
+  }, []);
+
+  /* Render */
   return (
     <header className="border-brand-100 sticky top-0 z-50 w-full border-b bg-white">
+      {/* Top Bar */}
       <div className="app-container flex items-center justify-between gap-3 py-4">
+        {/* Mobile Menu */}
         <div className="lg:hidden">
           <Sheet>
             <SheetTrigger asChild>
@@ -69,29 +83,32 @@ function NavbarContent() {
                 <Menu className="size-6 text-slate-500" />
               </Button>
             </SheetTrigger>
+
             <SheetContent side="left" className="w-72">
               <SheetHeader className="border-b">
                 <SheetTitle className="flex items-center justify-between">
                   <Logo />
+
                   <SheetClose className="hover:bg-brand-50 flex size-9 min-w-9 items-center justify-center rounded-md text-slate-500">
                     <X className="size-5.5" />
                   </SheetClose>
                 </SheetTitle>
               </SheetHeader>
 
-              {/* Mobile Search Bar */}
+              {/* Mobile Search */}
               <div className="group relative px-4">
-                <Search className="absolute top-1/2 left-6 h-4 w-4 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-slate-600" />
+                <Search className="absolute top-1/2 left-6 h-4 w-4 -translate-y-1/2 text-slate-400" />
+
                 <input
                   type="text"
-                  placeholder="Search for items or brands"
-                  className="border-brand-100 focus:bg-brand-50/50 h-10 w-full rounded-md border px-4 pl-8 text-sm transition-all outline-none placeholder:text-slate-400 focus:ring-1 focus:ring-slate-300"
+                  placeholder="Search..."
+                  className="border-brand-100 focus:bg-brand-50/50 h-10 w-full rounded-md border px-4 pl-8 text-sm outline-none"
                 />
               </div>
 
-              {/* Mobile Nav Links */}
+              {/* Mobile Nav */}
               <nav className="flex flex-col gap-1 px-4">
-                {nav?.map((item) => {
+                {nav.map((item) => {
                   const isActive = category
                     ? item.href.includes(`category=${category}`)
                     : pathname === item.href;
@@ -100,7 +117,7 @@ function NavbarContent() {
                     <Link
                       key={item.label}
                       href={item.href}
-                      className={`block rounded-md p-3 text-sm transition-colors ${
+                      className={`rounded-md p-3 text-sm transition ${
                         isActive
                           ? 'bg-brand-50 text-primary font-medium'
                           : 'hover:bg-brand-50 text-slate-600'
@@ -115,28 +132,41 @@ function NavbarContent() {
           </Sheet>
         </div>
 
+        {/* Logo */}
         <Logo />
 
+        {/* Desktop Search */}
         <div className="hidden flex-1 lg:block">
           <div className="group relative">
-            <Search className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-slate-600" />
+            <Search className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-slate-400" />
+
             <input
               type="text"
-              placeholder="Search for items or brands"
-              className="border-brand-100 focus:bg-brand-50/50 h-11 w-full rounded-md border px-4 pl-12 text-sm transition-all outline-none placeholder:text-slate-400 focus:ring-1 focus:ring-slate-300"
+              placeholder="Search..."
+              className="border-brand-100 focus:bg-brand-50/50 h-11 w-full rounded-md border px-4 pl-12 text-sm outline-none"
             />
           </div>
         </div>
 
-        {/* 3. Right Actions */}
+        {/* Right Actions */}
         <div className="flex items-center gap-2">
-          {mode !== 'guest' ? (
+          {/* Loading Skeleton */}
+          {showAuthSkeleton && (
             <div className="flex items-center gap-3">
+              <AvatarSkeleton />
+            </div>
+          )}
+
+          {/* Authenticated */}
+          {!showAuthSkeleton && isAuthenticated && (
+            <div className="flex items-center gap-3">
+              {/* Buy / Sell */}
               <Link href="/buyer/overview" className="hidden lg:block">
                 <Button size="lg" variant={pathname.startsWith('/buyer') ? 'default' : 'secondary'}>
                   Buy
                 </Button>
               </Link>
+
               <Link href="/seller/overview" className="hidden lg:block">
                 <Button
                   size="lg"
@@ -146,36 +176,40 @@ function NavbarContent() {
                 </Button>
               </Link>
 
-              {/* Profile Popover Implementation */}
+              {/* Profile */}
               <Popover open={isOpen} onOpenChange={setIsOpen}>
                 <PopoverTrigger asChild>
-                  <button className="flex items-center gap-1.5 rounded-full p-1 transition-colors hover:bg-neutral-100 focus:outline-none">
+                  <button className="rounded-full">
                     <Avatar className="border-brand-100 h-10 w-10 border shadow-sm">
-                      <AvatarImage src="https://github.com/shadcn.png" />
-                      <AvatarFallback className="bg-slate-100 text-xs">JD</AvatarFallback>
+                      <AvatarImage src={user?.profileImage} />
+
+                      <AvatarFallback className="bg-slate-100 text-xs font-semibold">
+                        {getInitials(user?.name)}
+                      </AvatarFallback>
                     </Avatar>
                   </button>
                 </PopoverTrigger>
 
+                {/* Popover Content */}
                 <PopoverContent align="end" className="w-64 rounded-xl p-0">
                   {/* User Info */}
                   <div className="flex items-center gap-2 border-b p-3">
-                    <Avatar className="border-brand-100 size-10 min-w-10 border shadow-sm">
-                      <AvatarImage src="https://github.com/shadcn.png" />
-                      <AvatarFallback className="bg-slate-100 text-xs">JD</AvatarFallback>
+                    <Avatar className="border-brand-100 size-10 border shadow-sm">
+                      <AvatarImage src={user?.profileImage} />
+
+                      <AvatarFallback className="bg-slate-100 text-xs font-semibold">
+                        {getInitials(user?.name)}
+                      </AvatarFallback>
                     </Avatar>
 
-                    <div className="">
-                      <p title="John Doe" className="text-sm font-semibold">
-                        John Doe
-                      </p>
-                      <p title="johndoe@gmail.com" className="text-muted-foreground text-xs">
-                        johndoe@gmail.com
-                      </p>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold">{user?.name || 'User'}</p>
+
+                      <p className="text-muted-foreground truncate text-xs">{user?.email}</p>
                     </div>
                   </div>
 
-                  {/* Menu Items */}
+                  {/* Menu */}
                   <div className="space-y-1 p-3">
                     {userNav.map((item) => {
                       const isActive =
@@ -183,12 +217,12 @@ function NavbarContent() {
 
                       return (
                         <Link
-                          onClick={() => setIsOpen(false)}
                           key={item.label}
                           href={item.href}
-                          className={`flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm transition ${
+                          onClick={() => setIsOpen(false)}
+                          className={`flex items-center gap-2 rounded-md px-3 py-2.5 text-sm transition ${
                             isActive
-                              ? 'text-primary bg-brand-50 font-medium'
+                              ? 'bg-brand-50 text-primary font-medium'
                               : 'hover:bg-brand-50 hover:text-primary text-slate-500'
                           }`}
                         >
@@ -198,16 +232,16 @@ function NavbarContent() {
                       );
                     })}
 
-                    {/* Sign out */}
+                    {/* Logout */}
                     <button
                       onClick={() => logout()}
-                      type="button"
-                      disabled={isLoading}
-                      className="text-destructive flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm transition hover:bg-red-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                      disabled={isLogoutLoading}
+                      className="text-destructive flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-sm transition hover:bg-red-50 disabled:cursor-not-allowed"
                     >
-                      {isLoading ? (
+                      {isLogoutLoading ? (
                         <>
-                          <Loader2 className="size-4 animate-spin" /> Signing out...
+                          <Loader2 className="size-4 animate-spin" />
+                          Signing out...
                         </>
                       ) : (
                         <>
@@ -220,25 +254,30 @@ function NavbarContent() {
                 </PopoverContent>
               </Popover>
             </div>
-          ) : (
+          )}
+
+          {/* Guest */}
+          {!showAuthSkeleton && !isAuthenticated && (
             <div className="flex items-center gap-2">
               <Link href="/sign-in">
-                <Button variant="ghost" className="px-3 lg:px-6">
+                <Button size="lg" variant="ghost">
                   Sign In
                 </Button>
               </Link>
+
               <Link href="/sign-up">
-                <Button className="px-3 lg:px-6">Sign Up</Button>
+                <Button size="lg">Sign Up</Button>
               </Link>
             </div>
           )}
         </div>
       </div>
 
-      {(mode === 'home' || mode === 'guest') && (
+      {/* Bottom Nav */}
+      {!(pathname.startsWith('/buyer') || pathname.startsWith('/seller')) && (
         <nav className="border-brand-50 hidden border-t bg-white lg:block">
           <ul className="app-container flex h-10 items-center gap-5">
-            {nav?.map((item) => {
+            {nav.map((item) => {
               const isActive = category
                 ? item.href.includes(`category=${category}`)
                 : pathname === item.href;
@@ -247,13 +286,12 @@ function NavbarContent() {
                 <li key={item.label} className="relative flex h-full items-center">
                   <Link
                     href={item.href}
-                    className={`group relative flex h-full items-center px-2 text-[14px] font-medium whitespace-nowrap transition-colors ${
-                      isActive ? 'text-primary bg-brand-50' : 'hover:text-primary text-slate-500'
+                    className={`relative flex h-full items-center px-2 text-[14px] font-medium transition ${
+                      isActive ? 'bg-brand-50 text-primary' : 'hover:text-primary text-slate-500'
                     }`}
                   >
                     {item.label}
 
-                    {/* underline */}
                     <span
                       className={`absolute bottom-0 left-0 h-0.5 w-full transition-transform duration-300 ${
                         isActive
@@ -269,13 +307,5 @@ function NavbarContent() {
         </nav>
       )}
     </header>
-  );
-}
-
-export default function Navbar() {
-  return (
-    <Suspense fallback={<NavbarSkeleton />}>
-      <NavbarContent />
-    </Suspense>
   );
 }

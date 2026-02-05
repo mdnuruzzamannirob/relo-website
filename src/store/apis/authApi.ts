@@ -1,28 +1,12 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import {
-  AuthResponse,
-  User,
-  OTPResponse,
-  ResetPasswordRequest,
-  ChangePasswordRequest,
-} from '@/types/auth';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { User, OTPResponse, ResetPasswordRequest, ChangePasswordRequest } from '@/types/auth';
 import { toast } from 'sonner';
 import { clearUser, setUser } from '../slices/userSlice';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://10.10.20.2:5007/api/v1';
+import { baseQuery } from '../baseQuery';
 
 export const authApi = createApi({
   reducerPath: 'authApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: API_URL,
-    prepareHeaders: (headers) => {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
-      if (token) {
-        headers.set('authorization', `Bearer ${token}`);
-      }
-      return headers;
-    },
-  }),
+  baseQuery,
   tagTypes: ['User'],
   endpoints: (builder) => ({
     // Sign Up
@@ -69,11 +53,12 @@ export const authApi = createApi({
             data: { data },
           } = await queryFulfilled;
 
-          dispatch(setUser(data?.userData));
-
           if (data.token) {
             localStorage.setItem('authToken', data.token);
           }
+
+          dispatch(setUser(data?.userData));
+          localStorage.setItem('userData', JSON.stringify(data.userData));
 
           toast.success('Sign in successful!');
         } catch (error: any) {
@@ -96,9 +81,8 @@ export const authApi = createApi({
             data: { data },
           } = await queryFulfilled;
           dispatch(setUser(data));
-        } catch (error: any) {
-          console.log(error);
-        }
+          localStorage.setItem('userData', JSON.stringify(data));
+        } catch (error: any) {}
       },
       providesTags: ['User'],
     }),
@@ -211,16 +195,26 @@ export const authApi = createApi({
         try {
           await queryFulfilled;
 
+          // Clear all auth-related state and storage
           dispatch(clearUser());
           localStorage.removeItem('authToken');
-          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('userData');
+          sessionStorage.clear();
+
           // Clear user cache
           dispatch(authApi.util.resetApiState());
 
-          toast.success('Logout successful');
+          toast.success('Logged out successfully');
         } catch (error: any) {
-          const errorMessage = error?.error?.data?.message || 'Logout failed';
-          toast.error(errorMessage);
+          // Even if logout fails on backend, clear local state
+          dispatch(clearUser());
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('userData');
+          sessionStorage.clear();
+          dispatch(authApi.util.resetApiState());
+
+          const errorMessage = error?.error?.data?.message || 'Logged out successfully';
+          toast.success(errorMessage);
         }
       },
       invalidatesTags: ['User'],

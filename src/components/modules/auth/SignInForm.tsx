@@ -9,12 +9,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 const SignInForm = () => {
   const router = useRouter();
+
+  const [showPassword, setShowPassword] = useState(false);
+
   const [signIn, { isLoading: isSigningIn, isSuccess }] = useSignInMutation();
 
   const {
@@ -94,12 +97,22 @@ const SignInForm = () => {
             <div className="relative">
               <input
                 {...register('password')}
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 id="password"
                 placeholder="Enter your password"
                 disabled={isLoading}
                 className="border-brand-100 focus:bg-brand-50/50 h-11 w-full rounded-md border px-4 text-sm transition-all outline-none placeholder:text-slate-400 focus:ring-1 focus:ring-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
               />
+
+              {/* toggle */}
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute top-2.5 right-2.5 p-1 text-slate-400"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+
               {errors.password && (
                 <div className="mt-1 flex items-center gap-1 text-xs text-red-500">
                   <AlertCircle size={14} />
