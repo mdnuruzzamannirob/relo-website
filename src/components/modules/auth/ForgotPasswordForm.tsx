@@ -13,6 +13,7 @@ import { useEffect } from 'react';
 
 const ForgotPasswordForm = () => {
   const router = useRouter();
+
   const [forgotPassword, { isLoading, isSuccess }] = useForgotPasswordMutation();
 
   const {

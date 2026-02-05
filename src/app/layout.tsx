@@ -30,7 +30,14 @@ export default function RootLayout({
           <Navbar />
           {children}
           <Footer />
-          <Toaster position="top-center" richColors theme="light" duration={3000} />
+          <Toaster
+            position="top-center"
+            richColors
+            theme="light"
+            duration={3000}
+            expand
+            swipeDirections={['bottom', 'top', 'left', 'right']}
+          />
         </Provider>
       </body>
     </html>

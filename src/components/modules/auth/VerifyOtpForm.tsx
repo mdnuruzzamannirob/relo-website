@@ -9,11 +9,13 @@ import { useEffect, useRef, useState } from 'react';
 const VerifyOtpForm = () => {
   const router = useRouter();
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
+
   const [email, setEmail] = useState<string>('');
+  const [resendTimer, setResendTimer] = useState(0);
   const [otpValues, setOtpValues] = useState<string[]>(Array(6).fill(''));
+
   const [verifyOTP, { isLoading, isSuccess }] = useVerifyOTPMutation();
   const [resend, { isLoading: isResending }] = useResendOtpMutation();
-  const [resendTimer, setResendTimer] = useState(0);
 
   useEffect(() => {
     if (isSuccess) {

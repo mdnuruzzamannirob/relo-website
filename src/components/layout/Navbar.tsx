@@ -19,20 +19,7 @@ import { useEffect, useState } from 'react';
 import { userNav, nav } from '@/lib/constants/nav-links';
 import { useLogoutMutation, useSwitchUserMutation } from '@/store/apis/authApi';
 import { useAppSelector } from '@/store/hook';
-import { set } from 'zod';
-
-/* Utils */
-const getInitials = (fullName?: string): string => {
-  if (!fullName) return 'U';
-
-  return fullName
-    .trim()
-    .split(' ')
-    .map((p) => p[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase();
-};
+import { getInitials } from '@/lib/utils/getInitials';
 
 /* Avatar Skeleton */
 function AvatarSkeleton() {
@@ -81,10 +68,6 @@ export default function Navbar() {
       }
     }
   }, [isSwitchSuccess, router, data]);
-
-  useEffect(() => {
-    setHasHydrated(true);
-  }, []);
 
   const switchRoleHandler = (type: 'BUYER' | 'SELL') => {
     if (isSwitchLoading) return;
