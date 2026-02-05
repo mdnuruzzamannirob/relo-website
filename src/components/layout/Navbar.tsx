@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, LogOut, Menu, X, Loader2, LayoutDashboard, Home } from 'lucide-react';
+import { Search, LogOut, Menu, X, Loader2, LayoutDashboard, Home, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -267,6 +267,19 @@ export default function Navbar() {
                       <LayoutDashboard className="size-4" />
                       Seller Dashboard
                     </button>
+
+                    <Link
+                      href="/settings"
+                      onClick={() => setIsOpen(false)}
+                      className={`flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-sm transition ${
+                        pathname === '/settings'
+                          ? 'bg-brand-50 text-primary font-medium'
+                          : 'hover:bg-brand-50 hover:text-primary text-slate-500'
+                      }`}
+                    >
+                      <Settings className="size-4" />
+                      Settings
+                    </Link>
 
                     {/* Logout */}
                     <button

@@ -176,12 +176,92 @@ export const authApi = createApi({
     }),
 
     // Change Password
-    changePassword: builder.mutation<{ message: string }, ChangePasswordRequest>({
+    changePassword: builder.mutation<
+      { success: boolean; message: string },
+      { oldPassword: string; newPassword: string; confirmNewPassword: string }
+    >({
       query: (body) => ({
         url: '/auth/change-password',
-        method: 'POST',
+        method: 'PUT',
         body,
       }),
+      async onQueryStarted(args, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          toast.success('Password changed successfully!');
+        } catch (error: any) {
+          const errorMessage = error?.error?.data?.message || 'Failed to change password';
+          toast.error(errorMessage);
+        }
+      },
+      invalidatesTags: ['User'],
+    }),
+
+    // Profile Image Upload
+    profileImage: builder.mutation<
+      {
+        success: boolean;
+        message: string;
+        data: {
+          id: string;
+          name: string;
+          email: string;
+          profileImageId: string;
+          profileImage: string;
+          createdAt: string;
+          updatedAt: string;
+        };
+      },
+      FormData
+    >({
+      query: (formData) => ({
+        url: '/users/profile-image',
+        method: 'PUT',
+        body: formData,
+      }),
+      async onQueryStarted(args, { dispatch, queryFulfilled }) {
+        try {
+          const {
+            data: { data },
+          } = await queryFulfilled;
+          dispatch(setUser(data as any));
+          localStorage.setItem('userData', JSON.stringify(data));
+          toast.success('Profile image updated successfully!');
+        } catch (error: any) {
+          const errorMessage = error?.error?.data?.message || 'Failed to update profile image';
+          toast.error(errorMessage);
+        }
+      },
+      invalidatesTags: ['User'],
+    }),
+
+    // Profile Update
+    profileUpdate: builder.mutation<
+      {
+        success: boolean;
+        message: string;
+        data: User;
+      },
+      FormData
+    >({
+      query: (formData) => ({
+        url: '/users/profile-update',
+        method: 'PUT',
+        body: formData,
+      }),
+      async onQueryStarted(args, { dispatch, queryFulfilled }) {
+        try {
+          const {
+            data: { data },
+          } = await queryFulfilled;
+          dispatch(setUser(data));
+          localStorage.setItem('userData', JSON.stringify(data));
+          toast.success('Profile updated successfully!');
+        } catch (error: any) {
+          const errorMessage = error?.error?.data?.message || 'Failed to update profile';
+          toast.error(errorMessage);
+        }
+      },
       invalidatesTags: ['User'],
     }),
 
@@ -245,4 +325,6 @@ export const {
   useChangePasswordMutation,
   useLogoutMutation,
   useSwitchUserMutation,
+  useProfileImageMutation,
+  useProfileUpdateMutation,
 } = authApi;

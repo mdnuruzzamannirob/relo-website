@@ -1,8 +1,9 @@
 import { fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://10.10.20.2:5007/api/v1';
 
-export const baseQuery = fetchBaseQuery({
+const rawBaseQuery = fetchBaseQuery({
   baseUrl: API_URL,
   prepareHeaders: (headers, { getState }) => {
     // Get token from localStorage dynamically
@@ -13,8 +14,32 @@ export const baseQuery = fetchBaseQuery({
       headers.set('authorization', `Bearer ${token}`);
     }
 
-    headers.set('Content-Type', 'application/json');
-
     return headers;
   },
 });
+
+export const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
+  args,
+  api,
+  extraOptions,
+) => {
+  // For FormData, we need to ensure Content-Type is not set so browser can set it with boundary
+  if (typeof args !== 'string' && args.body instanceof FormData) {
+    const result = await rawBaseQuery(args, api, extraOptions);
+    return result;
+  }
+
+  // For regular requests, ensure Content-Type is set to application/json
+  const adjustedArgs =
+    typeof args === 'string'
+      ? args
+      : {
+          ...args,
+          headers: {
+            ...args.headers,
+            'Content-Type': 'application/json',
+          },
+        };
+
+  return rawBaseQuery(adjustedArgs, api, extraOptions);
+};
