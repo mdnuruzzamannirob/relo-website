@@ -185,6 +185,18 @@ export const authApi = createApi({
       invalidatesTags: ['User'],
     }),
 
+    // switch user role type
+    switchUser: builder.mutation<
+      { success: boolean; message: string; data: { type: string } },
+      void
+    >({
+      query: () => ({
+        url: '/auth/switch-role',
+        method: 'PUT',
+      }),
+      invalidatesTags: ['User'],
+    }),
+
     // Logout
     logout: builder.mutation<{ message: string }, void>({
       query: () => ({
@@ -232,4 +244,5 @@ export const {
   useResetPasswordMutation,
   useChangePasswordMutation,
   useLogoutMutation,
+  useSwitchUserMutation,
 } = authApi;

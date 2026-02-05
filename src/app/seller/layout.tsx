@@ -11,7 +11,7 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
 
   return (
     <div className="bg-brand-50">
-      <div className="app-container flex min-h-[calc(100vh-81px)] gap-8 pt-8 pb-14">
+      <div className="app-container flex min-h-[calc(100vh-78px)] gap-8 pt-8 pb-14">
         {/* Sidebar */}
         <Sidebar info={info} variant="seller" />
 

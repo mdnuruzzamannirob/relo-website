@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, LogOut, Menu, X, Loader2 } from 'lucide-react';
+import { Search, LogOut, Menu, X, Loader2, LayoutDashboard, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -17,8 +17,9 @@ import Logo from '../shared/Logo';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { userNav, nav } from '@/lib/constants/nav-links';
-import { useLogoutMutation } from '@/store/apis/authApi';
+import { useLogoutMutation, useSwitchUserMutation } from '@/store/apis/authApi';
 import { useAppSelector } from '@/store/hook';
+import { set } from 'zod';
 
 /* Utils */
 const getInitials = (fullName?: string): string => {
@@ -48,7 +49,6 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-
   const category = searchParams.get('category');
 
   const [isOpen, setIsOpen] = useState(false);
@@ -56,6 +56,8 @@ export default function Navbar() {
 
   const { user, isAuthenticated, isLoading } = useAppSelector((state) => state.user);
   const [logout, { isLoading: isLogoutLoading, isSuccess }] = useLogoutMutation();
+  const [switchUser, { isLoading: isSwitchLoading, isSuccess: isSwitchSuccess, data }] =
+    useSwitchUserMutation();
 
   const showAuthSkeleton = !hasHydrated || isLoading;
 
@@ -69,6 +71,39 @@ export default function Navbar() {
   useEffect(() => {
     setHasHydrated(true);
   }, []);
+
+  useEffect(() => {
+    if (isSwitchSuccess) {
+      if (data.data.type === 'BUYER') {
+        router.push('/buyer/overview');
+      } else if (data.data.type === 'SELL') {
+        router.push('/seller/overview');
+      }
+    }
+  }, [isSwitchSuccess, router, data]);
+
+  useEffect(() => {
+    setHasHydrated(true);
+  }, []);
+
+  const switchRoleHandler = (type: 'BUYER' | 'SELL') => {
+    if (isSwitchLoading) return;
+
+    if (user?.type === type && type === 'BUYER') {
+      setIsOpen(false);
+      router.push('/buyer/overview');
+      return;
+    }
+
+    if (user?.type === type && type === 'SELL') {
+      setIsOpen(false);
+      router.push('/seller/overview');
+      return;
+    }
+
+    switchUser();
+    setIsOpen(false);
+  };
 
   /* Render */
   return (
@@ -161,20 +196,23 @@ export default function Navbar() {
           {!showAuthSkeleton && isAuthenticated && (
             <div className="flex items-center gap-3">
               {/* Buy / Sell */}
-              <Link href="/buyer/overview" className="hidden lg:block">
-                <Button size="lg" variant={pathname.startsWith('/buyer') ? 'default' : 'secondary'}>
-                  Buy
-                </Button>
-              </Link>
+              <Button
+                onClick={() => switchRoleHandler('BUYER')}
+                size="lg"
+                variant={pathname.startsWith('/buyer') ? 'default' : 'secondary'}
+                className="hidden lg:block"
+              >
+                Buy
+              </Button>
 
-              <Link href="/seller/overview" className="hidden lg:block">
-                <Button
-                  size="lg"
-                  variant={pathname.startsWith('/seller') ? 'default' : 'secondary'}
-                >
-                  Sell
-                </Button>
-              </Link>
+              <Button
+                onClick={() => switchRoleHandler('SELL')}
+                size="lg"
+                variant={pathname.startsWith('/seller') ? 'default' : 'secondary'}
+                className="hidden lg:block"
+              >
+                Sell
+              </Button>
 
               {/* Profile */}
               <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -211,26 +249,41 @@ export default function Navbar() {
 
                   {/* Menu */}
                   <div className="space-y-1 p-3">
-                    {userNav.map((item) => {
-                      const isActive =
-                        item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
+                    <Link
+                      href="/"
+                      onClick={() => setIsOpen(false)}
+                      className={`flex items-center gap-2 rounded-md px-3 py-2.5 text-sm transition ${
+                        pathname === '/'
+                          ? 'bg-brand-50 text-primary font-medium'
+                          : 'hover:bg-brand-50 hover:text-primary text-slate-500'
+                      }`}
+                    >
+                      <Home className="size-4" />
+                      Home
+                    </Link>
 
-                      return (
-                        <Link
-                          key={item.label}
-                          href={item.href}
-                          onClick={() => setIsOpen(false)}
-                          className={`flex items-center gap-2 rounded-md px-3 py-2.5 text-sm transition ${
-                            isActive
-                              ? 'bg-brand-50 text-primary font-medium'
-                              : 'hover:bg-brand-50 hover:text-primary text-slate-500'
-                          }`}
-                        >
-                          <item.icon className="size-4" />
-                          {item.label}
-                        </Link>
-                      );
-                    })}
+                    <button
+                      onClick={() => switchRoleHandler('BUYER')}
+                      className={`flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-sm transition ${
+                        pathname.startsWith('/buyer')
+                          ? 'bg-brand-50 text-primary font-medium'
+                          : 'hover:bg-brand-50 hover:text-primary text-slate-500'
+                      }`}
+                    >
+                      <LayoutDashboard className="size-4" />
+                      Buyer Dashboard
+                    </button>
+                    <button
+                      onClick={() => switchRoleHandler('SELL')}
+                      className={`flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-sm transition ${
+                        pathname.startsWith('/seller')
+                          ? 'bg-brand-50 text-primary font-medium'
+                          : 'hover:bg-brand-50 hover:text-primary text-slate-500'
+                      }`}
+                    >
+                      <LayoutDashboard className="size-4" />
+                      Seller Dashboard
+                    </button>
 
                     {/* Logout */}
                     <button

@@ -63,7 +63,7 @@ export default function MobileSidebar({
 
       {/* Drawer */}
       <div
-        className={`fixed top-0 left-0 z-50 mt-20.25 h-full w-72 bg-white p-4 transition-transform duration-300 ${open ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`fixed top-0 left-0 z-50 mt-19.5 h-full w-72 bg-white p-4 transition-transform duration-300 ${open ? 'translate-x-0' : '-translate-x-full'}`}
       >
         <Button
           variant="ghost"
