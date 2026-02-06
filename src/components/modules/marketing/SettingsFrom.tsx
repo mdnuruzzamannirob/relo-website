@@ -12,8 +12,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle, Eye, EyeOff, Loader2, Upload } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
+import { getInitials } from '@/lib/utils/getInitials';
 
 export default function SettingsForm() {
   const { user } = useAuth();
@@ -25,24 +26,11 @@ export default function SettingsForm() {
     phone: '',
     location: '',
   });
-
   const [originalProfileData, setOriginalProfileData] = useState({
     name: '',
     phone: '',
     location: '',
   });
-
-  // Password state - using React Hook Form
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting, isDirty },
-    reset: resetPasswordForm,
-  } = useForm<ChangePasswordFormData>({
-    resolver: zodResolver(changePasswordSchema),
-    mode: 'onChange',
-  });
-
   const [showPasswords, setShowPasswords] = useState({
     old: false,
     new: false,
@@ -54,9 +42,31 @@ export default function SettingsForm() {
   const [profileUpdateMutation, { isLoading: isUpdatingProfile }] = useProfileUpdateMutation();
   const [changePasswordMutation, { isLoading: isChangingPassword }] = useChangePasswordMutation();
 
+  // Password state - using React Hook Form
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset: resetPasswordForm,
+    control,
+  } = useForm<ChangePasswordFormData>({
+    resolver: zodResolver(changePasswordSchema),
+    defaultValues: {
+      oldPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    },
+    mode: 'onChange',
+  });
+
+  const [oldPassword, newPassword, confirmPassword] = useWatch({
+    control,
+    name: ['oldPassword', 'newPassword', 'confirmPassword'],
+  });
+
   // Initialize profile data from user
   useEffect(() => {
-    if (user) {
+    if (user?.name || user?.phone || user?.location) {
       const initialData = {
         name: user.name || '',
         phone: user.phone || '',
@@ -65,13 +75,17 @@ export default function SettingsForm() {
       setProfileData(initialData);
       setOriginalProfileData(initialData);
     }
-  }, [user]);
+  }, [user?.name, user?.phone, user?.location]);
 
   // Check if profile data has changed
   const hasProfileChanges =
     profileData.name !== originalProfileData.name ||
     profileData.phone !== originalProfileData.phone ||
     profileData.location !== originalProfileData.location;
+
+  // check if any password field has input
+  const hasAnyPasswordInput =
+    !!oldPassword?.trim() || !!newPassword?.trim() || !!confirmPassword?.trim();
 
   const handleUploadClick = () => {
     fileInputRef.current?.click();
@@ -162,24 +176,23 @@ export default function SettingsForm() {
       }).unwrap();
 
       // Clear form
-      resetPasswordForm();
+      resetPasswordForm({
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      });
     } catch (error) {
       // Error handled by mutation
     }
   };
 
   const handleCancelPassword = () => {
-    resetPasswordForm();
+    resetPasswordForm({
+      oldPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    });
     toast.info('Password form cleared');
-  };
-
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
   };
 
   return (
@@ -429,7 +442,11 @@ export default function SettingsForm() {
           </div>
 
           <div className="mt-4 flex gap-3">
-            <Button type="submit" className="h-11" disabled={isSubmitting || isChangingPassword}>
+            <Button
+              type="submit"
+              className="h-11"
+              disabled={!hasAnyPasswordInput || isSubmitting || isChangingPassword}
+            >
               {isSubmitting || isChangingPassword ? (
                 <>
                   <Loader2 className="mr-2 size-4 animate-spin" />
@@ -439,7 +456,7 @@ export default function SettingsForm() {
                 'Update Password'
               )}
             </Button>
-            {isDirty && (
+            {hasAnyPasswordInput && (
               <Button
                 type="button"
                 variant="outline"
