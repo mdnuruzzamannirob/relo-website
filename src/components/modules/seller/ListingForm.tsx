@@ -62,15 +62,11 @@ export default function ListingForm({ type, initialData }: ListingFormProps) {
       const formData = { ...data, imageFile: selectedFile };
 
       if (type === 'create') {
-        console.log('Creating with Image:', formData);
         alert('Published Successfully!');
       } else {
-        console.log('Updating with Image:', formData);
         alert('Updated Successfully!');
       }
-    } catch (error) {
-      console.error('Error submitting form', error);
-    }
+    } catch (error) {}
   };
 
   return (

@@ -14,9 +14,9 @@ import {
 } from '@/components/ui/sheet';
 import Link from 'next/link';
 import Logo from '../shared/Logo';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { userNav, nav } from '@/lib/constants/nav-links';
+import { nav } from '@/lib/constants/nav-links';
 import { useLogoutMutation, useSwitchUserMutation } from '@/store/apis/authApi';
 import { useAppSelector } from '@/store/hook';
 import { getInitials } from '@/lib/utils/getInitials';
@@ -35,8 +35,6 @@ function AvatarSkeleton() {
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const category = searchParams.get('category');
 
   const [isOpen, setIsOpen] = useState(false);
   const [hasHydrated, setHasHydrated] = useState(false);
@@ -127,9 +125,7 @@ export default function Navbar() {
               {/* Mobile Nav */}
               <nav className="flex flex-col gap-1 px-4">
                 {nav.map((item) => {
-                  const isActive = category
-                    ? item.href.includes(`category=${category}`)
-                    : pathname === item.href;
+                  const isActive = pathname === item.href;
 
                   return (
                     <Link
@@ -327,9 +323,7 @@ export default function Navbar() {
         <nav className="border-brand-50 hidden border-t bg-white lg:block">
           <ul className="app-container flex h-10 items-center gap-5">
             {nav.map((item) => {
-              const isActive = category
-                ? item.href.includes(`category=${category}`)
-                : pathname === item.href;
+              const isActive = pathname === item.href;
 
               return (
                 <li key={item.label} className="relative flex h-full items-center">

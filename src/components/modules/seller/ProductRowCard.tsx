@@ -22,12 +22,8 @@ export interface ProductRowData {
 export default function ProductRowCard({ product }: { product: ProductRowData }) {
   const { id, title, size, price, image, description, postedDate, status } = product;
 
-  const handleEdit = (id: string) => {
-    console.log(id);
-  };
-  const handleDelete = (id: string) => {
-    console.log(id);
-  };
+  const handleEdit = (id: string) => {};
+  const handleDelete = (id: string) => {};
 
   return (
     <div className="border-brand-100 flex flex-col gap-4 rounded-xl border bg-white p-4 sm:flex-row">
