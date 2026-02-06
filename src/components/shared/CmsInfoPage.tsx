@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { dateFormatter } from '@/lib/utils/dateFormatter';
 import { useGetCmsPageQuery, type CmsPageKey } from '@/store/apis/cmsApi';
 import { ArrowLeft, RefreshCcw } from 'lucide-react';
 import Link from 'next/link';
@@ -28,7 +29,13 @@ const CmsInfoPage = ({ title, pageKey, backHref = '/', backLabel = 'Back' }: Cms
         </Button>
       </Link>
 
-      <h1 className="text-primary mb-6 text-2xl font-semibold">{title}</h1>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-primary text-2xl font-semibold">{title}</h1>
+        <p className="text-end text-sm font-medium text-slate-500">
+          {' '}
+          Updated on {dateFormatter(data?.data?.updatedAt as string, { showTime: true })}
+        </p>
+      </div>
 
       <div className="border-brand-100 rounded-xl border p-8">
         {isLoading && (
