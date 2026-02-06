@@ -196,27 +196,27 @@
 
 /* Headings */
 .Prose h1 {
-  @apply text-5xl font-black my-3 text-primary;
+  @apply text-4xl font-black my-2.5 text-primary;
 }
 
 .Prose h2 {
-  @apply text-4xl font-extrabold my-2.5 text-primary;
+  @apply text-3xl font-extrabold my-2 text-primary;
 }
 
 .Prose h3 {
-  @apply text-3xl font-bold my-2 text-primary;
+  @apply text-2xl font-bold my-1.5 text-primary;
 }
 
 .Prose h4 {
-  @apply text-2xl font-semibold my-1.5 text-primary;
+  @apply text-xl font-semibold my-1 text-primary;
 }
 
 .Prose h5 {
-  @apply text-xl font-medium my-1 text-primary;
+  @apply text-lg font-medium my-0.5 text-primary;
 }
 
 .Prose h6 {
-  @apply text-lg font-medium my-0.5 text-primary;
+  @apply text-base font-medium text-primary;
 }
 
 /* Blockquote */
@@ -233,7 +233,7 @@
 .Prose ul ul,
 .Prose ol ul,
 .Prose ul ol {
-  @apply ml-5 mt-2 mb-0;
+  @apply ml-4 mt-1 mb-0;
 }
 
 .Prose ol ol {
