@@ -17,7 +17,12 @@ import {
 } from '@/components/ui/select';
 import { listingSchema } from '@/lib/schema';
 import type { ListingValues } from '@/lib/schema';
-import { useCreateProductMutation, useUpdateProductMutation } from '@/store/apis/productApi';
+import {
+  useCreateProductMutation,
+  useGetCategoriesQuery,
+  useGetLockerAddressesQuery,
+  useUpdateProductMutation,
+} from '@/store/apis/productApi';
 
 interface ListingFormProps {
   type: 'create' | 'edit';
@@ -31,11 +36,15 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
   const [previewUrls, setPreviewUrls] = useState<string[]>(
     initialData?.imageUrl ? [initialData.imageUrl] : [],
   );
+  const { data: categoriesData, isLoading: isCategoriesLoading } = useGetCategoriesQuery();
+  const { data: lockerAddressesData, isLoading: isLockerAddressesLoading } =
+    useGetLockerAddressesQuery();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
   const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation();
   const isSaving = isCreating || isUpdating;
 
+  console.log(categoriesData, lockerAddressesData);
   const {
     register,
     handleSubmit,
@@ -213,12 +222,15 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
             Category <span className="text-red-500">*</span>
           </label>
           <Select onValueChange={categoryField.onChange} value={categoryField.value || ''}>
-            <SelectTrigger className="h-11 w-full">
+            <SelectTrigger className="h-11! w-full">
               <SelectValue placeholder="Select" />
             </SelectTrigger>
             <SelectContent position="popper">
-              <SelectItem value="electronics">Electronics</SelectItem>
-              <SelectItem value="fashion">Fashion</SelectItem>
+              {categoriesData?.data?.categories.map((category: any) => (
+                <SelectItem key={category.id} value={category.id}>
+                  {category.title}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           {errors.category && (
@@ -277,7 +289,7 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
             Condition <span className="text-red-500">*</span>
           </label>
           <Select onValueChange={conditionField.onChange} value={conditionField.value || ''}>
-            <SelectTrigger className="h-11 w-full">
+            <SelectTrigger className="h-11! w-full">
               <SelectValue placeholder="Select" />
             </SelectTrigger>
             <SelectContent position="popper">
@@ -298,7 +310,7 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
             Locker size <span className="text-red-500">*</span>
           </label>
           <Select onValueChange={lockerSizeField.onChange} value={lockerSizeField.value || ''}>
-            <SelectTrigger className="h-11 w-full">
+            <SelectTrigger className="h-11! w-full">
               <SelectValue placeholder="Select" />
             </SelectTrigger>
             <SelectContent position="popper">
@@ -320,12 +332,15 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
             Location <span className="text-red-500">*</span>
           </label>
           <Select onValueChange={locationField.onChange} value={locationField.value || ''}>
-            <SelectTrigger className="h-11 w-full">
+            <SelectTrigger className="h-11! w-full">
               <SelectValue placeholder="Select" />
             </SelectTrigger>
             <SelectContent position="popper">
-              <SelectItem value="dhaka">Dhaka</SelectItem>
-              <SelectItem value="ny">New York</SelectItem>
+              {lockerAddressesData?.data?.categories.map((locker: any) => (
+                <SelectItem key={locker.id} value={locker.id}>
+                  {locker.title}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           {errors.location && (

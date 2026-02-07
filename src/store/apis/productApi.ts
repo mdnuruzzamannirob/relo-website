@@ -53,6 +53,14 @@ type MyFavoriteProductsResponse = {
   message: string;
   data: FavoriteProduct[];
 };
+type CategoriesLockerResponse = {
+  success: boolean;
+  message: string;
+  data: {
+    meta: { page: number; limit: number; total: number; totalPage: number };
+    categories: any[];
+  };
+};
 
 export type ProductListParams = {
   page?: number;
@@ -65,8 +73,9 @@ export type ProductListParams = {
 export const productApi = createApi({
   reducerPath: 'productApi',
   baseQuery,
-  tagTypes: ['Product', 'ProductList', 'FavoriteProducts'],
+  tagTypes: ['Product', 'ProductList', 'FavoriteProducts', 'Categories', 'LockerAddresses'],
   endpoints: (builder) => ({
+    // get my products
     getMyProducts: builder.query<ProductListResponse, ProductListParams>({
       query: ({ page = 1, limit = 10, searchTerm, myProducts = true, isActive } = {}) => ({
         url: '/products',
@@ -99,6 +108,7 @@ export const productApi = createApi({
       },
     }),
 
+    // get product details
     getProductDetails: builder.query<ProductDetailsResponse, string>({
       query: (productId) => ({
         url: `/products/details/${productId}`,
@@ -115,6 +125,7 @@ export const productApi = createApi({
       providesTags: (result, error, productId) => [{ type: 'Product', id: productId }],
     }),
 
+    // create product
     createProduct: builder.mutation<ProductDetailsResponse, FormData>({
       query: (formData) => ({
         url: '/products',
@@ -133,6 +144,7 @@ export const productApi = createApi({
       invalidatesTags: [{ type: 'ProductList', id: 'MY' }],
     }),
 
+    // update product
     updateProduct: builder.mutation<ProductDetailsResponse, { productId: string; body: FormData }>({
       query: ({ productId, body }) => ({
         url: `/products/update/${productId}`,
@@ -154,6 +166,7 @@ export const productApi = createApi({
       ],
     }),
 
+    // delete product
     deleteProduct: builder.mutation<ProductDetailsResponse, string>({
       query: (productId) => ({
         url: `/products/delete/${productId}`,
@@ -174,6 +187,7 @@ export const productApi = createApi({
       ],
     }),
 
+    // toggle favorite
     toggleFavorite: builder.mutation<{ success: boolean; message: string }, string>({
       query: (productId) => ({
         url: `/products/favorite/${productId}`,
@@ -190,6 +204,7 @@ export const productApi = createApi({
       invalidatesTags: [{ type: 'FavoriteProducts', id: 'LIST' }],
     }),
 
+    // get my favorite products
     getMyFavoriteProducts: builder.query<MyFavoriteProductsResponse, void>({
       query: () => ({
         url: '/products/my-favorite-products',
@@ -205,6 +220,17 @@ export const productApi = createApi({
       },
       providesTags: [{ type: 'FavoriteProducts', id: 'LIST' }],
     }),
+
+    // Get Categories
+    getCategories: builder.query<CategoriesLockerResponse, void>({
+      query: () => `/categories/all`,
+      providesTags: ['Categories'],
+    }),
+
+    getLockerAddresses: builder.query<CategoriesLockerResponse, void>({
+      query: () => `/locker-address/all`,
+      providesTags: ['LockerAddresses'],
+    }),
   }),
 });
 
@@ -216,4 +242,6 @@ export const {
   useDeleteProductMutation,
   useToggleFavoriteMutation,
   useGetMyFavoriteProductsQuery,
+  useGetCategoriesQuery,
+  useGetLockerAddressesQuery,
 } = productApi;
