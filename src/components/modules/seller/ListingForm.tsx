@@ -5,7 +5,8 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useController, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertCircle, ImagePlus, Loader2, Trash2, Upload, X } from 'lucide-react';
+import { AlertCircle, ImagePlus, Loader2, Trash2, X } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -29,6 +30,15 @@ interface ListingFormProps {
 }
 
 const MAX_PHOTOS = 4;
+const MAX_FILE_MB = 4;
+const ACCEPTED_IMAGE_MIME = new Set([
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+  'image/avif',
+  'image/gif',
+]);
 
 export default function ListingForm({ type, initialData, productId }: ListingFormProps) {
   const router = useRouter();
@@ -64,10 +74,13 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
 
   // New files + previews
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [previewUrls, setPreviewUrls] = useState<string[]>([]); // blob URLs
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
   // Existing URLs (edit mode)
   const [existingUrls, setExistingUrls] = useState<string[]>(initialData?.existingImages ?? []);
+
+  // Drag state
+  const [isDragging, setIsDragging] = useState(false);
 
   const {
     register,
@@ -123,12 +136,30 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
     fileInputRef.current?.click();
   };
 
-  const handleAddImages = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const incoming = Array.from(e.target.files || []);
-    if (!incoming.length) return;
+  const validateIncomingFiles = (files: File[]) => {
+    const valid: File[] = [];
 
-    // allow selecting same file again later
-    e.target.value = '';
+    for (const f of files) {
+      if (!ACCEPTED_IMAGE_MIME.has(f.type)) {
+        toast.error(`Unsupported file type: ${f.name}`);
+        continue;
+      }
+      const sizeMB = f.size / (1024 * 1024);
+      if (sizeMB > MAX_FILE_MB) {
+        toast.error(`File too large (max ${MAX_FILE_MB}MB): ${f.name}`);
+        continue;
+      }
+      valid.push(f);
+    }
+
+    return valid;
+  };
+
+  const addFiles = (incomingFiles: File[]) => {
+    if (isSaving) return;
+
+    const incoming = validateIncomingFiles(incomingFiles);
+    if (!incoming.length) return;
 
     // de-dupe against current selectedFiles
     const key = (f: File) => `${f.name}-${f.size}-${f.lastModified}`;
@@ -136,7 +167,11 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
     const filtered = incoming.filter((f) => !existingKeys.has(key(f)));
 
     const accepted = filtered.slice(0, remainingSlots);
-    if (!accepted.length) return;
+
+    if (!accepted.length) {
+      if (remainingSlots === 0) toast.error(`You can upload max ${MAX_PHOTOS} photos`);
+      return;
+    }
 
     const nextFiles = [...selectedFiles, ...accepted];
     setSelectedFiles(nextFiles);
@@ -144,6 +179,39 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
 
     const newPreviews = accepted.map((f) => URL.createObjectURL(f));
     setPreviewUrls((prev) => [...prev, ...newPreviews]);
+
+    const skipped = filtered.length - accepted.length;
+    if (skipped > 0) toast.message(`Skipped ${skipped} file(s) (max ${MAX_PHOTOS})`);
+  };
+
+  const handleAddImages = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    e.target.value = '';
+    addFiles(files);
+  };
+
+  const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const files = Array.from(e.dataTransfer.files || []);
+    if (!files.length) return;
+    addFiles(files);
+  };
+
+  const onDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isDragging) setIsDragging(true);
+  };
+
+  const onDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
   };
 
   const removeNewFile = (index: number) => {
@@ -178,11 +246,7 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
 
   const handleReset = () => {
     reset();
-
-    // Reset new files
     clearAllNew();
-
-    // Reset existing urls from initialData
     setExistingUrls(initialData?.existingImages ?? []);
   };
 
@@ -201,8 +265,6 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
         categoryId: data.category,
         locationId: data.location,
         isPublic: true,
-
-        // edit mode keep list
         existingImages: existingUrls,
       };
 
@@ -226,11 +288,9 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
     }
   };
 
-  // Derived arrays to render (existing first then new)
   const existingTiles = useMemo(
     () =>
       existingUrls.map((url, idx) => ({
-        type: 'existing' as const,
         url,
         idx,
       })),
@@ -240,23 +300,18 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
   const newTiles = useMemo(
     () =>
       previewUrls.map((url, idx) => ({
-        type: 'new' as const,
         url,
         idx,
       })),
     [previewUrls],
   );
 
-  const showUploaderEmpty = totalCount === 0;
-
   return (
     <form
       onSubmit={handleSubmit(onFormSubmit)}
       className="border-brand-100 space-y-6 rounded-xl border bg-white p-8"
     >
-      {/* TOP GRID */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-6">
-        {/* Title */}
         <div className="md:col-span-3">
           <label htmlFor="title" className="mb-1 block text-sm font-medium text-slate-500">
             Title <span className="text-red-500">*</span>
@@ -276,7 +331,6 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
           )}
         </div>
 
-        {/* Price */}
         <div className="md:col-span-3">
           <label htmlFor="price" className="mb-1 block text-sm font-medium text-slate-500">
             Price <span className="text-red-500">*</span>
@@ -297,7 +351,6 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
           )}
         </div>
 
-        {/* Category (lazy + loading) */}
         <div className="md:col-span-2">
           <label htmlFor="category" className="mb-1 block text-sm font-medium text-slate-500">
             Category <span className="text-red-500">*</span>
@@ -313,7 +366,6 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
             </SelectTrigger>
 
             <SelectContent position="popper">
-              {/* Loading state */}
               {isCategoriesLoading && (
                 <div className="flex items-center justify-center gap-2 px-3 py-6 text-sm text-slate-500">
                   <Loader2 size={18} className="animate-spin" />
@@ -321,7 +373,6 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
                 </div>
               )}
 
-              {/* Data state */}
               {!isCategoriesLoading &&
                 categoriesData?.map((category: any) => (
                   <SelectItem key={category.id} value={category.id}>
@@ -329,7 +380,6 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
                   </SelectItem>
                 ))}
 
-              {/* Empty state */}
               {!isCategoriesLoading && !hasCategories && (
                 <div className="px-3 py-3 text-center text-sm text-slate-500">
                   No categories found
@@ -346,7 +396,6 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
           )}
         </div>
 
-        {/* Brand */}
         <div className="md:col-span-2">
           <label htmlFor="brand" className="mb-1 block text-sm font-medium text-slate-500">
             Brand <span className="text-red-500">*</span>
@@ -366,7 +415,6 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
           )}
         </div>
 
-        {/* Size */}
         <div className="md:col-span-2">
           <label htmlFor="size" className="mb-1 block text-sm font-medium text-slate-500">
             Size <span className="text-red-500">*</span>
@@ -387,7 +435,6 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
           )}
         </div>
 
-        {/* Condition */}
         <div className="md:col-span-2">
           <label htmlFor="condition" className="mb-1 block text-sm font-medium text-slate-500">
             Condition <span className="text-red-500">*</span>
@@ -413,7 +460,6 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
           )}
         </div>
 
-        {/* Locker size */}
         <div className="md:col-span-2">
           <label htmlFor="lockerSize" className="mb-1 block text-sm font-medium text-slate-500">
             Locker size <span className="text-red-500">*</span>
@@ -440,7 +486,6 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
           )}
         </div>
 
-        {/* Location (lazy + loading) */}
         <div className="md:col-span-2">
           <label htmlFor="location" className="mb-1 block text-sm font-medium text-slate-500">
             Location <span className="text-red-500">*</span>
@@ -456,7 +501,6 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
             </SelectTrigger>
 
             <SelectContent position="popper">
-              {/* Loading state */}
               {isLockersLoading && (
                 <div className="flex items-center justify-center gap-2 px-3 py-6 text-sm text-slate-500">
                   <Loader2 size={18} className="animate-spin" />
@@ -464,7 +508,6 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
                 </div>
               )}
 
-              {/* Data state */}
               {!isLockersLoading &&
                 lockerAddressesData?.map((locker: any) => (
                   <SelectItem key={locker.id} value={locker.id}>
@@ -472,7 +515,6 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
                   </SelectItem>
                 ))}
 
-              {/* Empty state */}
               {!isLockersLoading && !hasLockers && (
                 <div className="px-3 py-3 text-center text-sm text-slate-500">
                   No locations found
@@ -489,7 +531,6 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
           )}
         </div>
 
-        {/* Description */}
         <div className="col-span-full">
           <label htmlFor="description" className="mb-1 block text-sm font-medium text-slate-500">
             Description <span className="text-red-500">*</span>
@@ -510,7 +551,7 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
         </div>
       </div>
 
-      {/* MODERN MULTI UPLOADER */}
+      {/* PHOTOS (no outer border/effects; only uploader card reacts) */}
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-3">
           <label className="text-sm font-medium text-slate-500">
@@ -518,6 +559,10 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
           </label>
 
           <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-400">
+              {totalCount}/{MAX_PHOTOS}
+            </span>
+
             {selectedFiles.length > 0 && (
               <Button
                 type="button"
@@ -536,7 +581,17 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
               type="button"
               size="sm"
               variant="secondary"
-              onClick={openPicker}
+              onClick={() => {
+                if (isSaving) {
+                  toast.message('Please wait — saving in progress');
+                  return;
+                }
+                if (isMaxed) {
+                  toast.error(`You can upload max ${MAX_PHOTOS} photos`);
+                  return;
+                }
+                openPicker();
+              }}
               disabled={isSaving || isMaxed}
             >
               <ImagePlus size={16} className="mr-2" />
@@ -555,25 +610,31 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
           disabled={isSaving}
         />
 
-        {showUploaderEmpty ? (
-          <div
-            onClick={openPicker}
-            className="group border-brand-100 hover:bg-brand-50/50 flex w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed bg-white p-14 transition-all duration-300"
-          >
-            <div className="bg-brand-50 group-hover:bg-brand-100 rounded-full p-5 transition-all duration-300 group-hover:scale-110">
-              <Upload className="text-primary size-9" />
-            </div>
-
-            <div className="mt-5 text-center">
-              <p className="text-primary text-lg font-bold">Upload photos</p>
-              <p className="mt-1 text-sm font-medium text-slate-500">
-                Select multiple images • Max {MAX_PHOTOS}
-              </p>
-            </div>
-          </div>
-        ) : (
+        {/* Transparent drop handler (NO border / NO hover / NO ring on the whole area) */}
+        <div
+          onDrop={(e) => {
+            if (isSaving) return;
+            if (isMaxed) {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsDragging(false);
+              toast.error(`You can upload max ${MAX_PHOTOS} photos`);
+              return;
+            }
+            onDrop(e);
+          }}
+          onDragOver={(e) => {
+            if (isSaving || isMaxed) return;
+            onDragOver(e);
+          }}
+          onDragLeave={(e) => {
+            if (isSaving || isMaxed) return;
+            onDragLeave(e);
+          }}
+          className={isSaving ? 'opacity-60' : ''}
+        >
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            {/* Existing */}
+            {/* Existing first */}
             {existingTiles.map((t) => (
               <div
                 key={`existing-${t.url}-${t.idx}`}
@@ -583,7 +644,11 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
                 <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/45 via-transparent to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
                 <button
                   type="button"
-                  onClick={() => removeExistingUrl(t.idx)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeExistingUrl(t.idx);
+                    toast.message('Removed 1 existing photo');
+                  }}
                   disabled={isSaving}
                   className="absolute top-2 right-2 rounded-full bg-black/60 p-1.5 text-white opacity-0 transition-all duration-200 group-hover:opacity-100 disabled:opacity-50"
                   title="Remove"
@@ -596,7 +661,7 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
               </div>
             ))}
 
-            {/* New */}
+            {/* New next */}
             {newTiles.map((t) => (
               <div
                 key={`new-${t.url}-${t.idx}`}
@@ -606,7 +671,11 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
                 <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/45 via-transparent to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
                 <button
                   type="button"
-                  onClick={() => removeNewFile(t.idx)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeNewFile(t.idx);
+                    toast.message('Removed 1 new photo');
+                  }}
                   disabled={isSaving}
                   className="absolute top-2 right-2 rounded-full bg-black/60 p-1.5 text-white opacity-0 transition-all duration-200 group-hover:opacity-100 disabled:opacity-50"
                   title="Remove"
@@ -619,23 +688,46 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
               </div>
             ))}
 
-            {/* Add-more Tile (dynamic) */}
+            {/* Uploader card LAST (like before). Hidden when maxed. */}
             {!isMaxed && (
               <button
                 type="button"
-                onClick={openPicker}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (isSaving) {
+                    toast.message('Please wait — saving in progress');
+                    return;
+                  }
+                  openPicker();
+                }}
                 disabled={isSaving}
-                className="border-brand-100 hover:bg-brand-50/50 group flex aspect-square w-full flex-col items-center justify-center rounded-xl border-2 border-dashed bg-white transition-all"
+                className={[
+                  'border-brand-100 group flex aspect-square w-full flex-col items-center justify-center rounded-xl border-2 border-dashed bg-white transition-all',
+                  isDragging ? 'bg-brand-50/60 ring-2 ring-slate-300' : 'hover:bg-brand-50/30',
+                  isSaving ? 'cursor-not-allowed opacity-60' : 'cursor-pointer',
+                ].join(' ')}
               >
                 <div className="bg-brand-50 group-hover:bg-brand-100 rounded-full p-4 transition-all group-hover:scale-105">
                   <ImagePlus className="text-primary size-7" />
                 </div>
-                <p className="mt-3 text-sm font-semibold text-slate-700">Add more</p>
-                <p className="mt-0.5 text-xs text-slate-400">{remainingSlots} left</p>
+
+                <p className="mt-3 text-sm font-semibold text-slate-700">
+                  {isSaving
+                    ? 'Saving...'
+                    : isDragging
+                      ? 'Drop to upload'
+                      : totalCount === 0
+                        ? 'Click or drag & drop'
+                        : 'Add more'}
+                </p>
+
+                <p className="mt-0.5 text-xs text-slate-400">
+                  {remainingSlots} left • Max {MAX_FILE_MB}MB
+                </p>
               </button>
             )}
           </div>
-        )}
+        </div>
 
         {errors.images && (
           <div className="mt-1 flex items-center gap-1 text-xs text-red-500">
@@ -645,7 +737,6 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
         )}
       </div>
 
-      {/* Buttons */}
       <div className="flex items-center gap-4 pt-4">
         <Button
           type="button"
