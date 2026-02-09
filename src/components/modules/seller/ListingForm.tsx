@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useController, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertCircle, ImagePlus, Loader2, Trash2, X } from 'lucide-react';
+import { AlertCircle, ImagePlus, Loader2, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,8 +17,8 @@ import {
 } from '@/components/ui/select';
 import {
   useCreateProductMutation,
-  useLazyGetCategoriesQuery,
-  useLazyGetLockerAddressesQuery,
+  useGetCategoriesQuery,
+  useGetLockerAddressesQuery,
   useUpdateProductMutation,
 } from '@/store/apis/productApi';
 import { listingMultiSchema, type ListingMultiValues } from '@/lib/schema/product';
@@ -31,6 +31,7 @@ interface ListingFormProps {
 
 const MAX_PHOTOS = 4;
 const MAX_FILE_MB = 4;
+
 const ACCEPTED_IMAGE_MIME = new Set([
   'image/jpeg',
   'image/jpg',
@@ -40,13 +41,34 @@ const ACCEPTED_IMAGE_MIME = new Set([
   'image/gif',
 ]);
 
+const ALLOWED_EXT_HINT = 'JPG, PNG, WEBP, AVIF, GIF';
+
+const toMB = (bytes: number) => bytes / (1024 * 1024);
+const round1 = (n: number) => Math.round(n * 10) / 10;
+
+const CONDITION_OPTIONS = [
+  { value: 'new', label: 'New' },
+  { value: 'like_new', label: 'Like new' },
+  { value: 'gently_used', label: 'Gently used' },
+  { value: 'used', label: 'Used' },
+  { value: 'well_used', label: 'Well used' },
+  { value: 'refurbished', label: 'Refurbished' },
+  { value: 'damaged', label: 'Damaged' },
+];
+
+const LOCKER_SIZES = [
+  { value: 'SMALL', label: 'Small' },
+  { value: 'MEDIUM', label: 'Medium' },
+  { value: 'LARGE', label: 'Large' },
+];
+
 export default function ListingForm({ type, initialData, productId }: ListingFormProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Lazy queries
-  const [triggerCategories, categoriesState] = useLazyGetCategoriesQuery();
-  const [triggerLockers, lockersState] = useLazyGetLockerAddressesQuery();
+  // Direct queries
+  const categoriesState = useGetCategoriesQuery();
+  const lockersState = useGetLockerAddressesQuery();
 
   const categoriesData = categoriesState.data?.data?.categories;
   const lockerAddressesData = lockersState.data?.data?.categories;
@@ -56,16 +78,6 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
 
   const isCategoriesLoading = categoriesState.isFetching || categoriesState.isLoading;
   const isLockersLoading = lockersState.isFetching || lockersState.isLoading;
-
-  const ensureCategories = () => {
-    if (hasCategories || isCategoriesLoading) return;
-    triggerCategories(undefined, true);
-  };
-
-  const ensureLockers = () => {
-    if (hasLockers || isLockersLoading) return;
-    triggerLockers(undefined, true);
-  };
 
   // Mutations
   const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
@@ -82,17 +94,8 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
   // Drag state
   const [isDragging, setIsDragging] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    control,
-    reset,
-    setValue,
-    setError,
-  } = useForm<ListingMultiValues>({
-    resolver: zodResolver(listingMultiSchema),
-    defaultValues: {
+  const defaultValues = useMemo(
+    () => ({
       title: initialData?.title ?? '',
       price: initialData?.price ?? '',
       category: initialData?.category ?? '',
@@ -104,7 +107,21 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
       description: initialData?.description ?? '',
       images: [],
       existingImages: initialData?.existingImages ?? [],
-    },
+    }),
+    [initialData],
+  );
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    control,
+    reset,
+    setValue,
+    setError,
+  } = useForm<ListingMultiValues>({
+    resolver: zodResolver(listingMultiSchema),
+    defaultValues,
   });
 
   // Controllers for shadcn Select
@@ -113,10 +130,34 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
   const { field: lockerSizeField } = useController({ name: 'lockerSize', control });
   const { field: locationField } = useController({ name: 'location', control });
 
+  const categoryValue = categoryField.value || '';
+  const locationValue = locationField.value || '';
+  const categoryLabel = categoriesData?.find(
+    (category: any) => category.id === categoryValue,
+  )?.title;
+  const locationLabel = lockerAddressesData?.find(
+    (locker: any) => locker.id === locationValue,
+  )?.title;
+  const showCategoryFallback = Boolean(categoryValue && !categoryLabel);
+  const showLocationFallback = Boolean(locationValue && !locationLabel);
+
   // Keep form existingImages synced with local state
   useEffect(() => {
     setValue('existingImages', existingUrls, { shouldValidate: true });
   }, [existingUrls, setValue]);
+
+  // Sync edit data into the form so selects stay filled
+  useEffect(() => {
+    reset(defaultValues);
+    setExistingUrls(defaultValues.existingImages ?? []);
+    setSelectedFiles([]);
+    setPreviewUrls((prev) => {
+      prev.forEach((url) => {
+        if (url.startsWith('blob:')) URL.revokeObjectURL(url);
+      });
+      return [];
+    });
+  }, [defaultValues, reset]);
 
   // Cleanup blob urls
   useEffect(() => {
@@ -132,46 +173,95 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
   const isMaxed = remainingSlots === 0;
 
   const openPicker = () => {
-    if (isSaving || isMaxed) return;
     fileInputRef.current?.click();
   };
 
+  const openPickerSafe = () => {
+    if (isSaving) return toast.message('Please wait, saving is in progress.');
+    if (isMaxed) return toast.error(`You can upload maximum ${MAX_PHOTOS} photos.`);
+    openPicker();
+  };
+
+  // Validation returns a report (NO toast here)
   const validateIncomingFiles = (files: File[]) => {
     const valid: File[] = [];
+    const rejected = {
+      invalidType: [] as File[],
+      tooLarge: [] as File[],
+    };
 
     for (const f of files) {
       if (!ACCEPTED_IMAGE_MIME.has(f.type)) {
-        toast.error(`Unsupported file type: ${f.name}`);
+        rejected.invalidType.push(f);
         continue;
       }
-      const sizeMB = f.size / (1024 * 1024);
+      const sizeMB = toMB(f.size);
       if (sizeMB > MAX_FILE_MB) {
-        toast.error(`File too large (max ${MAX_FILE_MB}MB): ${f.name}`);
+        rejected.tooLarge.push(f);
         continue;
       }
       valid.push(f);
     }
 
-    return valid;
+    return { valid, rejected };
   };
 
+  // Single source of truth for upload-related toasts
   const addFiles = (incomingFiles: File[]) => {
-    if (isSaving) return;
+    if (isSaving) return toast.message('Please wait, saving is in progress.');
+    if (!incomingFiles.length) return;
 
-    const incoming = validateIncomingFiles(incomingFiles);
-    if (!incoming.length) return;
+    if (remainingSlots <= 0) return toast.error(`You can upload maximum ${MAX_PHOTOS} photos.`);
+
+    const { valid, rejected } = validateIncomingFiles(incomingFiles);
+
+    // Unsupported types (1 toast)
+    if (rejected.invalidType.length) {
+      const names = rejected.invalidType
+        .slice(0, 2)
+        .map((f) => f.name)
+        .join(', ');
+      const extra =
+        rejected.invalidType.length > 2 ? ` (+${rejected.invalidType.length - 2} more)` : '';
+      toast.error(`Unsupported file type: ${names}${extra}. `, {
+        description: `Allowed types: ${ALLOWED_EXT_HINT}.`,
+      });
+    }
+
+    // Too large (1 toast)
+    if (rejected.tooLarge.length) {
+      const first = rejected.tooLarge[0];
+      const firstMB = round1(toMB(first.size));
+      const extra = rejected.tooLarge.length > 1 ? ` (+${rejected.tooLarge.length - 1} more)` : '';
+      toast.error(`File too large: ${first.name} (${firstMB}MB)${extra}.`, {
+        description: `Max file size is ${MAX_FILE_MB}MB.`,
+      });
+    }
+
+    // If nothing valid, don't show extra "no valid" toast (avoid duplicates)
+    if (!valid.length) return;
 
     // de-dupe against current selectedFiles
     const key = (f: File) => `${f.name}-${f.size}-${f.lastModified}`;
     const existingKeys = new Set(selectedFiles.map(key));
-    const filtered = incoming.filter((f) => !existingKeys.has(key(f)));
 
-    const accepted = filtered.slice(0, remainingSlots);
+    let dupes = 0;
+    const deduped = valid.filter((f) => {
+      const isDup = existingKeys.has(key(f));
+      if (isDup) dupes += 1;
+      return !isDup;
+    });
 
-    if (!accepted.length) {
-      if (remainingSlots === 0) toast.error(`You can upload max ${MAX_PHOTOS} photos`);
-      return;
+    if (dupes > 0) {
+      toast.message(
+        dupes === 1 ? 'This file is already selected.' : `${dupes} files were already selected.`,
+      );
     }
+
+    if (!deduped.length) return;
+
+    const accepted = deduped.slice(0, remainingSlots);
+    const skippedBecauseMax = Math.max(0, deduped.length - accepted.length);
 
     const nextFiles = [...selectedFiles, ...accepted];
     setSelectedFiles(nextFiles);
@@ -180,14 +270,18 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
     const newPreviews = accepted.map((f) => URL.createObjectURL(f));
     setPreviewUrls((prev) => [...prev, ...newPreviews]);
 
-    const skipped = filtered.length - accepted.length;
-    if (skipped > 0) toast.message(`Skipped ${skipped} file(s) (max ${MAX_PHOTOS})`);
+    if (skippedBecauseMax > 0) {
+      toast.message(
+        `${skippedBecauseMax} file${skippedBecauseMax > 1 ? 's were' : ' was'} not added due to the maximum limit of ${MAX_PHOTOS} photos.`,
+      );
+    }
   };
 
   const handleAddImages = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
 
+    // allow re-selecting same file
     e.target.value = '';
     addFiles(files);
   };
@@ -214,6 +308,7 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
     setIsDragging(false);
   };
 
+  // Toast only here (UI onClick no toast)
   const removeNewFile = (index: number) => {
     setSelectedFiles((prev) => {
       const next = prev.filter((_, i) => i !== index);
@@ -228,11 +323,21 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
     });
   };
 
+  // Toast only here (UI onClick no toast)
   const removeExistingUrl = (index: number) => {
     setExistingUrls((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const clearAllNew = () => {
+  // Toast only here
+  const clearAllNew = (options?: { toast?: boolean }) => {
+    const showToast = options?.toast !== false;
+    if (selectedFiles.length === 0) {
+      if (showToast) toast.message('No new photos to clear.');
+      return;
+    }
+
+    const count = selectedFiles.length;
+
     setSelectedFiles([]);
     setValue('images', [], { shouldValidate: true });
 
@@ -242,12 +347,15 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
       });
       return [];
     });
+
+    if (showToast) toast.success(`Cleared ${count} new photo(s).`);
   };
 
   const handleReset = () => {
-    reset();
-    clearAllNew();
-    setExistingUrls(initialData?.existingImages ?? []);
+    reset(defaultValues);
+    clearAllNew({ toast: false });
+    setExistingUrls(defaultValues.existingImages ?? []);
+    router.push('/seller/my-listings');
   };
 
   const onFormSubmit = async (data: ListingMultiValues) => {
@@ -274,17 +382,24 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
 
       if (type === 'create') {
         await createProduct(formData).unwrap();
+        toast.success('Listing published successfully.');
         router.push('/seller/my-listings');
         return;
       }
 
       if (type === 'edit' && productId) {
         await updateProduct({ productId, body: formData }).unwrap();
+        toast.success('Changes saved successfully.');
         router.push('/seller/my-listings');
         return;
       }
-    } catch (error) {
-      setError('root', { message: 'Something went wrong. Please try again.' });
+    } catch (error: any) {
+      const serverMessage =
+        error?.data?.message || error?.error?.data?.message || error?.message || null;
+
+      const msg = serverMessage || 'Something went wrong while saving. Please try again.';
+      setError('root', { message: msg });
+      toast.error(msg);
     }
   };
 
@@ -361,7 +476,7 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
             value={categoryField.value || ''}
             disabled={isSaving}
           >
-            <SelectTrigger className="h-11! w-full" onPointerDown={ensureCategories}>
+            <SelectTrigger className="h-11! w-full">
               <SelectValue placeholder="Select" />
             </SelectTrigger>
 
@@ -371,6 +486,10 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
                   <Loader2 size={18} className="animate-spin" />
                   Loading categories...
                 </div>
+              )}
+
+              {showCategoryFallback && (
+                <SelectItem value={categoryValue}>Current selection</SelectItem>
               )}
 
               {!isCategoriesLoading &&
@@ -448,8 +567,11 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
               <SelectValue placeholder="Select" />
             </SelectTrigger>
             <SelectContent position="popper">
-              <SelectItem value="new">New</SelectItem>
-              <SelectItem value="used">Used</SelectItem>
+              {CONDITION_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           {errors.condition && (
@@ -473,9 +595,11 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
               <SelectValue placeholder="Select" />
             </SelectTrigger>
             <SelectContent position="popper">
-              <SelectItem value="SMALL">Small</SelectItem>
-              <SelectItem value="MEDIUM">Medium</SelectItem>
-              <SelectItem value="LARGE">Large</SelectItem>
+              {LOCKER_SIZES.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           {errors.lockerSize && (
@@ -496,7 +620,7 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
             value={locationField.value || ''}
             disabled={isSaving}
           >
-            <SelectTrigger className="h-11! w-full" onPointerDown={ensureLockers}>
+            <SelectTrigger className="h-11! w-full">
               <SelectValue placeholder="Select" />
             </SelectTrigger>
 
@@ -506,6 +630,10 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
                   <Loader2 size={18} className="animate-spin" />
                   Loading locations...
                 </div>
+              )}
+
+              {showLocationFallback && (
+                <SelectItem value={locationValue}>Current selection</SelectItem>
               )}
 
               {!isLockersLoading &&
@@ -551,7 +679,7 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
         </div>
       </div>
 
-      {/* PHOTOS (no outer border/effects; only uploader card reacts) */}
+      {/* PHOTOS */}
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-3">
           <label className="text-sm font-medium text-slate-500">
@@ -562,41 +690,6 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
             <span className="text-xs text-slate-400">
               {totalCount}/{MAX_PHOTOS}
             </span>
-
-            {selectedFiles.length > 0 && (
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                onClick={clearAllNew}
-                disabled={isSaving}
-                className="hover:text-destructive hover:bg-red-50"
-              >
-                <Trash2 size={16} className="mr-2" />
-                Clear new
-              </Button>
-            )}
-
-            <Button
-              type="button"
-              size="sm"
-              variant="secondary"
-              onClick={() => {
-                if (isSaving) {
-                  toast.message('Please wait — saving in progress');
-                  return;
-                }
-                if (isMaxed) {
-                  toast.error(`You can upload max ${MAX_PHOTOS} photos`);
-                  return;
-                }
-                openPicker();
-              }}
-              disabled={isSaving || isMaxed}
-            >
-              <ImagePlus size={16} className="mr-2" />
-              Add photos
-            </Button>
           </div>
         </div>
 
@@ -610,15 +703,12 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
           disabled={isSaving}
         />
 
-        {/* Transparent drop handler (NO border / NO hover / NO ring on the whole area) */}
         <div
           onDrop={(e) => {
-            if (isSaving) return;
-            if (isMaxed) {
+            if (isSaving || isMaxed) {
               e.preventDefault();
               e.stopPropagation();
               setIsDragging(false);
-              toast.error(`You can upload max ${MAX_PHOTOS} photos`);
               return;
             }
             onDrop(e);
@@ -647,7 +737,6 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
                   onClick={(e) => {
                     e.stopPropagation();
                     removeExistingUrl(t.idx);
-                    toast.message('Removed 1 existing photo');
                   }}
                   disabled={isSaving}
                   className="absolute top-2 right-2 rounded-full bg-black/60 p-1.5 text-white opacity-0 transition-all duration-200 group-hover:opacity-100 disabled:opacity-50"
@@ -674,7 +763,6 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
                   onClick={(e) => {
                     e.stopPropagation();
                     removeNewFile(t.idx);
-                    toast.message('Removed 1 new photo');
                   }}
                   disabled={isSaving}
                   className="absolute top-2 right-2 rounded-full bg-black/60 p-1.5 text-white opacity-0 transition-all duration-200 group-hover:opacity-100 disabled:opacity-50"
@@ -688,17 +776,13 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
               </div>
             ))}
 
-            {/* Uploader card LAST (like before). Hidden when maxed. */}
+            {/* Uploader card LAST */}
             {!isMaxed && (
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (isSaving) {
-                    toast.message('Please wait — saving in progress');
-                    return;
-                  }
-                  openPicker();
+                  openPickerSafe();
                 }}
                 disabled={isSaving}
                 className={[
@@ -722,7 +806,8 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
                 </p>
 
                 <p className="mt-0.5 text-xs text-slate-400">
-                  {remainingSlots} left • Max {MAX_FILE_MB}MB
+                  {remainingSlots} left • Max {MAX_FILE_MB}MB <br />
+                  {ALLOWED_EXT_HINT}
                 </p>
               </button>
             )}
