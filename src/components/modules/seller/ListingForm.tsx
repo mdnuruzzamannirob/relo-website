@@ -38,11 +38,24 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
   const [triggerCategories, categoriesState] = useLazyGetCategoriesQuery();
   const [triggerLockers, lockersState] = useLazyGetLockerAddressesQuery();
 
-  const categoriesData = categoriesState.data;
-  const lockerAddressesData = lockersState.data;
+  const categoriesData = categoriesState.data?.data?.categories;
+  const lockerAddressesData = lockersState.data?.data?.categories;
+
+  const hasCategories = Boolean(categoriesData?.length);
+  const hasLockers = Boolean(lockerAddressesData?.length);
 
   const isCategoriesLoading = categoriesState.isFetching || categoriesState.isLoading;
   const isLockersLoading = lockersState.isFetching || lockersState.isLoading;
+
+  const ensureCategories = () => {
+    if (hasCategories || isCategoriesLoading) return;
+    triggerCategories(undefined, true);
+  };
+
+  const ensureLockers = () => {
+    if (hasLockers || isLockersLoading) return;
+    triggerLockers(undefined, true);
+  };
 
   // Mutations
   const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
@@ -86,12 +99,6 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
   const { field: conditionField } = useController({ name: 'condition', control });
   const { field: lockerSizeField } = useController({ name: 'lockerSize', control });
   const { field: locationField } = useController({ name: 'location', control });
-
-  // Lazy fetch on mount (true "lazy" but auto-triggered)
-  useEffect(() => {
-    triggerCategories(undefined, true);
-    triggerLockers(undefined, true);
-  }, [triggerCategories, triggerLockers]);
 
   // Keep form existingImages synced with local state
   useEffect(() => {
@@ -299,26 +306,37 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
           <Select
             onValueChange={categoryField.onChange}
             value={categoryField.value || ''}
-            disabled={isSaving || isCategoriesLoading}
+            disabled={isSaving}
           >
-            <SelectTrigger className="h-11! w-full">
-              <SelectValue placeholder={isCategoriesLoading ? 'Loading...' : 'Select'} />
+            <SelectTrigger className="h-11! w-full" onPointerDown={ensureCategories}>
+              <SelectValue placeholder="Select" />
             </SelectTrigger>
+
             <SelectContent position="popper">
-              {categoriesData?.data?.categories?.map((category: any) => (
-                <SelectItem key={category.id} value={category.id}>
-                  {category.title}
-                </SelectItem>
-              ))}
+              {/* Loading state */}
+              {isCategoriesLoading && (
+                <div className="flex items-center justify-center gap-2 px-3 py-6 text-sm text-slate-500">
+                  <Loader2 size={18} className="animate-spin" />
+                  Loading categories...
+                </div>
+              )}
+
+              {/* Data state */}
+              {!isCategoriesLoading &&
+                categoriesData?.map((category: any) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.title}
+                  </SelectItem>
+                ))}
+
+              {/* Empty state */}
+              {!isCategoriesLoading && !hasCategories && (
+                <div className="px-3 py-3 text-center text-sm text-slate-500">
+                  No categories found
+                </div>
+              )}
             </SelectContent>
           </Select>
-
-          {isCategoriesLoading && (
-            <div className="mt-1 flex items-center gap-2 text-xs text-slate-400">
-              <Loader2 size={14} className="animate-spin" />
-              Loading categories...
-            </div>
-          )}
 
           {errors.category && (
             <div className="mt-1 flex items-center gap-1 text-xs text-red-500">
@@ -431,26 +449,37 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
           <Select
             onValueChange={locationField.onChange}
             value={locationField.value || ''}
-            disabled={isSaving || isLockersLoading}
+            disabled={isSaving}
           >
-            <SelectTrigger className="h-11! w-full">
-              <SelectValue placeholder={isLockersLoading ? 'Loading...' : 'Select'} />
+            <SelectTrigger className="h-11! w-full" onPointerDown={ensureLockers}>
+              <SelectValue placeholder="Select" />
             </SelectTrigger>
+
             <SelectContent position="popper">
-              {lockerAddressesData?.data?.categories?.map((locker: any) => (
-                <SelectItem key={locker.id} value={locker.id}>
-                  {locker.title}
-                </SelectItem>
-              ))}
+              {/* Loading state */}
+              {isLockersLoading && (
+                <div className="flex items-center justify-center gap-2 px-3 py-6 text-sm text-slate-500">
+                  <Loader2 size={18} className="animate-spin" />
+                  Loading locations...
+                </div>
+              )}
+
+              {/* Data state */}
+              {!isLockersLoading &&
+                lockerAddressesData?.map((locker: any) => (
+                  <SelectItem key={locker.id} value={locker.id}>
+                    {locker.title}
+                  </SelectItem>
+                ))}
+
+              {/* Empty state */}
+              {!isLockersLoading && !hasLockers && (
+                <div className="px-3 py-3 text-center text-sm text-slate-500">
+                  No locations found
+                </div>
+              )}
             </SelectContent>
           </Select>
-
-          {isLockersLoading && (
-            <div className="mt-1 flex items-center gap-2 text-xs text-slate-400">
-              <Loader2 size={14} className="animate-spin" />
-              Loading locations...
-            </div>
-          )}
 
           {errors.location && (
             <div className="mt-1 flex items-center gap-1 text-xs text-red-500">
@@ -641,8 +670,6 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
           )}
         </Button>
       </div>
-
-      {errors.root?.message && <p className="text-sm text-red-500">{errors.root?.message}</p>}
     </form>
   );
 }
