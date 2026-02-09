@@ -1,74 +1,13 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { toast } from 'sonner';
 import { baseQuery } from '../baseQuery';
-
-export type Product = {
-  id: string;
-  userId: string;
-  title: string;
-  price: number;
-  brandName?: string;
-  size?: string;
-  condition?: string;
-  description?: string;
-  photos?: string[];
-  lockerSize?: string;
-  categoryId?: string;
-  locationId?: string;
-  isPublic?: boolean;
-  isSold?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-};
-
-type ProductListMeta = {
-  page: number;
-  limit: number;
-  total: number;
-  totalPage: number;
-};
-
-type ProductListResponse = {
-  success: boolean;
-  message: string;
-  data: {
-    meta: ProductListMeta;
-    result: Product[];
-  };
-};
-
-type ProductDetailsResponse = {
-  success: boolean;
-  message: string;
-  data: Product;
-};
-
-type FavoriteProduct = {
-  id: string;
-  product: Product;
-};
-
-type MyFavoriteProductsResponse = {
-  success: boolean;
-  message: string;
-  data: FavoriteProduct[];
-};
-type CategoriesLockerResponse = {
-  success: boolean;
-  message: string;
-  data: {
-    meta: { page: number; limit: number; total: number; totalPage: number };
-    categories: any[];
-  };
-};
-
-export type ProductListParams = {
-  page?: number;
-  limit?: number;
-  searchTerm?: string;
-  myProducts?: boolean;
-  isActive?: boolean;
-};
+import {
+  ProductListResponse,
+  ProductListParams,
+  ProductDetailsResponse,
+  MyFavoriteProductsResponse,
+  CategoriesLockerResponse,
+} from '@/types/product';
 
 export const productApi = createApi({
   reducerPath: 'productApi',
@@ -244,4 +183,6 @@ export const {
   useGetMyFavoriteProductsQuery,
   useGetCategoriesQuery,
   useGetLockerAddressesQuery,
+  useLazyGetCategoriesQuery,
+  useLazyGetLockerAddressesQuery,
 } = productApi;

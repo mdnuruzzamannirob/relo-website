@@ -6,7 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { useGetProductDetailsQuery } from '@/store/apis/productApi';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import type { ListingValues } from '@/lib/schema';
+import { ListingMultiValues } from '@/lib/schema/product';
 
 const EditListingPage = () => {
   const searchParams = useSearchParams();
@@ -16,7 +16,7 @@ const EditListingPage = () => {
   });
 
   const product = data?.data;
-  const initialData: ListingValues | undefined = product
+  const initialData: ListingMultiValues | undefined = product
     ? {
         title: product.title || '',
         price: product.price?.toString() || '',
@@ -27,8 +27,8 @@ const EditListingPage = () => {
         lockerSize: product.lockerSize || '',
         location: product.locationId || '',
         description: product.description || '',
-        imageUrl: product.photos?.[0] || undefined,
         images: [],
+        existingImages: product.photos,
       }
     : undefined;
 

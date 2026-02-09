@@ -2,7 +2,7 @@ import z from 'zod';
 
 const imageFileSchema = typeof File !== 'undefined' ? z.instanceof(File) : z.any();
 
-export const listingSchema = z
+export const listingMultiSchema = z
   .object({
     title: z.string().min(1, 'Title is required'),
     price: z.string().min(1, 'Price is required'),
@@ -14,13 +14,13 @@ export const listingSchema = z
     location: z.string().min(1, 'Select location'),
     description: z.string().min(1, 'Description is required'),
     images: z.array(imageFileSchema).optional(),
-    imageUrl: z.string().url('Invalid image URL').optional(),
+    existingImages: z.array(z.string().url()).optional(),
   })
   .superRefine((data, ctx) => {
-    const hasImages = Boolean(data.images?.length);
-    const hasExistingImage = Boolean(data.imageUrl);
+    const newCount = data.images?.length ?? 0;
+    const existingCount = data.existingImages?.length ?? 0;
 
-    if (!hasImages && !hasExistingImage) {
+    if (newCount + existingCount < 1) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: 'At least one photo is required',
@@ -29,4 +29,4 @@ export const listingSchema = z
     }
   });
 
-export type ListingValues = z.infer<typeof listingSchema>;
+export type ListingMultiValues = z.infer<typeof listingMultiSchema>;
