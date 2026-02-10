@@ -1,10 +1,10 @@
 import { Home, LayoutDashboard, Settings } from 'lucide-react';
 
 export const nav = [
-  { label: 'Woman', href: '/product/woman' },
-  { label: 'Men', href: '/product/men' },
-  { label: 'Kids', href: '/product/kids' },
-  { label: 'Electronics', href: '/product/electronics' },
+  { label: 'Woman', href: '/product/woman', slug: 'woman' },
+  { label: 'Men', href: '/product/men', slug: 'men' },
+  { label: 'Kids', href: '/product/kids', slug: 'kids' },
+  { label: 'Electronics', href: '/product/electronics', slug: 'electronics' },
   { label: 'About Us', href: '/about-us' },
 ];
 

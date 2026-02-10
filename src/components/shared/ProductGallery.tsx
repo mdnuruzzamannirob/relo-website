@@ -17,6 +17,7 @@ interface Props {
 }
 
 export default function ProductGallery({ images, title }: Props) {
+  const safeImages = images.length > 0 ? images : ['/images/banner.png'];
   const [active, setActive] = useState(0);
   const [open, setOpen] = useState(false);
 
@@ -27,12 +28,12 @@ export default function ProductGallery({ images, title }: Props) {
         onClick={() => setOpen(true)}
         className="border-brand-100 bg-brand-50 relative aspect-square w-full cursor-zoom-in overflow-hidden rounded-xl border"
       >
-        <Image src={images[active]} alt={title} fill priority className="object-cover" />
+        <Image src={safeImages[active]} alt={title} fill priority className="object-cover" />
       </div>
 
       {/* THUMBNAILS SWIPER */}
       <Swiper modules={[FreeMode]} spaceBetween={12} slidesPerView="auto" freeMode className="mt-4">
-        {images.map((img, i) => (
+        {safeImages.map((img, i) => (
           <SwiperSlide key={img} className="w-24!">
             <button
               onClick={() => setActive(i)}
@@ -48,7 +49,9 @@ export default function ProductGallery({ images, title }: Props) {
       </Swiper>
 
       {/* MODAL */}
-      {open && <ImageZoomPreview images={images} index={active} onClose={() => setOpen(false)} />}
+      {open && (
+        <ImageZoomPreview images={safeImages} index={active} onClose={() => setOpen(false)} />
+      )}
     </div>
   );
 }

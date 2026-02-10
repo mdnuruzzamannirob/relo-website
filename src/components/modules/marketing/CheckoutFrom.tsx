@@ -7,9 +7,23 @@ import Image from 'next/image';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useState } from 'react';
 import OrderConfirmedModal from './OrderConfirmedModal';
+import { useSearchParams } from 'next/navigation';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useGetProductDetailsQuery } from '@/store/apis/productApi';
 
 export default function CheckoutFrom() {
   const [orderSuccess, setOrderSuccess] = useState(false);
+  const searchParams = useSearchParams();
+  const productId = searchParams.get('productId') || '';
+  const { data, isLoading, isError, refetch } = useGetProductDetailsQuery(productId, {
+    skip: !productId,
+  });
+
+  const product = data?.data;
+  const productImage = product?.photos?.[0] || '/images/banner.png';
+  const productPrice = product?.price ?? 0;
+  const serviceFee = product ? 5 : 0;
+  const total = productPrice + serviceFee;
 
   return (
     <div className="app-container min-h-[calc(100vh-119px)] pt-8 pb-14">
@@ -134,48 +148,83 @@ export default function CheckoutFrom() {
         <div className="border-brand-100 h-fit rounded-xl border p-6">
           <h2 className="text-primary mb-4 font-semibold">Order Summary</h2>
 
-          <div className="mb-4 flex items-center gap-3">
-            <Image
-              src="https://images.unsplash.com/photo-1584917865442-de89df76afd3"
-              alt=""
-              width={56}
-              height={56}
-              className="size-20 min-w-20 rounded-lg object-cover"
-            />
-            <div>
-              <p className="text-sm font-medium">Woman Bag</p>
-              <p className="text-xs text-slate-500">
-                Size: <span className="font-medium">M</span>
+          {!productId && (
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+              No product selected for checkout.
+            </div>
+          )}
+
+          {isLoading && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <Skeleton className="size-20 rounded-lg" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-40" />
+                  <Skeleton className="h-3 w-28" />
+                  <Skeleton className="h-3 w-32" />
+                </div>
+              </div>
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          )}
+
+          {isError && productId && (
+            <div className="flex flex-col items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+              <p>Failed to load order summary.</p>
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Try again
+              </Button>
+            </div>
+          )}
+
+          {!isLoading && !isError && product && (
+            <>
+              <div className="mb-4 flex items-center gap-3">
+                <Image
+                  src={productImage}
+                  alt={product.title}
+                  width={56}
+                  height={56}
+                  className="size-20 min-w-20 rounded-lg object-cover"
+                />
+                <div>
+                  <p className="text-sm font-medium">{product.title}</p>
+                  <p className="text-xs text-slate-500">
+                    Size: <span className="font-medium">{product.size || 'N/A'}</span>
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    Condition: <span className="font-medium">{product.condition || 'N/A'}</span>
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2 text-sm text-slate-500">
+                <div className="flex justify-between">
+                  <span>Item price</span>
+                  <span>${productPrice.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Service fee</span>
+                  <span>${serviceFee.toFixed(2)}</span>
+                </div>
+              </div>
+
+              <div className="border-brand-100 my-4 flex justify-between border-t pt-4 font-semibold">
+                <span>Total</span>
+                <span>${total.toFixed(2)}</span>
+              </div>
+
+              <Button className="w-full" onClick={() => setOrderSuccess(true)}>
+                Place Order
+              </Button>
+
+              <p className="mt-3 text-center text-xs text-slate-500">
+                You won&apos;t be charged until the seller ships the item.
               </p>
-              <p className="text-xs text-slate-500">
-                Condition: <span className="font-medium">Like New</span>
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-2 text-sm text-slate-500">
-            <div className="flex justify-between">
-              <span>Item price</span>
-              <span>$45.00</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Service fee</span>
-              <span>$5.00</span>
-            </div>
-          </div>
-
-          <div className="border-brand-100 my-4 flex justify-between border-t pt-4 font-semibold">
-            <span>Total</span>
-            <span>$50.00</span>
-          </div>
-
-          <Button className="w-full" onClick={() => setOrderSuccess(true)}>
-            Place Order
-          </Button>
-
-          <p className="mt-3 text-center text-xs text-slate-500">
-            You won&apos;t be charged until the seller ships the item.
-          </p>
+            </>
+          )}
         </div>
       </div>
 

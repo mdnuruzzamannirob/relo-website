@@ -13,8 +13,17 @@ export type Product = {
   locationId?: string;
   isPublic?: boolean;
   isSold?: boolean;
+  isFavorite?: boolean;
   createdAt?: string;
   updatedAt?: string;
+};
+
+export type Category = {
+  id: string;
+  title?: string;
+  slug?: string;
+  image?: string;
+  isPopular?: boolean;
 };
 
 export type ProductListMeta = {
@@ -54,7 +63,7 @@ export type CategoriesLockerResponse = {
   message: string;
   data: {
     meta: { page: number; limit: number; total: number; totalPage: number };
-    categories: any[];
+    categories: Category[];
   };
 };
 
@@ -64,4 +73,12 @@ export type ProductListParams = {
   searchTerm?: string;
   myProducts?: boolean;
   isActive?: boolean;
+  categorySlug?: string;
+};
+
+export type CategoryListParams = {
+  page?: number;
+  limit?: number;
+  searchTerm?: string;
+  mostPopular?: boolean;
 };

@@ -7,6 +7,7 @@ import {
   ProductDetailsResponse,
   MyFavoriteProductsResponse,
   CategoriesLockerResponse,
+  CategoryListParams,
 } from '@/types/product';
 
 export const productApi = createApi({
@@ -16,7 +17,14 @@ export const productApi = createApi({
   endpoints: (builder) => ({
     // get my products
     getMyProducts: builder.query<ProductListResponse, ProductListParams>({
-      query: ({ page = 1, limit = 10, searchTerm, myProducts = true, isActive } = {}) => ({
+      query: ({
+        page = 1,
+        limit = 10,
+        searchTerm,
+        myProducts = true,
+        isActive,
+        categorySlug,
+      } = {}) => ({
         url: '/products',
         method: 'GET',
         params: {
@@ -25,6 +33,7 @@ export const productApi = createApi({
           searchTerm,
           myProducts,
           isActive,
+          categorySlug,
         },
       }),
       async onQueryStarted(args, { queryFulfilled }) {
@@ -42,6 +51,47 @@ export const productApi = createApi({
 
         return [
           { type: 'ProductList', id: 'MY' },
+          ...result.data.result.map((product) => ({ type: 'Product' as const, id: product.id })),
+        ];
+      },
+    }),
+
+    // get public products
+    getProducts: builder.query<ProductListResponse, ProductListParams>({
+      query: ({
+        page = 1,
+        limit = 10,
+        searchTerm,
+        myProducts = false,
+        isActive,
+        categorySlug,
+      } = {}) => ({
+        url: '/products',
+        method: 'GET',
+        params: {
+          page,
+          limit,
+          searchTerm,
+          myProducts,
+          isActive,
+          categorySlug,
+        },
+      }),
+      async onQueryStarted(args, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+        } catch (error: any) {
+          const errorMessage = error?.error?.data?.message || 'Failed to load products';
+          toast.error(errorMessage);
+        }
+      },
+      providesTags: (result) => {
+        if (!result?.data?.result) {
+          return [{ type: 'ProductList', id: 'PUBLIC' }];
+        }
+
+        return [
+          { type: 'ProductList', id: 'PUBLIC' },
           ...result.data.result.map((product) => ({ type: 'Product' as const, id: product.id })),
         ];
       },
@@ -161,8 +211,12 @@ export const productApi = createApi({
     }),
 
     // Get Categories
-    getCategories: builder.query<CategoriesLockerResponse, void>({
-      query: () => `/categories/all`,
+    getCategories: builder.query<CategoriesLockerResponse, CategoryListParams | void>({
+      query: (params) => ({
+        url: '/categories/all',
+        method: 'GET',
+        ...(params ? { params } : {}),
+      }),
       providesTags: ['Categories'],
     }),
 
@@ -175,6 +229,7 @@ export const productApi = createApi({
 
 export const {
   useGetMyProductsQuery,
+  useGetProductsQuery,
   useGetProductDetailsQuery,
   useCreateProductMutation,
   useUpdateProductMutation,

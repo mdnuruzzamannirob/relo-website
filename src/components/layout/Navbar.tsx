@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/sheet';
 import Link from 'next/link';
 import Logo from '../shared/Logo';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { nav } from '@/lib/constants/nav-links';
 import { useLogoutMutation, useSwitchUserMutation } from '@/store/apis/authApi';
@@ -34,6 +34,8 @@ function AvatarSkeleton() {
 
 export default function Navbar() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const activeCategory = searchParams.get('category');
   const router = useRouter();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -125,7 +127,10 @@ export default function Navbar() {
               {/* Mobile Nav */}
               <nav className="flex flex-col gap-1 px-4">
                 {nav.map((item) => {
-                  const isActive = pathname === item.href;
+                  const isActive =
+                    pathname === item.href ||
+                    pathname.startsWith(`${item.href}/`) ||
+                    (item.slug && pathname === '/product' && activeCategory === item.slug);
 
                   return (
                     <Link
@@ -323,7 +328,10 @@ export default function Navbar() {
         <nav className="border-brand-50 hidden border-t bg-white lg:block">
           <ul className="app-container flex h-10 items-center gap-5">
             {nav.map((item) => {
-              const isActive = pathname === item.href;
+              const isActive =
+                pathname === item.href ||
+                pathname.startsWith(`${item.href}/`) ||
+                (item.slug && pathname === '/product' && activeCategory === item.slug);
 
               return (
                 <li key={item.label} className="relative flex h-full items-center">

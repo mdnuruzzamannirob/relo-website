@@ -1,7 +1,8 @@
 import { fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://10.10.20.2:5007/api/v1';
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || 'https://relo-ecommerce-backend.vercel.app/api/v1';
 
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: API_URL,
