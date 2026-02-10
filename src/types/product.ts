@@ -74,6 +74,7 @@ export type ProductListParams = {
   myProducts?: boolean;
   isActive?: boolean;
   categorySlug?: string;
+  sortOrder?: 'asc' | 'desc';
 };
 
 export type CategoryListParams = {

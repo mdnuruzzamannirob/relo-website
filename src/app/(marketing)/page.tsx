@@ -6,7 +6,11 @@ const HomePage = () => {
   return (
     <>
       <Banner />
-      <ProductGrid />
+      <ProductGrid
+        title="Fresh finds, just for you"
+        description="Discover the latest items added near you and pick your next favorite."
+        limit={6}
+      />
       <PopularCategories />
     </>
   );

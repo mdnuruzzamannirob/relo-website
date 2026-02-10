@@ -12,6 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 interface ProductGridProps {
   title?: string;
+  description?: string;
   limit?: number;
   showCount?: boolean;
   categorySlug?: string;
@@ -19,8 +20,9 @@ interface ProductGridProps {
 
 const ProductGrid = ({
   title = 'Our Collection',
+  description,
   limit = 6,
-  showCount = true,
+  showCount = false,
   categorySlug,
 }: ProductGridProps) => {
   const { isAuthenticated } = useAuth();
@@ -43,6 +45,7 @@ const ProductGrid = ({
       <div className="app-container">
         <div className="mb-8 space-y-1 text-center">
           <h1 className="text-primary text-3xl font-semibold">{title}</h1>
+          {description && <p className="text-sm text-slate-500">{description}</p>}
           {showCount && <p className="text-sm text-slate-500">Showing {totalCount} items</p>}
         </div>
 

@@ -7,7 +7,7 @@ import { ArrowLeft, Heart, MessageSquare, X } from 'lucide-react';
 import ProductGallery from '@/components/shared/ProductGallery';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import {
   useGetMyFavoriteProductsQuery,
   useGetProductDetailsQuery,
@@ -15,18 +15,19 @@ import {
 } from '@/store/apis/productApi';
 import { useAuth } from '@/hooks/useAuth';
 
-interface ProductDetailsProps {
-  productId: string;
-}
-
-export default function ProductDetails({ productId }: ProductDetailsProps) {
+export default function ProductDetails() {
   const [showOffer, setShowOffer] = useState(false);
 
   const router = useRouter();
+  const params = useParams();
+  const productId = typeof params?.id === 'string' ? params.id : '';
+
   const { isAuthenticated } = useAuth();
+
   const { data, isLoading, isError, refetch } = useGetProductDetailsQuery(productId, {
     skip: !productId,
   });
+
   const { data: favoritesData } = useGetMyFavoriteProductsQuery(undefined, {
     skip: !isAuthenticated,
   });

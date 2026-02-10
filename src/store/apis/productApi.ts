@@ -24,6 +24,7 @@ export const productApi = createApi({
         myProducts = true,
         isActive,
         categorySlug,
+        sortOrder,
       } = {}) => ({
         url: '/products',
         method: 'GET',
@@ -34,6 +35,7 @@ export const productApi = createApi({
           myProducts,
           isActive,
           categorySlug,
+          sortOrder,
         },
       }),
       async onQueryStarted(args, { queryFulfilled }) {
@@ -65,6 +67,7 @@ export const productApi = createApi({
         myProducts = false,
         isActive,
         categorySlug,
+        sortOrder,
       } = {}) => ({
         url: '/products',
         method: 'GET',
@@ -75,6 +78,7 @@ export const productApi = createApi({
           myProducts,
           isActive,
           categorySlug,
+          sortOrder,
         },
       }),
       async onQueryStarted(args, { queryFulfilled }) {
@@ -190,7 +194,11 @@ export const productApi = createApi({
           toast.error(errorMessage);
         }
       },
-      invalidatesTags: [{ type: 'FavoriteProducts', id: 'LIST' }],
+      invalidatesTags: (result, error, productId) => [
+        { type: 'FavoriteProducts', id: 'LIST' },
+        { type: 'ProductList', id: 'PUBLIC' },
+        { type: 'Product', id: productId },
+      ],
     }),
 
     // get my favorite products

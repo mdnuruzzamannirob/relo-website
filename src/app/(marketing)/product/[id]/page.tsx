@@ -5,10 +5,10 @@ export const metadata = {
   description: 'Product Details page',
 };
 
-const ProductDetailsPage = ({ params }: { params: { id: string } }) => {
+const ProductDetailsPage = () => {
   return (
     <>
-      <ProductDetails productId={params.id} />
+      <ProductDetails />
     </>
   );
 };

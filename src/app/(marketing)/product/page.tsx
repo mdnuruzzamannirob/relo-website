@@ -27,6 +27,7 @@ const ProductPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [category, setCategory] = useState('all');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {
     const handle = setTimeout(() => setDebouncedSearch(searchTerm.trim()), 300);
@@ -48,6 +49,7 @@ const ProductPage = () => {
     limit: 12,
     searchTerm: debouncedSearch || undefined,
     categorySlug: category === 'all' ? undefined : category,
+    sortOrder,
   });
 
   const { data: favoritesData } = useGetMyFavoriteProductsQuery(undefined, {
@@ -69,13 +71,13 @@ const ProductPage = () => {
         <p className="text-sm text-slate-500">Showing {totalCount} items</p>
       </div>
 
-      <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="border-brand-100 mb-8 grid grid-cols-1 gap-4 rounded-2xl border bg-white p-4 md:grid-cols-[1.4fr_1fr_0.8fr]">
         <div className="space-y-2">
           <label className="text-sm font-medium text-slate-600">Search</label>
           <Input
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder="Search products"
+            placeholder="Search by title or brand"
           />
         </div>
 
@@ -98,6 +100,22 @@ const ProductPage = () => {
                     {item.title || 'Category'}
                   </SelectItem>
                 ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-slate-600">Sort</label>
+          <Select
+            value={sortOrder}
+            onValueChange={(value) => setSortOrder(value as 'asc' | 'desc')}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Sort" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="asc">Ascending</SelectItem>
+              <SelectItem value="desc">Descending</SelectItem>
             </SelectContent>
           </Select>
         </div>
