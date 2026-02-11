@@ -17,29 +17,30 @@ export default function PopularCategories() {
   const { isAuthenticated } = useAuth();
   const { data: categoriesData, isLoading: isCategoriesLoading } = useGetCategoriesQuery({
     mostPopular: true,
-    limit: 8,
+    limit: 10,
   });
   const categories = categoriesData?.data?.categories || [];
   const [selectedSlug, setSelectedSlug] = useState<string>('');
+  const fallbackSlug = categories[0]?.slug || categories[0]?.id || '';
 
   useEffect(() => {
-    if (!selectedSlug && categories.length > 0) {
-      setSelectedSlug(categories[0]?.slug || categories[0]?.id || '');
+    if (!selectedSlug && fallbackSlug) {
+      setSelectedSlug(fallbackSlug);
+      return;
     }
-  }, [categories, selectedSlug]);
 
-  const {
-    data: productsData,
-    isLoading: isProductsLoading,
-    isFetching: isProductsFetching,
-  } = useGetProductsQuery(
-    {
-      page: 1,
-      limit: 6,
-      categorySlug: selectedSlug || undefined,
-    },
-    { skip: !selectedSlug },
-  );
+    if (selectedSlug && categories.length > 0) {
+      const stillExists = categories.some((item) => (item.slug || item.id) === selectedSlug);
+      if (!stillExists && fallbackSlug) {
+        setSelectedSlug(fallbackSlug);
+      }
+    }
+  }, [categories, fallbackSlug, selectedSlug]);
+
+  const { data: productsData, isLoading: isProductsLoading } = useGetProductsQuery({
+    page: 1,
+    limit: 9,
+  });
 
   const { data: favoritesData } = useGetMyFavoriteProductsQuery(undefined, {
     skip: !isAuthenticated,
@@ -51,8 +52,7 @@ export default function PopularCategories() {
     [favoritesData],
   );
 
-  const isLoading = isCategoriesLoading || isProductsLoading || isProductsFetching;
-  const categoryLink = selectedSlug ? `/product?category=${selectedSlug}` : '/product';
+  const isLoading = isCategoriesLoading || isProductsLoading;
 
   return (
     <section className="app-container w-full py-10">
@@ -68,20 +68,15 @@ export default function PopularCategories() {
         {!isCategoriesLoading &&
           categories.map((item) => {
             const slug = item.slug || item.id;
-            const isActive = slug === selectedSlug;
 
             return (
-              <button
+              <Link
                 key={slug}
-                onClick={() => setSelectedSlug(slug)}
-                className={`rounded-full border px-4 py-1.5 text-sm transition ${
-                  isActive
-                    ? 'border-primary bg-brand-50 text-primary'
-                    : 'border-brand-100 hover:bg-brand-50 text-slate-500'
-                }`}
+                href={`/product?category=${slug}`}
+                className="border-brand-100 hover:bg-brand-50 rounded-full border px-4 py-1.5 text-sm text-slate-500 transition"
               >
                 {item.title || 'Category'}
-              </button>
+              </Link>
             );
           })}
       </div>
@@ -116,13 +111,6 @@ export default function PopularCategories() {
               }}
             />
           ))}
-      </div>
-
-      {/* See all */}
-      <div className="mt-10 flex justify-center">
-        <Link href={categoryLink}>
-          <Button size="lg">See all items</Button>
-        </Link>
       </div>
     </section>
   );
