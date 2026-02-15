@@ -3,6 +3,7 @@
 import ProductCard from '@/components/shared/ProductCard';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import Link from 'next/link';
 import {
   useGetMyFavoriteProductsQuery,
   useGetProductsQuery,
@@ -16,6 +17,8 @@ interface ProductGridProps {
   limit?: number;
   showCount?: boolean;
   categorySlug?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
 }
 
 const ProductGrid = ({
@@ -24,9 +27,11 @@ const ProductGrid = ({
   limit = 6,
   showCount = false,
   categorySlug,
+  ctaLabel,
+  ctaHref,
 }: ProductGridProps) => {
   const { isAuthenticated } = useAuth();
-  const { data, isLoading, isFetching, isError, refetch } = useGetProductsQuery({
+  const { data, isLoading, isError, refetch } = useGetProductsQuery({
     page: 1,
     limit,
     categorySlug,
@@ -41,12 +46,19 @@ const ProductGrid = ({
   const favoriteIds = new Set(favoritesData?.data?.map((item) => item.product.id) || []);
 
   return (
-    <section className="bg-brand-50 min-h-screen py-10">
+    <section className="bg-brand-50 min-h-[70vh] py-10">
       <div className="app-container">
-        <div className="mb-8 space-y-1 text-center">
-          <h1 className="text-primary text-3xl font-semibold">{title}</h1>
-          {description && <p className="text-sm text-slate-500">{description}</p>}
-          {showCount && <p className="text-sm text-slate-500">Showing {totalCount} items</p>}
+        <div className="mb-8 flex flex-col gap-4 text-center md:flex-row md:items-end md:justify-between md:text-left">
+          <div className="space-y-1">
+            <h2 className="text-primary text-3xl font-semibold">{title}</h2>
+            {description && <p className="text-sm text-slate-500">{description}</p>}
+            {showCount && <p className="text-sm text-slate-500">Showing {totalCount} items</p>}
+          </div>
+          {ctaHref && ctaLabel && (
+            <Link href={ctaHref} className="flex justify-center md:justify-end">
+              <Button variant="outline">{ctaLabel}</Button>
+            </Link>
+          )}
         </div>
 
         {isError && (
@@ -60,7 +72,7 @@ const ProductGrid = ({
 
         {!isError && (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:gap-8 lg:grid-cols-3">
-            {(isLoading || isFetching) &&
+            {isLoading &&
               Array.from({ length: limit }).map((_, index) => (
                 <div
                   key={`product-skeleton-${index}`}
@@ -76,7 +88,6 @@ const ProductGrid = ({
               ))}
 
             {!isLoading &&
-              !isFetching &&
               products.map((item) => (
                 <ProductCard
                   key={item.id}
