@@ -1,5 +1,5 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
-import { User, OTPResponse, ResetPasswordRequest, ChangePasswordRequest } from '@/types/auth';
+import { User, OTPResponse, ResetPasswordRequest } from '@/types/auth';
 import { toast } from 'sonner';
 import { clearUser, setUser } from '../slices/userSlice';
 import { baseQuery } from '../baseQuery';
