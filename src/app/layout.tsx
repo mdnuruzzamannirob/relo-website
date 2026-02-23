@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils/cn';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { Toaster } from '@/components/ui/sonner';
+import { Suspense } from 'react';
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -28,7 +29,9 @@ export default function RootLayout({
     <html lang="en">
       <body suppressHydrationWarning className={cn('antialiased', poppins.className)}>
         <Provider>
-          <Navbar />
+          <Suspense>
+            <Navbar />
+          </Suspense>
           {children}
           <Footer />
           <Toaster
