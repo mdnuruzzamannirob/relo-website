@@ -1,4 +1,5 @@
 import ProductDetails from '@/components/modules/marketing/ProductDetails';
+import { Suspense } from 'react';
 
 export const metadata = {
   title: 'Product Details',
@@ -7,9 +8,9 @@ export const metadata = {
 
 const ProductDetailsPage = () => {
   return (
-    <>
+    <Suspense>
       <ProductDetails />
-    </>
+    </Suspense>
   );
 };
 
