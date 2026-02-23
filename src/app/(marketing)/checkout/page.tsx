@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import CheckoutFrom from '@/components/modules/marketing/CheckoutFrom';
 
 export const metadata = {
@@ -7,9 +8,9 @@ export const metadata = {
 
 const CheckoutPage = () => {
   return (
-    <>
+    <Suspense>
       <CheckoutFrom />
-    </>
+    </Suspense>
   );
 };
 
