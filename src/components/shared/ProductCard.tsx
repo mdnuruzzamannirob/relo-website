@@ -62,7 +62,7 @@ const ProductCard = ({
         <p className="mb-3 text-sm text-slate-500">Size: {sizeLabel}</p>
 
         {showBuy && (
-          <Link href={`/checkout?productId=${product.id}`} className="mt-auto">
+          <Link href={`/product/${product.id}`} className="mt-auto">
             <Button size="lg" className="w-full">
               Buy Now
             </Button>

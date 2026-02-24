@@ -29,15 +29,16 @@ const navigationLinksByVariant: Record<string, NavigationLink[]> = {
       href: '/seller/my-listings',
     },
     {
-      label: 'Messages',
-      icon: MessageSquare,
-      href: '/seller/messages',
-    },
-    {
       label: 'Offers',
       icon: Handshake,
       href: '/seller/offers',
     },
+    {
+      label: 'Messages',
+      icon: MessageSquare,
+      href: '/seller/messages',
+    },
+
     {
       label: 'Orders & Pickup',
       icon: Truck,
@@ -64,6 +65,11 @@ const navigationLinksByVariant: Record<string, NavigationLink[]> = {
       label: 'My Orders',
       icon: Package,
       href: '/buyer/my-orders',
+    },
+    {
+      label: 'Offers',
+      icon: Handshake,
+      href: '/buyer/offers',
     },
     {
       label: 'Messages',
