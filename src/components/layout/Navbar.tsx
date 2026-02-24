@@ -43,7 +43,7 @@ export default function Navbar() {
 
   const { user, isAuthenticated, isLoading } = useAppSelector((state) => state.user);
   const [logout, { isLoading: isLogoutLoading, isSuccess }] = useLogoutMutation();
-  const [switchUser, { isLoading: isSwitchLoading, isSuccess: isSwitchSuccess, data }] =
+  const [switchUser, { isLoading: isSwitchLoading, isSuccess: isSwitchSuccess, isError, data }] =
     useSwitchUserMutation();
 
   const showAuthSkeleton = !hasHydrated || isLoading;
@@ -61,29 +61,43 @@ export default function Navbar() {
 
   useEffect(() => {
     if (isSwitchSuccess) {
-      if (data.data.type === 'BUYER') {
+      sessionStorage.removeItem('roleSwitchTarget');
+
+      if (data?.data?.type === 'BUYER') {
         router.push('/buyer/overview');
-      } else if (data.data.type === 'SELL') {
+      } else if (data?.data?.type === 'SELLER') {
         router.push('/seller/overview');
+      } else {
+        router.push('/');
       }
     }
   }, [isSwitchSuccess, router, data]);
 
-  const switchRoleHandler = (type: 'BUYER' | 'SELL') => {
+  useEffect(() => {
+    if (isError) {
+      sessionStorage.removeItem('roleSwitchTarget');
+      router.push('/');
+    }
+  }, [isError, router]);
+
+  const switchRoleHandler = (type: 'BUYER' | 'SELLER') => {
     if (isSwitchLoading) return;
 
     if (user?.type === type && type === 'BUYER') {
       setIsOpen(false);
+      sessionStorage.removeItem('roleSwitchTarget');
       router.push('/buyer/overview');
       return;
     }
 
-    if (user?.type === type && type === 'SELL') {
+    if (user?.type === type && type === 'SELLER') {
       setIsOpen(false);
+      sessionStorage.removeItem('roleSwitchTarget');
       router.push('/seller/overview');
       return;
     }
 
+    sessionStorage.setItem('roleSwitchTarget', type);
     switchUser();
     setIsOpen(false);
   };
@@ -190,7 +204,7 @@ export default function Navbar() {
               </Button>
 
               <Button
-                onClick={() => switchRoleHandler('SELL')}
+                onClick={() => switchRoleHandler('SELLER')}
                 size="lg"
                 variant={pathname.startsWith('/seller') ? 'default' : 'secondary'}
                 className="hidden lg:block"
@@ -258,7 +272,7 @@ export default function Navbar() {
                       Buyer Dashboard
                     </button>
                     <button
-                      onClick={() => switchRoleHandler('SELL')}
+                      onClick={() => switchRoleHandler('SELLER')}
                       className={`flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-sm transition ${
                         pathname.startsWith('/seller')
                           ? 'bg-brand-50 text-primary font-medium'

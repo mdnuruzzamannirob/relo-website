@@ -60,23 +60,13 @@ export const productApi = createApi({
 
     // get public products
     getProducts: builder.query<ProductListResponse, ProductListParams>({
-      query: ({
-        page = 1,
-        limit = 10,
-        searchTerm,
-        myProducts = false,
-        isActive,
-        categorySlug,
-        sortOrder,
-      } = {}) => ({
-        url: '/products',
+      query: ({ page = 1, limit = 10, searchTerm, categorySlug, sortOrder } = {}) => ({
+        url: '/products/all',
         method: 'GET',
         params: {
           page,
           limit,
           searchTerm,
-          myProducts,
-          isActive,
           categorySlug,
           sortOrder,
         },

@@ -4,7 +4,7 @@ export interface User {
   email: string;
   role: 'USER';
   status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
-  type: 'BUYER' | 'SELL';
+  type: 'BUYER' | 'SELLER';
   profileImage?: string;
   phone?: string | null;
   location?: string | null;
