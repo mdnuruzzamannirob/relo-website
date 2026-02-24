@@ -13,10 +13,13 @@ import {
   useGetProductDetailsQuery,
   useToggleFavoriteMutation,
 } from '@/store/apis/productApi';
+import { useCreateOfferMutation } from '@/store/apis/offerApi';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function ProductDetails() {
   const [showOffer, setShowOffer] = useState(false);
+  const [offerAmount, setOfferAmount] = useState('');
+  const [createOffer, { isLoading: isCreatingOffer }] = useCreateOfferMutation();
 
   const router = useRouter();
   const params = useParams();
@@ -154,9 +157,29 @@ export default function ProductDetails() {
                   <input
                     type="number"
                     placeholder="Your offer"
+                    value={offerAmount}
+                    onChange={(e) => setOfferAmount(e.target.value)}
                     className="border-brand-100 focus:bg-brand-50/50 h-11 w-full rounded-md border px-4 text-sm transition-all outline-none placeholder:text-slate-400 focus:ring-1 focus:ring-slate-300"
                   />
-                  <Button className="h-11 px-5">Send</Button>
+                  <Button
+                    className="h-11 px-5"
+                    disabled={isCreatingOffer || !offerAmount || Number(offerAmount) <= 0}
+                    onClick={async () => {
+                      if (!product?.id || !offerAmount) return;
+                      try {
+                        await createOffer({
+                          amount: Number(offerAmount),
+                          productId: product.id,
+                        }).unwrap();
+                        setOfferAmount('');
+                        setShowOffer(false);
+                      } catch {
+                        // error handled via toast in offerApi
+                      }
+                    }}
+                  >
+                    {isCreatingOffer ? 'Sending...' : 'Send'}
+                  </Button>
 
                   <button
                     onClick={() => setShowOffer(false)}
