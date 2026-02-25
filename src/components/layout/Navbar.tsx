@@ -17,7 +17,7 @@ import Logo from '../shared/Logo';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { nav } from '@/lib/constants/nav-links';
-import { useLogoutMutation, useSwitchUserMutation } from '@/store/apis/authApi';
+import { useLogoutMutation } from '@/store/apis/authApi';
 import { useAppSelector } from '@/store/hook';
 import { getInitials } from '@/lib/utils/getInitials';
 
@@ -43,8 +43,6 @@ export default function Navbar() {
 
   const { user, isAuthenticated, isLoading } = useAppSelector((state) => state.user);
   const [logout, { isLoading: isLogoutLoading, isSuccess }] = useLogoutMutation();
-  const [switchUser, { isLoading: isSwitchLoading, isSuccess: isSwitchSuccess, isError, data }] =
-    useSwitchUserMutation();
 
   const showAuthSkeleton = !hasHydrated || isLoading;
 
@@ -59,47 +57,9 @@ export default function Navbar() {
     setHasHydrated(true);
   }, []);
 
-  useEffect(() => {
-    if (isSwitchSuccess) {
-      sessionStorage.removeItem('roleSwitchTarget');
-
-      if (data?.data?.type === 'BUYER') {
-        router.push('/buyer/overview');
-      } else if (data?.data?.type === 'SELLER') {
-        router.push('/seller/overview');
-      } else {
-        router.push('/');
-      }
-    }
-  }, [isSwitchSuccess, router, data]);
-
-  useEffect(() => {
-    if (isError) {
-      sessionStorage.removeItem('roleSwitchTarget');
-      router.push('/');
-    }
-  }, [isError, router]);
-
-  const switchRoleHandler = (type: 'BUYER' | 'SELLER') => {
-    if (isSwitchLoading) return;
-
-    if (user?.type === type && type === 'BUYER') {
-      setIsOpen(false);
-      sessionStorage.removeItem('roleSwitchTarget');
-      router.push('/buyer/overview');
-      return;
-    }
-
-    if (user?.type === type && type === 'SELLER') {
-      setIsOpen(false);
-      sessionStorage.removeItem('roleSwitchTarget');
-      router.push('/seller/overview');
-      return;
-    }
-
-    sessionStorage.setItem('roleSwitchTarget', type);
-    switchUser();
+  const navigateToRole = (type: 'BUYER' | 'SELLER') => {
     setIsOpen(false);
+    router.push(type === 'BUYER' ? '/buyer/overview' : '/seller/overview');
   };
 
   /* Render */
@@ -195,7 +155,7 @@ export default function Navbar() {
             <div className="flex items-center gap-3">
               {/* Buy / Sell */}
               <Button
-                onClick={() => switchRoleHandler('BUYER')}
+                onClick={() => navigateToRole('BUYER')}
                 size="lg"
                 variant={pathname.startsWith('/buyer') ? 'default' : 'secondary'}
                 className="hidden lg:block"
@@ -204,7 +164,7 @@ export default function Navbar() {
               </Button>
 
               <Button
-                onClick={() => switchRoleHandler('SELLER')}
+                onClick={() => navigateToRole('SELLER')}
                 size="lg"
                 variant={pathname.startsWith('/seller') ? 'default' : 'secondary'}
                 className="hidden lg:block"
@@ -261,7 +221,7 @@ export default function Navbar() {
                     </Link>
 
                     <button
-                      onClick={() => switchRoleHandler('BUYER')}
+                      onClick={() => navigateToRole('BUYER')}
                       className={`flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-sm transition ${
                         pathname.startsWith('/buyer')
                           ? 'bg-brand-50 text-primary font-medium'
@@ -272,7 +232,7 @@ export default function Navbar() {
                       Buyer Dashboard
                     </button>
                     <button
-                      onClick={() => switchRoleHandler('SELLER')}
+                      onClick={() => navigateToRole('SELLER')}
                       className={`flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-sm transition ${
                         pathname.startsWith('/seller')
                           ? 'bg-brand-50 text-primary font-medium'

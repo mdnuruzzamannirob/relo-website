@@ -265,7 +265,7 @@ export const authApi = createApi({
       invalidatesTags: ['User'],
     }),
 
-    // switch user role type
+    // switch user role type — just calls the API, RoleGuard orchestrates the full flow
     switchUser: builder.mutation<
       { success: boolean; message: string; data: { type: string; token: string } },
       void
@@ -274,28 +274,6 @@ export const authApi = createApi({
         url: '/auth/switch-role',
         method: 'PUT',
       }),
-      async onQueryStarted(args, { dispatch, getState, queryFulfilled }) {
-        try {
-          const {
-            data: { data },
-          } = await queryFulfilled;
-
-          const state = getState() as any;
-          const currentUser = state.user?.user;
-          const currentToken = data?.token;
-
-          if (currentUser && data?.type) {
-            const updatedUser = { ...currentUser, type: data.type } as User;
-            dispatch(setUser(updatedUser));
-            localStorage.setItem('authToken', currentToken);
-            localStorage.setItem('userData', JSON.stringify(updatedUser));
-          }
-        } catch (error: any) {
-          const errorMessage = error?.error?.data?.message || 'Failed to switch role';
-          toast.error(errorMessage);
-        }
-      },
-      invalidatesTags: ['User'],
     }),
 
     // Logout

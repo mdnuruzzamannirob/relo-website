@@ -1,10 +1,14 @@
-'use client';
+﻿'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
-import { useSwitchUserMutation } from '@/store/apis/authApi';
+import { useAppDispatch } from '@/store/hook';
+import { useSwitchUserMutation, authApi } from '@/store/apis/authApi';
+import { productApi } from '@/store/apis/productApi';
+import { offerApi } from '@/store/apis/offerApi';
+import { setUser } from '@/store/slices/userSlice';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/hooks/useAuth';
 
 type RoleType = 'BUYER' | 'SELLER';
 
@@ -16,109 +20,128 @@ interface RoleGuardProps {
 
 export default function RoleGuard({ requiredRole, redirectTo = '/', children }: RoleGuardProps) {
   const router = useRouter();
-  const { user, isAuthenticated, isLoading } = useAuth();
-  const [switchUser, { isLoading: isSwitchLoading, isSuccess, isError, data }] =
-    useSwitchUserMutation();
-  const hasTriggeredRef = useRef(false);
-  const [hasHydrated, setHasHydrated] = useState(false);
-  const roleSwitchTarget = hasHydrated ? sessionStorage.getItem('roleSwitchTarget') : null;
-  const isRoleSwitching = !!roleSwitchTarget;
+  const dispatch = useAppDispatch();
+  const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
+
+  const [switchUser] = useSwitchUserMutation();
+  const [isSwitching, setIsSwitching] = useState(false);
+  const switchRef = useRef(false);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    setHasHydrated(true);
+    setHydrated(true);
   }, []);
 
-  useEffect(() => {
-    if (!hasHydrated || isLoading) return;
+  // ---- The single role-switch + getMe pipeline ----
+  const performRoleSwitch = useCallback(async () => {
+    if (switchRef.current) return; // already in progress
+    switchRef.current = true;
+    setIsSwitching(true);
 
+    try {
+      // 1. Call switch-role PUT -> get new token + type
+      const switchResult = await switchUser().unwrap();
+      const newToken = switchResult?.data?.token;
+      const newType = switchResult?.data?.type;
+
+      if (!newToken || !newType) {
+        throw new Error('Invalid switch response');
+      }
+
+      // 2. Update token in localStorage so subsequent API calls use it
+      localStorage.setItem('authToken', newToken);
+
+      // 3. Call getMe with the NEW token to get full user data
+      const getMeResult = await dispatch(
+        authApi.endpoints.getMe.initiate(undefined, { forceRefetch: true }),
+      ).unwrap();
+
+      if (getMeResult?.data) {
+        dispatch(setUser(getMeResult.data));
+        localStorage.setItem('userData', JSON.stringify(getMeResult.data));
+      }
+
+      // 4. Invalidate role-specific cached data so dashboards refetch
+      dispatch(productApi.util.invalidateTags(['Product', 'ProductList', 'FavoriteProducts']));
+      dispatch(offerApi.util.invalidateTags(['OfferList']));
+
+      // 5. Check if the switch actually gave us the right role
+      if (getMeResult?.data?.type !== requiredRole) {
+        router.push(redirectTo);
+      }
+    } catch {
+      // Switch failed -> redirect away
+      router.push(redirectTo);
+    } finally {
+      setIsSwitching(false);
+      switchRef.current = false;
+    }
+  }, [switchUser, dispatch, requiredRole, redirectTo, router]);
+
+  // ---- Main guard logic ----
+  useEffect(() => {
+    if (!hydrated || isAuthLoading) return;
+
+    // Not authenticated -> check token, else redirect
     if (!isAuthenticated) {
       const token = localStorage.getItem('authToken');
-
       if (!token) {
         router.push(redirectTo);
       }
-    }
-  }, [hasHydrated, isLoading, isAuthenticated, redirectTo, router]);
-
-  useEffect(() => {
-    if (!hasHydrated || isLoading || isSwitchLoading || !isAuthenticated) return;
-
-    if (user?.type === requiredRole) {
-      hasTriggeredRef.current = false;
+      // If token exists, AuthInitializer will hydrate -> re-run this effect
       return;
     }
 
-    if (!hasTriggeredRef.current && !isRoleSwitching) {
-      sessionStorage.setItem('roleSwitchTarget', requiredRole);
-      hasTriggeredRef.current = true;
-      switchUser();
-    }
+    // Already correct role -> done
+    if (user?.type === requiredRole) return;
+
+    // Wrong role -> switch
+    performRoleSwitch();
   }, [
-    hasHydrated,
-    isLoading,
-    isSwitchLoading,
+    hydrated,
+    isAuthLoading,
     isAuthenticated,
-    requiredRole,
-    switchUser,
     user?.type,
-    isRoleSwitching,
+    requiredRole,
+    redirectTo,
+    router,
+    performRoleSwitch,
   ]);
 
-  useEffect(() => {
-    if (!isSuccess) return;
+  // ---- Render ----
+  const showSkeleton =
+    !hydrated || isAuthLoading || isSwitching || (isAuthenticated && user?.type !== requiredRole);
 
-    if (data?.data?.type !== requiredRole) {
-      sessionStorage.removeItem('roleSwitchTarget');
-      router.push(redirectTo);
-      return;
-    }
-
-    sessionStorage.removeItem('roleSwitchTarget');
-  }, [isSuccess, data, requiredRole, redirectTo, router]);
-
-  useEffect(() => {
-    if (isError) {
-      sessionStorage.removeItem('roleSwitchTarget');
-      router.push(redirectTo);
-    }
-  }, [isError, redirectTo, router]);
-
-  useEffect(() => {
-    if (!hasHydrated) return;
-
-    if (user?.type === requiredRole && roleSwitchTarget === requiredRole) {
-      sessionStorage.removeItem('roleSwitchTarget');
-    }
-  }, [hasHydrated, user?.type, requiredRole, roleSwitchTarget]);
-
-  if (!hasHydrated || isLoading || isSwitchLoading || isRoleSwitching) {
+  if (showSkeleton) {
     return (
       <div className="bg-brand-50">
         <div className="app-container flex min-h-[calc(100vh-78px)] gap-8 pt-8 pb-14">
-          <aside className="hidden w-72 shrink-0 lg:block">
+          <aside className="hidden h-fit w-72 shrink-0 rounded-xl bg-white p-5 lg:block">
             <div className="space-y-4">
-              <Skeleton className="h-16 w-full" />
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-16 w-full rounded-xl" />
+              <Skeleton className="h-10 w-full rounded-lg" />
+              <Skeleton className="h-10 w-full rounded-lg" />
+              <Skeleton className="h-10 w-full rounded-lg" />
+              <Skeleton className="h-10 w-full rounded-lg" />
+              <Skeleton className="h-10 w-full rounded-lg" />
             </div>
           </aside>
 
           <main className="w-full flex-1 space-y-6 pt-8 lg:pt-0">
-            <Skeleton className="h-10 w-60" />
-            <div className="grid gap-4 md:grid-cols-2">
-              <Skeleton className="h-36 w-full" />
-              <Skeleton className="h-36 w-full" />
+            <Skeleton className="h-10 w-60 rounded-lg bg-white" />
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <Skeleton className="h-32 w-full rounded-xl bg-white" />
+              <Skeleton className="h-32 w-full rounded-xl bg-white" />
+              <Skeleton className="h-32 w-full rounded-xl bg-white" />
             </div>
-            <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-96 w-full rounded-xl bg-white" />
           </main>
         </div>
       </div>
     );
   }
+
   if (!isAuthenticated) return null;
-  if (user?.type !== requiredRole) return null;
 
   return <>{children}</>;
 }
