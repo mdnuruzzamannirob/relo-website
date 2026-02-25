@@ -46,7 +46,7 @@ const ProductGrid = ({
   const favoriteIds = new Set(favoritesData?.data?.map((item) => item.product.id) || []);
 
   return (
-    <section className="bg-brand-50 min-h-[70vh] py-10">
+    <section className="bg-brand-50 py-10">
       <div className="app-container">
         <div className="mb-8 flex flex-col gap-4 text-center md:flex-row md:items-end md:justify-between md:text-left">
           <div className="space-y-1">

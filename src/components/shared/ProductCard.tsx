@@ -27,7 +27,7 @@ const ProductCard = ({
   return (
     <div className="border-brand-100 flex h-full flex-col overflow-hidden rounded-xl border bg-white">
       <Link
-        href={`/product/${product.id}`}
+        href={`/products/${product.id}`}
         className="bg-brand-50 relative block h-64 w-full overflow-hidden rounded-t-xl"
       >
         <Image
@@ -62,7 +62,7 @@ const ProductCard = ({
         <p className="mb-3 text-sm text-slate-500">Size: {sizeLabel}</p>
 
         {showBuy && (
-          <Link href={`/product/${product.id}`} className="mt-auto">
+          <Link href={`/products/${product.id}`} className="mt-auto">
             <Button size="lg" className="w-full">
               Buy Now
             </Button>

@@ -24,6 +24,7 @@ import { useAuth } from '@/hooks/useAuth';
 const ProductPage = () => {
   const searchParams = useSearchParams();
   const { isAuthenticated } = useAuth();
+
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [category, setCategory] = useState('all');

@@ -144,7 +144,7 @@ export default function Navbar() {
                   const isActive =
                     pathname === item.href ||
                     pathname.startsWith(`${item.href}/`) ||
-                    (item.slug && pathname === '/product' && activeCategory === item.slug);
+                    (item.slug && pathname === '/products' && activeCategory === item.slug);
 
                   return (
                     <Link
@@ -345,7 +345,7 @@ export default function Navbar() {
               const isActive =
                 pathname === item.href ||
                 pathname.startsWith(`${item.href}/`) ||
-                (item.slug && pathname === '/product' && activeCategory === item.slug);
+                (item.slug && pathname === '/products' && activeCategory === item.slug);
 
               return (
                 <li key={item.label} className="relative flex h-full items-center">

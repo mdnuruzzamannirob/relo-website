@@ -11,7 +11,7 @@ const HomePage = () => {
         description="Discover the latest items added near you and pick your next favorite."
         limit={6}
         ctaLabel="Browse all"
-        ctaHref="/product"
+        ctaHref="/products"
       />
       <PopularCategories />
     </>
