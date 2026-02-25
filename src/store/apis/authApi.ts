@@ -267,7 +267,7 @@ export const authApi = createApi({
 
     // switch user role type
     switchUser: builder.mutation<
-      { success: boolean; message: string; data: { type: string } },
+      { success: boolean; message: string; data: { type: string; token: string } },
       void
     >({
       query: () => ({
@@ -282,10 +282,12 @@ export const authApi = createApi({
 
           const state = getState() as any;
           const currentUser = state.user?.user;
+          const currentToken = data?.token;
 
           if (currentUser && data?.type) {
             const updatedUser = { ...currentUser, type: data.type } as User;
             dispatch(setUser(updatedUser));
+            localStorage.setItem('authToken', currentToken);
             localStorage.setItem('userData', JSON.stringify(updatedUser));
           }
         } catch (error: any) {

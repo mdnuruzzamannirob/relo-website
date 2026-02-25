@@ -8,6 +8,7 @@ import type {
   CreateOfferResponse,
   OfferStatusUpdateRequest,
   OfferStatusUpdateResponse,
+  OfferCheckoutResponse,
 } from '@/types/offer';
 
 export const offerApi = createApi({
@@ -60,17 +61,22 @@ export const offerApi = createApi({
       async onQueryStarted(_args, { queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          const status = data?.data?.status;
+          // Seller actions return Offer with status; buyer accept returns checkout data
+          const status = (data?.data as { status?: string })?.status;
 
-          const messages: Record<string, string> = {
-            ACCEPT: 'Offer accepted!',
-            DECLINE: 'Offer declined.',
-            COUNTER_OFFER: 'Counter offer sent!',
-            COUNTER_ACCEPT: 'Counter offer accepted!',
-            COUNTER_DECLINE: 'Counter offer declined.',
-          };
-
-          toast.success(messages[status] || 'Offer updated!');
+          if (status) {
+            const messages: Record<string, string> = {
+              ACCEPT: 'Offer accepted!',
+              DECLINE: 'Offer declined.',
+              COUNTER_OFFER: 'Counter offer sent!',
+              COUNTER_ACCEPT: 'Counter offer accepted!',
+              COUNTER_DECLINE: 'Counter offer declined.',
+            };
+            toast.success(messages[status] || 'Offer updated!');
+          } else {
+            // Checkout response — use server message
+            toast.success(data?.message || 'Offer updated!');
+          }
         } catch (error: any) {
           const msg = error?.error?.data?.message || 'Failed to update offer';
           toast.error(msg);

@@ -90,6 +90,11 @@ export interface SellerCounterOfferRequest {
 }
 
 // Buyer actions on counter offer
+export interface BuyerAcceptRequest {
+  offerId: string;
+  body: { status: 'ACCEPT' };
+}
+
 export interface BuyerCounterAcceptRequest {
   offerId: string;
   body: { status: 'COUNTER_ACCEPT' };
@@ -104,11 +109,34 @@ export type OfferStatusUpdateRequest =
   | SellerAcceptRequest
   | SellerDeclineRequest
   | SellerCounterOfferRequest
+  | BuyerAcceptRequest
   | BuyerCounterAcceptRequest
   | BuyerCounterDeclineRequest;
 
+// Response for seller actions (accept/decline/counter) — returns updated Offer
 export interface OfferStatusUpdateResponse {
   success: boolean;
   message: string;
   data: Offer;
+}
+
+// Response specifically when buyer accepts (ACCEPT / COUNTER_ACCEPT) — returns checkout info
+export interface OfferCheckoutResponse {
+  success: boolean;
+  message: string;
+  data: {
+    offerAmount: number;
+    serviceFee: number;
+    totalAmount: number;
+    product: {
+      id: string;
+      brandName?: string;
+      photos?: string[];
+      price: number;
+      title: string;
+      category?: { id: string; title: string; slug: string };
+      location?: { id: string; title: string; slug: string };
+    };
+    paymentUrl: string;
+  };
 }

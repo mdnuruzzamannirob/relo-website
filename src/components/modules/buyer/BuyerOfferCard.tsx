@@ -1,17 +1,28 @@
-'use client';
+﻿'use client';
 
 import Image from 'next/image';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { CheckCircle2, XCircle, AlertTriangle, CreditCard, Lock, ExternalLink } from 'lucide-react';
+import {
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+  CreditCard,
+  Lock,
+  ExternalLink,
+  MessageSquare,
+  Loader2,
+} from 'lucide-react';
 import { useUpdateOfferStatusMutation } from '@/store/apis/offerApi';
-import type { Offer } from '@/types/offer';
+import type { Offer, OfferCheckoutResponse } from '@/types/offer';
+import Link from 'next/link';
 
-type BuyerAction = 'accept' | 'decline' | 'checkout';
+type ModalState = 'checkout' | 'decline' | null;
 
 const statusConfig: Record<string, { label: string; color: string }> = {
   PENDING: { label: 'Pending', color: 'bg-yellow-100 text-yellow-700' },
+  SOLD: { label: 'Ordered', color: 'bg-purple-100 text-purple-700' },
   ACCEPT: { label: 'Accepted', color: 'bg-green-100 text-green-700' },
   DECLINE: { label: 'Declined', color: 'bg-red-100 text-red-700' },
   COUNTER_OFFER: { label: 'Counter Received', color: 'bg-blue-100 text-blue-700' },
@@ -20,43 +31,73 @@ const statusConfig: Record<string, { label: string; color: string }> = {
 };
 
 export default function BuyerOfferCard({ offer }: { offer: Offer }) {
-  const [open, setOpen] = useState<BuyerAction | null>(null);
-  const [updateOfferStatus, { isLoading }] = useUpdateOfferStatusMutation();
+  const [modal, setModal] = useState<ModalState>(null);
+  const [checkoutData, setCheckoutData] = useState<OfferCheckoutResponse['data'] | null>(null);
+  const [isAccepting, setIsAccepting] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [updateOfferStatus, { isLoading: isDeclining }] = useUpdateOfferStatusMutation();
 
   const product = offer.product;
   const productImage = product?.photos?.[0] || '/images/banner.png';
   const seller = offer.productUser;
-  const status = statusConfig[offer.status] || statusConfig.PENDING;
 
-  // Buyer can respond to COUNTER_OFFER
-  const canRespondToCounter = offer.status === 'COUNTER_OFFER';
-  // Buyer's offer was accepted → can proceed to payment
-  const canPay = offer.status === 'ACCEPT';
+  // If product is sold, show "Ordered" regardless of offer status
+  const isSold = product?.isSold === true;
+  const status = isSold
+    ? { label: 'Ordered', color: 'bg-purple-100 text-purple-700' }
+    : statusConfig[offer.status] || statusConfig.PENDING;
 
-  const paymentAmount = canPay ? offer.amount : offer.counterAmount || offer.amount;
-  const serviceFee = 5;
-  const total = paymentAmount + serviceFee;
+  // Buyer can act when seller accepted or sent counter (but NOT if already sold/ordered)
+  const canRespondToCounter = !isSold && offer.status === 'COUNTER_OFFER';
+  const canPay = !isSold && offer.status === 'ACCEPT';
+  const canAct = canRespondToCounter || canPay;
 
-  const handleCounterAccept = async () => {
-    await updateOfferStatus({ offerId: offer.id, body: { status: 'COUNTER_ACCEPT' } });
-    setOpen(null);
-    // After accepting counter, show checkout
-    setOpen('checkout');
+  // Accept -> PUT call -> checkout popup with response data
+  const handleAccept = async () => {
+    setIsAccepting(true);
+    try {
+      // Seller accepted -> buyer sends ACCEPT; Seller counter -> buyer sends COUNTER_ACCEPT
+      const result = canRespondToCounter
+        ? await updateOfferStatus({
+            offerId: offer.id,
+            body: { status: 'COUNTER_ACCEPT' },
+          }).unwrap()
+        : await updateOfferStatus({
+            offerId: offer.id,
+            body: { status: 'ACCEPT' },
+          }).unwrap();
+
+      // Store checkout response (offerAmount, serviceFee, totalAmount, product, paymentUrl)
+      setCheckoutData(result.data as unknown as OfferCheckoutResponse['data']);
+      setModal('checkout');
+    } catch {
+      // error toast handled in API
+    } finally {
+      setIsAccepting(false);
+    }
   };
 
-  const handleCounterDecline = async () => {
+  // Decline
+  const handleDecline = async () => {
     await updateOfferStatus({ offerId: offer.id, body: { status: 'COUNTER_DECLINE' } });
-    setOpen(null);
+    setModal(null);
   };
 
+  // Redirect to Stripe payment URL from server response
   const handlePayment = () => {
-    // Redirect to checkout page with offer context
-    window.location.href = `/checkout?productId=${product?.id}&offerId=${offer.id}&amount=${paymentAmount}`;
+    if (checkoutData?.paymentUrl) {
+      setIsRedirecting(true);
+      window.location.href = checkoutData.paymentUrl;
+    }
   };
+
+  // Use real response data for checkout popup
+  const checkoutProduct = checkoutData?.product || product;
+  const checkoutImage = checkoutProduct?.photos?.[0] || '/images/banner.png';
 
   return (
     <>
-      {/* ================= CARD ================= */}
+      {/* CARD */}
       <div className="border-brand-100 flex flex-col gap-4 rounded-xl border bg-white p-4 shadow-sm transition-shadow hover:shadow-md md:flex-row md:gap-5 md:p-5">
         <Image
           src={productImage}
@@ -65,7 +106,9 @@ export default function BuyerOfferCard({ offer }: { offer: Offer }) {
           height={500}
           className="aspect-video w-full rounded-lg object-cover sm:aspect-square sm:h-28 sm:w-28 md:h-24 md:w-24 lg:h-28 lg:w-28"
         />
+
         <div className="flex-1 space-y-3 md:space-y-4">
+          {/* Header */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
             <div className="flex-1 space-y-1.5">
               <div className="flex items-center gap-2">
@@ -92,7 +135,7 @@ export default function BuyerOfferCard({ offer }: { offer: Offer }) {
                   </div>
                 )}
                 <span className="text-primary text-sm font-medium">{seller?.name || 'Seller'}</span>
-                <span className="hidden text-slate-300 sm:inline">•</span>
+                <span className="hidden text-slate-300 sm:inline">&bull;</span>
                 <span className="text-xs text-slate-400">
                   {new Date(offer.createdAt).toLocaleDateString()}
                 </span>
@@ -139,79 +182,76 @@ export default function BuyerOfferCard({ offer }: { offer: Offer }) {
               </div>
             )}
 
-          {/* Actions for counter offer */}
-          {canRespondToCounter && (
-            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
+          {/* Action Buttons */}
+          {canAct && (
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3 sm:gap-3">
+              {/* Accept / Pay — directly calls PUT, on success shows checkout popup */}
               <Button
                 className="flex-1 bg-green-600 text-white shadow-sm transition-all hover:bg-green-700 hover:shadow-md"
-                onClick={() => setOpen('accept')}
+                onClick={handleAccept}
+                disabled={isAccepting}
               >
-                <CheckCircle2 className="mr-2 size-4" />
-                Accept Counter (${offer.counterAmount?.toFixed(2)})
+                {isAccepting ? (
+                  <>
+                    <Loader2 className="mr-2 size-4 animate-spin" />
+                    Processing&hellip;
+                  </>
+                ) : canRespondToCounter ? (
+                  <>
+                    <CheckCircle2 className="mr-2 size-4" />
+                    Accept &amp; Pay (${(offer.counterAmount ?? offer.amount).toFixed(2)})
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="mr-2 size-4" />
+                    Proceed to Payment (${offer.amount.toFixed(2)})
+                  </>
+                )}
               </Button>
 
+              {/* Message Seller */}
+              <Link href="/buyer/messages" className="flex-1">
+                <Button
+                  variant="outline"
+                  className="w-full border-slate-200 text-slate-600 transition-all hover:border-slate-300 hover:bg-slate-50"
+                >
+                  <MessageSquare className="mr-2 size-4" />
+                  Message Seller
+                </Button>
+              </Link>
+
+              {/* Decline */}
               <Button
                 variant="outline"
                 className="flex-1 border-red-200 text-red-600 transition-all hover:border-red-300 hover:bg-red-50 hover:text-red-700"
-                onClick={() => setOpen('decline')}
+                onClick={() => setModal('decline')}
               >
                 <XCircle className="mr-2 size-4" />
-                Decline Counter
+                Decline
               </Button>
             </div>
           )}
 
-          {/* Payment button for accepted offer */}
-          {canPay && (
-            <Button
-              className="w-full bg-green-600 text-white hover:bg-green-700"
-              onClick={() => setOpen('checkout')}
-            >
-              <CreditCard className="mr-2 size-4" />
-              Proceed to Payment (${offer.amount.toFixed(2)})
-            </Button>
-          )}
+          {/* Message button for non-actionable states (not declined/ordered) */}
+          {!canAct &&
+            !isSold &&
+            offer.status !== 'DECLINE' &&
+            offer.status !== 'COUNTER_DECLINE' && (
+              <Link href="/buyer/messages">
+                <Button
+                  variant="outline"
+                  className="w-full border-slate-200 text-slate-600 transition-all hover:border-slate-300 hover:bg-slate-50"
+                >
+                  <MessageSquare className="mr-2 size-4" />
+                  Message Seller
+                </Button>
+              </Link>
+            )}
         </div>
       </div>
 
-      {/* ================= ACCEPT COUNTER MODAL ================= */}
-      <Dialog open={open === 'accept'} onOpenChange={() => setOpen(null)}>
-        <DialogContent className="max-w-md rounded-2xl p-6 text-center">
-          <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-green-50">
-            <CheckCircle2 className="size-9 text-green-600" />
-          </div>
-
-          <DialogHeader>
-            <DialogTitle className="text-primary text-center text-xl font-semibold">
-              Accept counter offer?
-            </DialogTitle>
-            <p className="text-center text-sm text-slate-500">
-              You are accepting the seller&apos;s counter offer of{' '}
-              <span className="font-semibold text-slate-800">
-                ${offer.counterAmount?.toFixed(2)}
-              </span>
-              . You will be redirected to complete payment.
-            </p>
-          </DialogHeader>
-
-          <div className="flex gap-4">
-            <Button variant="outline" className="h-10 flex-1" onClick={() => setOpen(null)}>
-              Cancel
-            </Button>
-
-            <Button
-              onClick={handleCounterAccept}
-              disabled={isLoading}
-              className="h-10 flex-1 bg-green-600 hover:bg-green-700"
-            >
-              {isLoading ? 'Processing…' : 'Accept & Pay'}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* ================= DECLINE COUNTER MODAL ================= */}
-      <Dialog open={open === 'decline'} onOpenChange={() => setOpen(null)}>
+      {/* DECLINE CONFIRMATION */}
+      <Dialog open={modal === 'decline'} onOpenChange={() => setModal(null)}>
         <DialogContent className="max-w-md rounded-2xl p-6 text-center">
           <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-red-50">
             <AlertTriangle className="size-9 text-red-600" />
@@ -219,34 +259,40 @@ export default function BuyerOfferCard({ offer }: { offer: Offer }) {
 
           <DialogHeader>
             <DialogTitle className="text-primary text-center text-xl font-semibold">
-              Decline counter offer?
+              {canRespondToCounter ? 'Decline counter offer?' : 'Decline this offer?'}
             </DialogTitle>
             <p className="text-center text-sm text-slate-500">
-              The seller&apos;s counter offer of{' '}
-              <span className="font-semibold text-slate-800">
-                ${offer.counterAmount?.toFixed(2)}
-              </span>{' '}
-              will be declined.
+              {canRespondToCounter ? (
+                <>
+                  The seller&apos;s counter offer of{' '}
+                  <span className="font-semibold text-slate-800">
+                    ${(offer.counterAmount ?? offer.amount).toFixed(2)}
+                  </span>{' '}
+                  will be declined.
+                </>
+              ) : (
+                <>This accepted offer will be declined and the deal will be cancelled.</>
+              )}
             </p>
           </DialogHeader>
 
           <div className="flex gap-4">
-            <Button variant="outline" className="h-10 flex-1" onClick={() => setOpen(null)}>
+            <Button variant="outline" className="h-10 flex-1" onClick={() => setModal(null)}>
               No, Keep
             </Button>
             <Button
-              onClick={handleCounterDecline}
-              disabled={isLoading}
+              onClick={handleDecline}
+              disabled={isDeclining}
               className="h-10 flex-1 bg-red-600 hover:bg-red-700"
             >
-              {isLoading ? 'Processing…' : 'Yes, Decline'}
+              {isDeclining ? 'Processing\u2026' : 'Yes, Decline'}
             </Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* ================= CHECKOUT POPUP ================= */}
-      <Dialog open={open === 'checkout'} onOpenChange={() => setOpen(null)}>
+      {/* CHECKOUT POPUP — shown AFTER PUT response with product details, payment info, paymentUrl */}
+      <Dialog open={modal === 'checkout'} onOpenChange={() => setModal(null)}>
         <DialogContent className="max-w-lg rounded-2xl p-0">
           <DialogHeader className="border-b p-6 pb-4">
             <DialogTitle className="text-primary flex items-center gap-2 text-lg font-semibold">
@@ -256,49 +302,59 @@ export default function BuyerOfferCard({ offer }: { offer: Offer }) {
           </DialogHeader>
 
           <div className="space-y-5 p-6">
-            {/* Product Info */}
+            {/* Product Info from response */}
             <div className="flex items-center gap-4 rounded-xl bg-slate-50 p-4">
               <Image
-                src={productImage}
-                alt={product?.title || 'Product'}
+                src={checkoutImage}
+                alt={checkoutProduct?.title || 'Product'}
                 width={80}
                 height={80}
                 className="size-20 min-w-20 rounded-lg object-cover"
               />
               <div className="space-y-1">
-                <p className="font-semibold text-slate-800">{product?.title || 'Product'}</p>
-                {product?.size && (
+                <p className="font-semibold text-slate-800">
+                  {checkoutProduct?.title || 'Product'}
+                </p>
+                {checkoutProduct?.brandName && (
                   <p className="text-xs text-slate-500">
-                    Size: <span className="font-medium">{product.size}</span>
+                    Brand: <span className="font-medium">{checkoutProduct.brandName}</span>
                   </p>
                 )}
-                {product?.condition && (
+                {checkoutProduct?.category && (
                   <p className="text-xs text-slate-500">
-                    Condition: <span className="font-medium">{product.condition}</span>
+                    Category: <span className="font-medium">{checkoutProduct.category.title}</span>
+                  </p>
+                )}
+                {'location' in checkoutProduct && (checkoutProduct as any).location && (
+                  <p className="text-xs text-slate-500">
+                    Location:{' '}
+                    <span className="font-medium">{(checkoutProduct as any).location.title}</span>
                   </p>
                 )}
               </div>
             </div>
 
-            {/* Order Summary */}
+            {/* Payment Breakdown from server response */}
             <div className="space-y-2 text-sm text-slate-600">
               <div className="flex justify-between">
                 <span>Original price</span>
                 <span className="text-slate-400 line-through">
-                  ${(product?.price ?? 0).toFixed(2)}
+                  ${(checkoutProduct?.price ?? 0).toFixed(2)}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span>Agreed price</span>
-                <span className="font-medium">${paymentAmount.toFixed(2)}</span>
+                <span>Offer amount</span>
+                <span className="font-medium text-slate-800">
+                  ${(checkoutData?.offerAmount ?? 0).toFixed(2)}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span>Service fee</span>
-                <span>${serviceFee.toFixed(2)}</span>
+                <span>${(checkoutData?.serviceFee ?? 0).toFixed(2)}</span>
               </div>
               <div className="border-brand-100 flex justify-between border-t pt-2 text-base font-semibold text-slate-800">
                 <span>Total</span>
-                <span>${total.toFixed(2)}</span>
+                <span>${(checkoutData?.totalAmount ?? 0).toFixed(2)}</span>
               </div>
             </div>
 
@@ -311,14 +367,27 @@ export default function BuyerOfferCard({ offer }: { offer: Offer }) {
               </div>
             </div>
 
-            {/* Action Buttons */}
+            {/* Proceed / Cancel */}
             <div className="flex gap-3">
-              <Button variant="outline" className="h-11 flex-1" onClick={() => setOpen(null)}>
+              <Button variant="outline" className="h-11 flex-1" onClick={() => setModal(null)}>
                 Cancel
               </Button>
-              <Button className="h-11 flex-1" onClick={handlePayment}>
-                <ExternalLink className="mr-2 size-4" />
-                Proceed to Payment
+              <Button
+                className="h-11 flex-1"
+                onClick={handlePayment}
+                disabled={!checkoutData?.paymentUrl || isRedirecting}
+              >
+                {isRedirecting ? (
+                  <>
+                    <Loader2 className="mr-2 size-4 animate-spin" />
+                    Redirecting&hellip;
+                  </>
+                ) : (
+                  <>
+                    <ExternalLink className="mr-2 size-4" />
+                    Proceed to Payment
+                  </>
+                )}
               </Button>
             </div>
           </div>

@@ -8,11 +8,13 @@ import { CheckCircle2, XCircle, MessageSquare, AlertTriangle } from 'lucide-reac
 import { useUpdateOfferStatusMutation } from '@/store/apis/offerApi';
 import type { Offer } from '@/types/offer';
 import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
 
 export type OfferAction = 'accept' | 'counter' | 'decline';
 
 const statusConfig: Record<string, { label: string; color: string }> = {
   PENDING: { label: 'Pending', color: 'bg-yellow-100 text-yellow-700' },
+  SOLD: { label: 'Ordered', color: 'bg-purple-100 text-purple-700' },
   ACCEPT: { label: 'Accepted', color: 'bg-green-100 text-green-700' },
   DECLINE: { label: 'Declined', color: 'bg-red-100 text-red-700' },
   COUNTER_OFFER: { label: 'Counter Sent', color: 'bg-blue-100 text-blue-700' },
@@ -30,8 +32,13 @@ export default function SellerOfferCard({ offer }: { offer: Offer }) {
   const product = offer.product;
   const productImage = product?.photos?.[0] || '/images/banner.png';
   const offerer = offer.offerer;
-  const status = statusConfig[offer.status] || statusConfig.PENDING;
-  const canAct = offer.status === 'PENDING';
+
+  // If product is sold, show "Ordered" regardless of offer status
+  const isSold = product?.isSold === true;
+  const status = isSold
+    ? { label: 'Ordered', color: 'bg-purple-100 text-purple-700' }
+    : statusConfig[offer.status] || statusConfig.PENDING;
+  const canAct = !isSold && offer.status === 'PENDING';
 
   const handleAccept = async () => {
     await updateOfferStatus({ offerId: offer.id, body: { status: 'ACCEPT' } });
@@ -132,7 +139,7 @@ export default function SellerOfferCard({ offer }: { offer: Offer }) {
           )}
 
           {canAct && (
-            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3 sm:gap-3">
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-4">
               <Button
                 className="flex-1 bg-green-600 text-white shadow-sm transition-all hover:bg-green-700 hover:shadow-md"
                 onClick={() => setOpen('accept')}
@@ -149,6 +156,16 @@ export default function SellerOfferCard({ offer }: { offer: Offer }) {
                 Counter Offer
               </Button>
 
+              <Link href="/seller/messages" className="flex-1">
+                <Button
+                  variant="outline"
+                  className="w-full border-slate-200 text-slate-600 transition-all hover:border-slate-300 hover:bg-slate-50"
+                >
+                  <MessageSquare className="mr-2 size-4" />
+                  Message Buyer
+                </Button>
+              </Link>
+
               <Button
                 variant="outline"
                 className="flex-1 border-red-200 text-red-600 transition-all hover:border-red-300 hover:bg-red-50 hover:text-red-700"
@@ -159,6 +176,22 @@ export default function SellerOfferCard({ offer }: { offer: Offer }) {
               </Button>
             </div>
           )}
+
+          {/* Message button for non-actionable states */}
+          {!canAct &&
+            !isSold &&
+            offer.status !== 'DECLINE' &&
+            offer.status !== 'COUNTER_DECLINE' && (
+              <Link href="/seller/messages">
+                <Button
+                  variant="outline"
+                  className="w-full border-slate-200 text-slate-600 transition-all hover:border-slate-300 hover:bg-slate-50"
+                >
+                  <MessageSquare className="mr-2 size-4" />
+                  Message Buyer
+                </Button>
+              </Link>
+            )}
         </div>
       </div>
 
