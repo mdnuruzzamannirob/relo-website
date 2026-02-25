@@ -276,6 +276,29 @@ export const authApi = createApi({
       }),
     }),
 
+    connectStripeAccount: builder.mutation<
+      { success: boolean; message: string; data: { accountLinkUrl: string } },
+      void
+    >({
+      query: () => ({
+        url: '/users/stripe-connect',
+        method: 'POST',
+      }),
+      async onQueryStarted(args, { queryFulfilled }) {
+        try {
+          const {
+            data: { data },
+          } = await queryFulfilled;
+          if (data?.accountLinkUrl) {
+            window.location.href = data.accountLinkUrl; // Redirect to Stripe onboarding
+          }
+        } catch (error: any) {
+          const errorMessage = error?.error?.data?.message || 'Failed to connect Stripe account';
+          toast.error(errorMessage);
+        }
+      },
+    }),
+
     // Logout
     logout: builder.mutation<{ message: string }, void>({
       query: () => ({
@@ -326,4 +349,5 @@ export const {
   useSwitchUserMutation,
   useProfileImageMutation,
   useProfileUpdateMutation,
+  useConnectStripeAccountMutation,
 } = authApi;

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { DollarSign, Package, Clock, Boxes, Activity } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import HeaderBar from '@/components/shared/HeaderBar';
+import Link from 'next/link';
 
 const OverviewPage = () => {
   const { user } = useAuth();
@@ -85,9 +86,11 @@ const OverviewPage = () => {
           <p className="mt-1 text-sm text-slate-300">
             List a new item and reach thousands of buyers
           </p>
-          <Button className="mt-4 bg-white text-slate-900 hover:bg-slate-100">
-            Create New Listing
-          </Button>
+          <Link href="/seller/my-listings/new-listing">
+            <Button className="mt-4 bg-white text-slate-900 hover:bg-slate-100">
+              Create New Listing
+            </Button>
+          </Link>
         </div>
 
         {/* Payout */}

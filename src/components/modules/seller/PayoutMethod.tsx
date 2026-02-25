@@ -1,10 +1,16 @@
 'use client';
 
+import ButtonComp from '@/components/shared/ButtonComp';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { useAuth } from '@/hooks/useAuth';
+import { useConnectStripeAccountMutation } from '@/store/apis/authApi';
 import { CreditCard, CheckCircle2 } from 'lucide-react';
 
 const PayoutMethod = () => {
+  const { user } = useAuth();
+  const [connectStripeAccount, { isLoading: isConnecting }] = useConnectStripeAccountMutation();
+
   return (
     <Card>
       <CardHeader>
@@ -16,14 +22,22 @@ const PayoutMethod = () => {
             <CreditCard className="h-5 w-5 text-slate-600" />
             <span className="text-sm font-medium">Stripe Connect</span>
           </div>
-          <div className="flex items-center gap-2">
-            <Button size="sm">Connect</Button>
-            <CheckCircle2 className="h-5 w-5 text-green-500" />
-          </div>
+
+          {user?.isStripeAccountActive ? (
+            <Button className="cursor-default bg-green-600 text-white hover:bg-green-600">
+              Connected
+            </Button>
+          ) : (
+            <ButtonComp
+              loading={isConnecting}
+              disabled={isConnecting}
+              loadingText="Connecting..."
+              onClick={() => connectStripeAccount()}
+            >
+              Connect
+            </ButtonComp>
+          )}
         </div>
-        <Button variant="outline" className="w-full">
-          Add Payment Method
-        </Button>
       </CardContent>
     </Card>
   );

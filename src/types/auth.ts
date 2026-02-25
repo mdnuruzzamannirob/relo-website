@@ -10,6 +10,7 @@ export interface User {
   location?: string | null;
   createdAt: string;
   updatedAt: string;
+  isStripeAccountActive: boolean;
 }
 
 export interface AuthResponse {
