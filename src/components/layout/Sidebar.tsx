@@ -15,6 +15,9 @@ import {
 } from 'lucide-react';
 import { NavigationLink } from '@/types';
 import { Button } from '../ui/button';
+import { useAuth } from '@/hooks/useAuth';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { getInitials } from '@/lib/utils/getInitials';
 
 const navigationLinksByVariant: Record<string, NavigationLink[]> = {
   seller: [
@@ -90,7 +93,6 @@ const navigationLinksByVariant: Record<string, NavigationLink[]> = {
 };
 
 const Sidebar = ({
-  info,
   variant = 'seller',
   navigationLinks,
 }: {
@@ -99,20 +101,27 @@ const Sidebar = ({
   navigationLinks?: NavigationLink[];
 }) => {
   const pathname = usePathname();
+  const { user } = useAuth();
   const links = navigationLinks || navigationLinksByVariant[variant];
 
   return (
     <aside className="border-brand-100 sticky top-27.5 hidden h-fit w-65 rounded-xl border bg-white p-6 lg:block">
       {/* User */}
       <div className="border-brand-50 mb-5 flex items-center gap-3 border-b pb-5">
-        <div className="bg-brand-50 h-11 w-11 rounded-full" />
-        <div>
-          <p className="text-primary text-sm font-semibold">{info.name}</p>
-          <p className="text-xs text-slate-500">{info.type} Dashboard</p>
-          <div className="flex items-center gap-1 text-xs text-yellow-500">
+        <Avatar className="border-brand-100 size-10 border shadow-sm">
+          <AvatarImage src={user?.profileImage} />
+
+          <AvatarFallback className="bg-slate-100 text-xs font-semibold">
+            {getInitials(user?.name)}
+          </AvatarFallback>
+        </Avatar>
+        <div className="min-w-0">
+          <p className="text-primary truncate text-sm font-semibold">{user?.name}</p>
+          <p className="text-xs text-slate-500 capitalize">{user?.type?.toLowerCase()} Dashboard</p>
+          {/* <div className="flex items-center gap-1 text-xs text-yellow-500">
             <Star className="h-3 w-3 fill-yellow-500" />
             <span>{info.rating}</span>
-          </div>
+          </div> */}
         </div>
       </div>
 
