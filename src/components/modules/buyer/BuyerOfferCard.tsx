@@ -39,7 +39,7 @@ export default function BuyerOfferCard({ offer }: { offer: Offer }) {
 
   const product = offer.product;
   const productImage = product?.photos?.[0] || '/images/banner.png';
-  const seller = offer.productUser;
+  const seller = offer.user;
 
   // If product is sold, show "Ordered" regardless of offer status
   const isSold = product?.isSold === true;

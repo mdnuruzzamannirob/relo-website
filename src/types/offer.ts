@@ -32,7 +32,7 @@ export interface Offer {
     };
   };
   offerer?: OfferUser;
-  productUser?: OfferUser;
+  user?: OfferUser;
 }
 
 export interface OfferListMeta {

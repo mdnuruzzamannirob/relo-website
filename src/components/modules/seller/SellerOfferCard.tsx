@@ -7,7 +7,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { CheckCircle2, XCircle, MessageSquare, AlertTriangle } from 'lucide-react';
 import { useUpdateOfferStatusMutation } from '@/store/apis/offerApi';
 import type { Offer } from '@/types/offer';
-import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 
 export type OfferAction = 'accept' | 'counter' | 'decline';
@@ -30,6 +29,7 @@ export default function SellerOfferCard({ offer }: { offer: Offer }) {
   const [updateOfferStatus, { isLoading }] = useUpdateOfferStatusMutation();
 
   const product = offer.product;
+  const buyer = offer.user;
   const productImage = product?.photos?.[0] || '/images/banner.png';
   const offerer = offer.offerer;
 
@@ -86,20 +86,20 @@ export default function SellerOfferCard({ offer }: { offer: Offer }) {
               </div>
 
               <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500">
-                {offerer?.profileImage ? (
+                {buyer?.profileImage ? (
                   <Image
-                    src={offerer.profileImage}
-                    alt={offerer.name}
+                    src={buyer?.profileImage}
+                    alt={buyer?.name}
                     width={28}
                     height={28}
                     className="size-7 rounded-full object-cover"
                   />
                 ) : (
                   <div className="bg-brand-50 flex size-7 min-w-7 items-center justify-center rounded-full text-xs font-semibold">
-                    {offerer?.name?.charAt(0) || 'B'}
+                    {buyer?.name?.charAt(0) || 'B'}
                   </div>
                 )}
-                <span className="text-primary text-sm font-medium">{offerer?.name || 'Buyer'}</span>
+                <span className="text-primary text-sm font-medium">{buyer?.name || 'Buyer'}</span>
                 <span className="hidden text-slate-300 sm:inline">•</span>
                 <span className="text-xs text-slate-400">
                   {new Date(offer.createdAt).toLocaleDateString()}
