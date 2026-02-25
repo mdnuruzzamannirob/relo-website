@@ -297,6 +297,7 @@ export const authApi = createApi({
           toast.error(errorMessage);
         }
       },
+      invalidatesTags: ['User'],
     }),
 
     // Logout
