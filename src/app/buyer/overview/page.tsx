@@ -1,14 +1,12 @@
+'use client';
+
 import Notification from '@/components/modules/buyer/Notification';
 import OrderItem, { type OrderItemData } from '@/components/modules/buyer/OrderItem';
 import HeaderBar from '@/components/shared/HeaderBar';
 import StatCard from '@/components/shared/StatCard';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
 import { ArrowRight, Bell, CheckCircle, Clock, Package } from 'lucide-react';
-
-export const metadata = {
-  title: 'Overview - Buyer Dashboard',
-  description: 'Buyer Overview page',
-};
 
 // This data can come from API/Backend
 const notifications = [
@@ -82,12 +80,14 @@ const orders: OrderItemData[] = [
 ];
 
 const OverviewPage = () => {
+  const { user } = useAuth();
+
   return (
     <section className="space-y-6">
       {/* Header */}
       <HeaderBar
-        title="Welcome back, John Doe!"
-        description=" Here's what's happening with your purchases"
+        title={`Welcome back, ${user?.name}!`}
+        description="Track your orders and manage your purchases"
       />
 
       {/* Stats Cards */}

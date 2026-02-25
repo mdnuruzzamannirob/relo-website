@@ -1,21 +1,22 @@
+'use client';
+
 import StatCard from '@/components/shared/StatCard';
 import ActivityItem from '@/components/modules/seller/ActivityItem';
 import { Button } from '@/components/ui/button';
 import { DollarSign, Package, Clock, Boxes, Activity } from 'lucide-react';
-
-export const metadata = {
-  description: 'Overview page',
-  title: 'Seller Overview - Seller Dashboard',
-};
+import { useAuth } from '@/hooks/useAuth';
+import HeaderBar from '@/components/shared/HeaderBar';
 
 const OverviewPage = () => {
+  const { user } = useAuth();
+
   return (
     <section className="bg-brand-50 space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-primary text-2xl font-semibold">Seller Dashboard</h1>
-        <p className="text-sm text-slate-500">Track your sales and manage your listings</p>
-      </div>
+      <HeaderBar
+        title={`Welcome back, ${user?.name}!`}
+        description="Track your sales and manage your listings"
+      />
 
       {/* Stats */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
