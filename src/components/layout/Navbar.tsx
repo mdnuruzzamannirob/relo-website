@@ -18,8 +18,8 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { nav } from '@/lib/constants/nav-links';
 import { useLogoutMutation } from '@/store/apis/authApi';
-import { useAppSelector } from '@/store/hook';
 import { getInitials } from '@/lib/utils/getInitials';
+import { useAuth } from '@/hooks/useAuth';
 
 /* Avatar Skeleton */
 function AvatarSkeleton() {
@@ -34,14 +34,14 @@ function AvatarSkeleton() {
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const activeCategory = searchParams.get('category');
-  const router = useRouter();
 
   const [isOpen, setIsOpen] = useState(false);
   const [hasHydrated, setHasHydrated] = useState(false);
 
-  const { user, isAuthenticated, isLoading } = useAppSelector((state) => state.user);
+  const { user, isAuthenticated, isLoading } = useAuth();
   const [logout, { isLoading: isLogoutLoading, isSuccess }] = useLogoutMutation();
 
   const showAuthSkeleton = !hasHydrated || isLoading;

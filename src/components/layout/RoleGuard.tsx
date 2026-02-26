@@ -6,6 +6,7 @@ import { useAppDispatch } from '@/store/hook';
 import { useSwitchUserMutation, authApi } from '@/store/apis/authApi';
 import { productApi } from '@/store/apis/productApi';
 import { offerApi } from '@/store/apis/offerApi';
+import { orderApi } from '@/store/apis/orderApi';
 import { setUser } from '@/store/slices/userSlice';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/hooks/useAuth';
@@ -64,6 +65,7 @@ export default function RoleGuard({ requiredRole, redirectTo = '/', children }: 
       // 4. Invalidate role-specific cached data so dashboards refetch
       dispatch(productApi.util.invalidateTags(['Product', 'ProductList', 'FavoriteProducts']));
       dispatch(offerApi.util.invalidateTags(['OfferList']));
+      dispatch(orderApi.util.invalidateTags(['BuyerOrders', 'SellerOrders']));
 
       // 5. Check if the switch actually gave us the right role
       if (getMeResult?.data?.type !== requiredRole) {

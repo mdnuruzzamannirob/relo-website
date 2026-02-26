@@ -14,12 +14,14 @@ import {
   useToggleFavoriteMutation,
 } from '@/store/apis/productApi';
 import { useCreateOfferMutation } from '@/store/apis/offerApi';
+import { useBuyNowMutation } from '@/store/apis/orderApi';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function ProductDetails() {
   const [showOffer, setShowOffer] = useState(false);
   const [offerAmount, setOfferAmount] = useState('');
   const [createOffer, { isLoading: isCreatingOffer }] = useCreateOfferMutation();
+  const [buyNow, { isLoading: isBuyingNow }] = useBuyNowMutation();
 
   const router = useRouter();
   const params = useParams();
@@ -138,10 +140,24 @@ export default function ProductDetails() {
             {/* Actions */}
             <div className="mb-6 space-y-4">
               <Button
-                onClick={() => router.push(`/checkout?productId=${product.id}`)}
+                onClick={async () => {
+                  if (!isAuthenticated) {
+                    router.push('/sign-in');
+                    return;
+                  }
+                  try {
+                    const res = await buyNow({ productId: product.id }).unwrap();
+                    if (res?.data?.paymentUrl) {
+                      window.location.href = res.data.paymentUrl;
+                    }
+                  } catch {
+                    // error handled via toast in orderApi
+                  }
+                }}
                 className="h-11 w-full"
+                disabled={isBuyingNow}
               >
-                Buy Now
+                {isBuyingNow ? 'Processing...' : 'Buy Now'}
               </Button>
 
               {!showOffer ? (

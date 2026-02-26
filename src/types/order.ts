@@ -1,0 +1,103 @@
+// ── Order Status Enum ──
+export type OrderStatus = 'PENDING' | 'ACCEPT' | 'DECLINE' | 'CONFIRM' | 'PICKUP' | 'COMPLETE';
+
+// ── Nested types from API response ──
+export interface OrderProduct {
+  id: string;
+  brandName: string;
+  photos: string[];
+  price: number;
+  title: string;
+  category: {
+    id: string;
+    title: string;
+    slug: string;
+  };
+  location: {
+    id: string;
+    title: string;
+    slug: string;
+  };
+}
+
+export interface OrderUser {
+  id: string;
+  name: string;
+  profileImage: string;
+  lastActive: string | null;
+  isOnline: boolean;
+}
+
+// ── Single Order (from GET list responses) ──
+export interface Order {
+  id: string;
+  orderId: string;
+  amount: number;
+  depositCode?: string;
+  lockerNumber?: string;
+  status: OrderStatus;
+  isPayment: boolean;
+  products: OrderProduct;
+  seller?: OrderUser;
+  buyer?: OrderUser;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// ── API Response types ──
+export interface OrderListResponse {
+  success: boolean;
+  message: string;
+  data: {
+    meta: {
+      page: number;
+      limit: number;
+      totalPage: number;
+    };
+    data: Order[];
+  };
+}
+
+export interface OrderListParams {
+  page?: number;
+  limit?: number;
+  status?: string;
+}
+
+// Buy Now
+export interface BuyNowRequest {
+  productId: string;
+}
+
+export interface BuyNowResponse {
+  success: boolean;
+  message: string;
+  data: {
+    paymentUrl: string;
+  };
+}
+
+// Order Deposit (seller confirms deposit)
+export interface OrderDepositRequest {
+  orderId: string;
+  lockerNumber: string;
+  depositCode: string;
+}
+
+export interface OrderDepositResponse {
+  success: boolean;
+  message: string;
+  data?: unknown;
+}
+
+// Order Received (buyer confirms receipt or declines)
+export interface OrderReceivedRequest {
+  orderId: string;
+  status: 'ACCEPT' | 'DECLINE';
+}
+
+export interface OrderReceivedResponse {
+  success: boolean;
+  message: string;
+  data?: unknown;
+}
