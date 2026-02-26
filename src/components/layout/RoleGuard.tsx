@@ -65,7 +65,7 @@ export default function RoleGuard({ requiredRole, redirectTo = '/', children }: 
       // 4. Invalidate role-specific cached data so dashboards refetch
       dispatch(productApi.util.invalidateTags(['Product', 'ProductList', 'FavoriteProducts']));
       dispatch(offerApi.util.invalidateTags(['OfferList']));
-      dispatch(orderApi.util.invalidateTags(['BuyerOrders', 'SellerOrders']));
+      dispatch(orderApi.util.invalidateTags(['BuyerOrders', 'SellerOrders', 'Reviews']));
 
       // 5. Check if the switch actually gave us the right role
       if (getMeResult?.data?.type !== requiredRole) {

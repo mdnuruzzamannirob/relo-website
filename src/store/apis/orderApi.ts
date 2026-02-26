@@ -10,12 +10,16 @@ import type {
   OrderDepositResponse,
   OrderReceivedRequest,
   OrderReceivedResponse,
+  WriteReviewRequest,
+  WriteReviewResponse,
+  ReviewListResponse,
+  ReviewListParams,
 } from '@/types/order';
 
 export const orderApi = createApi({
   reducerPath: 'orderApi',
   baseQuery,
-  tagTypes: ['BuyerOrders', 'SellerOrders'],
+  tagTypes: ['BuyerOrders', 'SellerOrders', 'Reviews'],
   endpoints: (builder) => ({
     // ── Buy Now (buyer) ──
     buyNow: builder.mutation<BuyNowResponse, BuyNowRequest>({
@@ -116,6 +120,36 @@ export const orderApi = createApi({
       },
       invalidatesTags: ['BuyerOrders', 'SellerOrders'],
     }),
+
+    // ── Write Review (buyer reviews completed order) ──
+    writeReview: builder.mutation<WriteReviewResponse, WriteReviewRequest>({
+      query: (body) => ({
+        url: '/orders/order-review',
+        method: 'POST',
+        body,
+      }),
+      async onQueryStarted(_args, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          toast.success(data?.message || 'Review submitted successfully!');
+        } catch (error: any) {
+          const msg = error?.error?.data?.message || 'Failed to submit review';
+          toast.error(msg);
+        }
+      },
+      invalidatesTags: ['BuyerOrders', 'Reviews'],
+    }),
+
+    // ── Get Reviews (buyer gets their reviews, seller gets reviews from buyers) ──
+    getReviews: builder.query<ReviewListResponse, ReviewListParams | void>({
+      query: (params) => {
+        const qp = new URLSearchParams();
+        if (params?.page) qp.set('page', String(params.page));
+        if (params?.limit) qp.set('limit', String(params.limit));
+        return { url: `/orders/order-review?${qp.toString()}`, method: 'GET' };
+      },
+      providesTags: ['Reviews'],
+    }),
   }),
 });
 
@@ -126,4 +160,6 @@ export const {
   useOrderDepositMutation,
   useOrderReceivedMutation,
   useCancelOrderMutation,
+  useWriteReviewMutation,
+  useGetReviewsQuery,
 } = orderApi;

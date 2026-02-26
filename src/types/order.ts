@@ -37,6 +37,7 @@ export interface Order {
   lockerNumber?: string;
   status: OrderStatus;
   isPayment: boolean;
+  isReviewed?: boolean;
   products: OrderProduct;
   seller?: OrderUser;
   buyer?: OrderUser;
@@ -121,4 +122,65 @@ export interface OrderReceivedResponse {
   success: boolean;
   message: string;
   data?: unknown;
+}
+
+// ── Review System ──
+export interface WriteReviewRequest {
+  orderId: string;
+  rating: number;
+  review: string;
+}
+
+export interface WriteReviewResponse {
+  success: boolean;
+  message: string;
+  data?: unknown;
+}
+
+export interface Review {
+  id: string;
+  rating: number;
+  review: string;
+  product: {
+    id: string;
+    brandName: string;
+    photos: string[];
+    title: string;
+    category: {
+      id: string;
+      title: string;
+      slug: string;
+    };
+    location: {
+      id: string;
+      title: string;
+      slug: string;
+    };
+  };
+  buyer: {
+    id: string;
+    name: string;
+    profileImage: string;
+    externalId: string;
+  };
+  createdAt?: string;
+}
+
+export interface ReviewListParams {
+  page?: number;
+  limit?: number;
+}
+
+export interface ReviewListResponse {
+  success: boolean;
+  message: string;
+  data: {
+    meta: {
+      total: number;
+      page: number;
+      limit: number;
+      totalPage: number;
+    };
+    data: Review[];
+  };
 }

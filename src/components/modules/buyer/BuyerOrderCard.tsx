@@ -10,6 +10,7 @@ import StatusBadge from '@/components/shared/StatusBadge';
 import type { ColorType } from '@/components/shared/StatusBadge';
 import { useOrderReceivedMutation, useCancelOrderMutation } from '@/store/apis/orderApi';
 import type { Order } from '@/types/order';
+import ReviewModal from './ReviewModal';
 
 // ── Status badge config ──
 const statusConfig: Record<string, { label: string; color: ColorType }> = {
@@ -22,15 +23,20 @@ const statusConfig: Record<string, { label: string; color: ColorType }> = {
 };
 
 // ── Determine which actions to show ──
-type BuyerAction = 'cancel' | 'confirm' | 'contact';
+type BuyerAction = 'cancel' | 'confirm' | 'contact' | 'review';
 // QR code action commented out for now
 // type BuyerAction = 'cancel' | 'confirm' | 'contact' | 'qr';
 
 function getBuyerActions(order: Order): BuyerAction[] {
   const s = order.status;
 
-  // Completed or Declined → only contact
-  if (s === 'COMPLETE' || s === 'DECLINE') return ['contact'];
+  // Completed → contact + review (if not reviewed)
+  if (s === 'COMPLETE') {
+    return order.isReviewed === false ? ['review', 'contact'] : ['contact'];
+  }
+
+  // Declined → only contact
+  if (s === 'DECLINE') return ['contact'];
 
   // Pickup → confirm receipt + contact
   // QR code commented out: return ['qr', 'confirm', 'contact'];
@@ -44,11 +50,13 @@ const actionLabel: Record<BuyerAction, string> = {
   cancel: 'Cancel Order',
   confirm: 'Confirm Receipt',
   contact: 'Contact Seller',
+  review: 'Write Review',
   // qr: 'View QR Code',
 };
 
 export default function BuyerOrderCard({ order }: { order: Order }) {
   const [openModal, setOpenModal] = useState<'cancel' | 'confirm' | null>(null);
+  const [openReviewModal, setOpenReviewModal] = useState(false);
   const router = useRouter();
 
   const [orderReceived, { isLoading: isConfirming }] = useOrderReceivedMutation();
@@ -142,11 +150,15 @@ export default function BuyerOrderCard({ order }: { order: Order }) {
                     ? 'w-full bg-green-600 text-white hover:bg-green-700'
                     : action === 'cancel'
                       ? 'w-full border-red-600 text-red-600 hover:bg-red-50'
-                      : 'w-full'
+                      : action === 'review'
+                        ? 'w-full border-blue-600 text-blue-600 hover:bg-blue-50'
+                        : 'w-full'
                 }
                 onClick={() => {
                   if (action === 'contact') {
                     router.push('/buyer/messages');
+                  } else if (action === 'review') {
+                    setOpenReviewModal(true);
                   } else {
                     setOpenModal(action);
                   }
@@ -240,6 +252,9 @@ export default function BuyerOrderCard({ order }: { order: Order }) {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* ── REVIEW MODAL ── */}
+      <ReviewModal orderId={order.id} open={openReviewModal} onOpenChange={setOpenReviewModal} />
     </>
   );
 }

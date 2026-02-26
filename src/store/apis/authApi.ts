@@ -3,6 +3,7 @@ import { User, OTPResponse, ResetPasswordRequest } from '@/types/auth';
 import { toast } from 'sonner';
 import { clearUser, setUser } from '../slices/userSlice';
 import { baseQuery } from '../baseQuery';
+import { orderApi } from './orderApi';
 
 export const authApi = createApi({
   reducerPath: 'authApi',
@@ -319,6 +320,9 @@ export const authApi = createApi({
           // Clear user cache
           dispatch(authApi.util.resetApiState());
 
+          // Invalidate order-related tags
+          dispatch(orderApi.util.invalidateTags(['BuyerOrders', 'SellerOrders', 'Reviews']));
+
           toast.success('Logged out successfully');
         } catch (error: any) {
           // Even if logout fails on backend, clear local state
@@ -327,6 +331,7 @@ export const authApi = createApi({
           localStorage.removeItem('userData');
           sessionStorage.clear();
           dispatch(authApi.util.resetApiState());
+          dispatch(orderApi.util.invalidateTags(['BuyerOrders', 'SellerOrders', 'Reviews']));
 
           const errorMessage = error?.error?.data?.message || 'Logged out successfully';
           toast.success(errorMessage);
