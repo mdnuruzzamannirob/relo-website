@@ -173,7 +173,7 @@ export default function Navbar() {
               </Button>
 
               {/* Profile */}
-              <Popover open={isOpen} onOpenChange={setIsOpen}>
+              <Popover open={isOpen} onOpenChange={(value) => setIsOpen(value)}>
                 <PopoverTrigger asChild>
                   <button className="rounded-full">
                     <Avatar className="border-brand-100 h-10 w-10 border shadow-sm">
