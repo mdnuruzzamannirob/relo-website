@@ -9,8 +9,20 @@ export type Product = {
   description?: string;
   photos?: string[];
   lockerSize?: string;
-  categoryId?: string;
-  locationId?: string;
+  category?: {
+    id: string;
+    title: string;
+    slug: string;
+  };
+  location?: {
+    id: string;
+    title: string;
+  };
+  User: {
+    id: string;
+    name: string;
+    profileImage: string;
+  };
   isPublic?: boolean;
   isSold?: boolean;
   isFavorite?: boolean;

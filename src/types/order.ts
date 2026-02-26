@@ -64,17 +64,38 @@ export interface OrderListParams {
   status?: string;
 }
 
-// Buy Now
+// Buy Now Checkout
 export interface BuyNowRequest {
   productId: string;
+}
+
+export interface BuyNowCheckoutResponse {
+  serviceFee: number;
+  totalAmount: number;
+  product: {
+    id: string;
+    brandName: string;
+    photos: string[];
+    price: number;
+    title: string;
+    category: {
+      id: string;
+      title: string;
+      slug: string;
+    };
+    location: {
+      id: string;
+      title: string;
+      slug: string;
+    };
+  };
+  paymentUrl: string;
 }
 
 export interface BuyNowResponse {
   success: boolean;
   message: string;
-  data: {
-    paymentUrl: string;
-  };
+  data: BuyNowCheckoutResponse;
 }
 
 // Order Deposit (seller confirms deposit)

@@ -14,14 +14,12 @@ import {
   useToggleFavoriteMutation,
 } from '@/store/apis/productApi';
 import { useCreateOfferMutation } from '@/store/apis/offerApi';
-import { useBuyNowMutation } from '@/store/apis/orderApi';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function ProductDetails() {
   const [showOffer, setShowOffer] = useState(false);
   const [offerAmount, setOfferAmount] = useState('');
   const [createOffer, { isLoading: isCreatingOffer }] = useCreateOfferMutation();
-  const [buyNow, { isLoading: isBuyingNow }] = useBuyNowMutation();
 
   const router = useRouter();
   const params = useParams();
@@ -48,7 +46,9 @@ export default function ProductDetails() {
     product?.size ? { label: 'Size', value: product.size } : null,
     product?.condition ? { label: 'Condition', value: product.condition } : null,
     product?.brandName ? { label: 'Brand', value: product.brandName } : null,
-    product?.locationId ? { label: 'Location', value: product.locationId } : null,
+    product?.category?.title ? { label: 'Category', value: product.category.title } : null,
+    product?.location?.title ? { label: 'Location', value: product.location.title } : null,
+    product?.lockerSize ? { label: 'Locker Size', value: product.lockerSize } : null,
   ].filter(Boolean) as { label: string; value: string }[];
 
   return (
@@ -140,24 +140,16 @@ export default function ProductDetails() {
             {/* Actions */}
             <div className="mb-6 space-y-4">
               <Button
-                onClick={async () => {
+                onClick={() => {
                   if (!isAuthenticated) {
                     router.push('/sign-in');
                     return;
                   }
-                  try {
-                    const res = await buyNow({ productId: product.id }).unwrap();
-                    if (res?.data?.paymentUrl) {
-                      window.location.href = res.data.paymentUrl;
-                    }
-                  } catch {
-                    // error handled via toast in orderApi
-                  }
+                  router.push(`/checkout?productId=${product.id}`);
                 }}
                 className="h-11 w-full"
-                disabled={isBuyingNow}
               >
-                {isBuyingNow ? 'Processing...' : 'Buy Now'}
+                Buy Now
               </Button>
 
               {!showOffer ? (
@@ -221,15 +213,18 @@ export default function ProductDetails() {
               <h2 className="text-primary mb-3 font-semibold">Seller information</h2>
               <div className="mb-4 flex items-center gap-3">
                 <Image
-                  src="https://randomuser.me/api/portraits/lego/2.jpg"
-                  alt="Seller"
+                  src={
+                    product?.User?.profileImage || 'https://randomuser.me/api/portraits/lego/2.jpg'
+                  }
+                  alt={product?.User?.name || 'Seller'}
                   width={40}
                   height={40}
-                  className="rounded-full"
+                  className="size-8 shrink-0 rounded-full bg-slate-200 object-cover"
                 />
                 <div>
-                  <p className="text-primary text-sm font-medium">Seller</p>
-                  <p className="text-xs text-slate-500">Seller details coming soon</p>
+                  <p className="text-primary text-sm font-medium">
+                    {product?.User?.name || 'Seller'}
+                  </p>
                 </div>
               </div>
 

@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import CheckoutFrom from '@/components/modules/marketing/CheckoutFrom';
+import CheckoutOrder from '@/components/modules/marketing/CheckoutOrder';
 
 export const metadata = {
   title: 'Checkout',
@@ -9,7 +9,7 @@ export const metadata = {
 const CheckoutPage = () => {
   return (
     <Suspense>
-      <CheckoutFrom />
+      <CheckoutOrder />
     </Suspense>
   );
 };
