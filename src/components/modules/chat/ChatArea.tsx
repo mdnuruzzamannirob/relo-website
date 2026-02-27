@@ -7,6 +7,9 @@ import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 import type { ChatMessage as ChatMessageType, ChatUser } from '@/types/chat';
 
+// Pre-computed at module load time — outside React render, so no purity violation
+const SKELETON_WIDTHS = Array.from({ length: 6 }, () => 100 + Math.random() * 120);
+
 interface ChatAreaProps {
   activeUser: ChatUser | null;
   messages: ChatMessageType[];
@@ -32,31 +35,58 @@ export default function ChatArea({
   onLoadMore,
   onBack,
 }: ChatAreaProps) {
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const prevMessagesLengthRef = useRef(0);
+  const scrollHeightBeforeLoadRef = useRef(0);
+  const wasLoadingRef = useRef(false);
 
-  // Auto-scroll to bottom on new messages
+  // Preserve scroll position when loading older messages (infinite scroll)
   useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    // When starting to load older messages, save current scroll height
+    if (isLoadingMessages && !wasLoadingRef.current) {
+      scrollHeightBeforeLoadRef.current = container.scrollHeight;
+      wasLoadingRef.current = true;
+    }
+
+    // After loading finishes, restore scroll position
+    if (!isLoadingMessages && wasLoadingRef.current && scrollHeightBeforeLoadRef.current > 0) {
+      const newHeight = container.scrollHeight;
+      const heightDifference = newHeight - scrollHeightBeforeLoadRef.current;
+
+      // If new messages were added, scroll down by that amount to maintain view position
+      if (heightDifference > 0) {
+        container.scrollTop += heightDifference;
+      }
+
+      scrollHeightBeforeLoadRef.current = 0;
+      wasLoadingRef.current = false;
+    }
+  }, [isLoadingMessages]);
+
+  // Auto-scroll to bottom — scrolls only the messages container, NOT the page
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container || isLoadingMessages) return; // Don't auto-scroll while loading
+
     if (messages.length > prevMessagesLengthRef.current) {
-      // Only auto-scroll if at the bottom or new messages added at bottom
-      const container = messagesContainerRef.current;
-      if (container) {
-        const isNearBottom =
-          container.scrollHeight - container.scrollTop - container.clientHeight < 100;
-        if (isNearBottom || prevMessagesLengthRef.current === 0) {
-          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-        }
+      const isNearBottom =
+        container.scrollHeight - container.scrollTop - container.clientHeight < 150;
+      if (isNearBottom || prevMessagesLengthRef.current === 0) {
+        // Directly set scrollTop — never touches page-level scroll
+        container.scrollTop = container.scrollHeight;
       }
     }
     prevMessagesLengthRef.current = messages.length;
-  }, [messages.length]);
+  }, [messages.length, isLoadingMessages]);
 
   // Scroll handler for infinite scroll (load older messages)
   const handleScroll = useCallback(() => {
     const container = messagesContainerRef.current;
     if (!container) return;
-    if (container.scrollTop < 50 && hasMoreMessages && !isLoadingMessages) {
+    if (container.scrollTop < 100 && hasMoreMessages && !isLoadingMessages) {
       onLoadMore();
     }
   }, [hasMoreMessages, isLoadingMessages, onLoadMore]);
@@ -192,7 +222,7 @@ export default function ChatArea({
                 <div className={`space-y-1 ${i % 2 === 0 ? '' : 'flex flex-col items-end'}`}>
                   <div
                     className="h-9 animate-pulse rounded-2xl bg-slate-200"
-                    style={{ width: `${100 + Math.random() * 120}px` }}
+                    style={{ width: `${SKELETON_WIDTHS[i]}px` }}
                   />
                   <div className="h-3 w-10 animate-pulse rounded bg-slate-100" />
                 </div>
@@ -241,8 +271,6 @@ export default function ChatArea({
             </div>
           ))
         )}
-
-        <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}

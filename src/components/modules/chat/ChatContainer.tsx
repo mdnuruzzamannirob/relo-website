@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { MessageSquare, WifiOff, RefreshCw } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 import { useChat } from '@/hooks/useChat';
 import ChatSidebar from './ChatSidebar';
 import ChatArea from './ChatArea';
@@ -12,6 +13,9 @@ interface ChatContainerProps {
 }
 
 export default function ChatContainer({ variant }: ChatContainerProps) {
+  const searchParams = useSearchParams();
+  const initialUserId = searchParams.get('userId');
+
   const {
     chatUsers,
     activeRoomId,
@@ -34,6 +38,7 @@ export default function ChatContainer({ variant }: ChatContainerProps) {
 
   const [showChat, setShowChat] = useState(false);
   const [selectedUser, setSelectedUser] = useState<ChatUser | null>(null);
+  const autoOpenedRef = useRef(false);
 
   // Initialize chat on mount
   useEffect(() => {
@@ -49,6 +54,16 @@ export default function ChatContainer({ variant }: ChatContainerProps) {
     },
     [joinRoom],
   );
+
+  // Auto-open conversation when ?userId= is present and chatUsers are loaded
+  useEffect(() => {
+    if (!initialUserId || isLoadingUsers || !chatUsers.length || autoOpenedRef.current) return;
+    const match = chatUsers.find((u) => u.user.id === initialUserId);
+    if (match) {
+      autoOpenedRef.current = true;
+      handleSelectUser(match);
+    }
+  }, [initialUserId, chatUsers, isLoadingUsers, handleSelectUser]);
 
   // Handle back navigation (mobile)
   const handleBack = useCallback(() => {

@@ -156,7 +156,10 @@ export default function SellerOfferCard({ offer }: { offer: Offer }) {
                 Counter Offer
               </Button>
 
-              <Link href="/seller/messages" className="flex-1">
+              <Link
+                href={`/seller/messages${offer.offererId ? `?userId=${offer.offererId}` : ''}`}
+                className="flex-1"
+              >
                 <Button
                   variant="outline"
                   className="w-full border-slate-200 text-slate-600 transition-all hover:border-slate-300 hover:bg-slate-50"
@@ -182,7 +185,7 @@ export default function SellerOfferCard({ offer }: { offer: Offer }) {
             !isSold &&
             offer.status !== 'DECLINE' &&
             offer.status !== 'COUNTER_DECLINE' && (
-              <Link href="/seller/messages">
+              <Link href={`/seller/messages${offer.offererId ? `?userId=${offer.offererId}` : ''}`}>
                 <Button
                   variant="outline"
                   className="w-full border-slate-200 text-slate-600 transition-all hover:border-slate-300 hover:bg-slate-50"

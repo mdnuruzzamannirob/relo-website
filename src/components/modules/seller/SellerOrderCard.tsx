@@ -185,7 +185,9 @@ export default function SellerOrderCard({ order }: { order: Order }) {
                 }
                 onClick={() => {
                   if (action === 'contact') {
-                    router.push('/seller/messages');
+                    router.push(
+                      `/seller/messages${order.buyer?.id ? `?userId=${order.buyer.id}` : ''}`,
+                    );
                   } else {
                     setOpenModal(action);
                   }

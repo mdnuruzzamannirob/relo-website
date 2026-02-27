@@ -74,14 +74,21 @@ const chatSlice = createSlice({
       }>,
     ) => {
       const { messages, page, hasMore } = action.payload;
+
       if (page === 1) {
-        state.messages = messages;
+        // Spread into new array so Immer tracks correctly, then sort oldest→newest
+        state.messages = [...messages].sort(
+          (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+        );
       } else {
-        // Prepend older messages (avoiding duplicates)
+        // Merge without duplicates
         const existingIds = new Set(state.messages.map((m) => m.id));
         const newMessages = messages.filter((m) => !existingIds.has(m.id));
-        state.messages = [...newMessages, ...state.messages];
+        state.messages = [...newMessages, ...state.messages].sort(
+          (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+        );
       }
+
       state.currentPage = page;
       state.hasMoreMessages = hasMore;
       state.isLoadingMessages = false;
@@ -92,7 +99,10 @@ const chatSlice = createSlice({
       // Avoid duplicate messages
       const exists = state.messages.some((m) => m.id === msg.id);
       if (!exists) {
-        state.messages.push(msg);
+        // Spread into new sorted array so Immer tracks correctly
+        state.messages = [...state.messages, msg].sort(
+          (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+        );
       }
 
       // Update last message in chat users list

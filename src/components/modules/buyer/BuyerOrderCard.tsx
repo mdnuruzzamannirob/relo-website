@@ -156,7 +156,9 @@ export default function BuyerOrderCard({ order }: { order: Order }) {
                 }
                 onClick={() => {
                   if (action === 'contact') {
-                    router.push('/buyer/messages');
+                    router.push(
+                      `/buyer/messages${order.seller?.id ? `?userId=${order.seller.id}` : ''}`,
+                    );
                   } else if (action === 'review') {
                     setOpenReviewModal(true);
                   } else {

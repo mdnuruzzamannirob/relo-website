@@ -250,11 +250,23 @@ export function useChat() {
     if (user && !isConnected && !listenersSetupRef.current) {
       initializeChat();
     }
-
-    return () => {
-      // Don't disconnect on unmount to keep connection alive across pages
-    };
   }, [user, isConnected, initializeChat]);
+
+  // ── Re-authenticate when user type (role) changes ───────────────────────
+
+  const userTypeRef = useRef(user?.type);
+  useEffect(() => {
+    if (!user) return;
+
+    // If user type changed (role switch happened), reconnect socket with new token
+    if (userTypeRef.current && userTypeRef.current !== user.type) {
+      socketService.disconnect();
+      listenersSetupRef.current = false;
+      authenticatedRef.current = false;
+      // Will auto-reconnect via the effect above since isConnected becomes false
+    }
+    userTypeRef.current = user.type;
+  }, [user?.type, user]);
 
   // ── Helper: get current user ID ─────────────────────────────────────────
 

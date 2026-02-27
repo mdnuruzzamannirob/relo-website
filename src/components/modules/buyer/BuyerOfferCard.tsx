@@ -210,7 +210,10 @@ export default function BuyerOfferCard({ offer }: { offer: Offer }) {
               </Button>
 
               {/* Message Seller */}
-              <Link href="/buyer/messages" className="flex-1">
+              <Link
+                href={`/buyer/messages${offer.productUserId ? `?userId=${offer.productUserId}` : ''}`}
+                className="flex-1"
+              >
                 <Button
                   variant="outline"
                   className="w-full border-slate-200 text-slate-600 transition-all hover:border-slate-300 hover:bg-slate-50"
@@ -237,7 +240,9 @@ export default function BuyerOfferCard({ offer }: { offer: Offer }) {
             !isSold &&
             offer.status !== 'DECLINE' &&
             offer.status !== 'COUNTER_DECLINE' && (
-              <Link href="/buyer/messages">
+              <Link
+                href={`/buyer/messages${offer.productUserId ? `?userId=${offer.productUserId}` : ''}`}
+              >
                 <Button
                   variant="outline"
                   className="w-full border-slate-200 text-slate-600 transition-all hover:border-slate-300 hover:bg-slate-50"

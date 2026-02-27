@@ -228,7 +228,10 @@ export default function ProductDetails() {
                 </div>
               </div>
 
-              <Link href="/chat" passHref>
+              <Link
+                href={`/buyer/messages${product?.User?.id ? `?userId=${product.User.id}` : ''}`}
+                passHref
+              >
                 <Button className="w-full">
                   <MessageSquare className="mr-2 h-4 w-4" />
                   Message seller
