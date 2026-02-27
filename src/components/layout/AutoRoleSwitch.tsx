@@ -74,7 +74,7 @@ export default function AutoRoleSwitch() {
         dispatch(offerApi.util.invalidateTags(['OfferList']));
         dispatch(orderApi.util.invalidateTags(['BuyerOrders', 'SellerOrders', 'Reviews']));
       } catch (error) {
-        console.error('Auto role switch failed:', error);
+        // console.error('Auto role switch failed:', error);
       } finally {
         switchingRef.current = false;
       }

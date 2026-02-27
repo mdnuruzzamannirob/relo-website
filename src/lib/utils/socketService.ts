@@ -7,7 +7,6 @@ import type {
   AuthenticateResponse,
   JoinRoomResponse,
   ChatUser,
-  ChatMessage,
   GetMessagesResponse,
   UserStatusEvent,
   ReceiveMessageEvent,

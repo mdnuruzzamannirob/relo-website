@@ -203,7 +203,7 @@ const { isInitialized, isSyncing } = useAuth(); // ✅
 
 ```javascript
 // In console, check:
-console.log(localStorage.getItem('userData'));
+// console.log(localStorage.getItem('userData'));
 // Should output: {"id":"...","fullName":"...","email":"..."}
 
 // If null, data wasn't saved

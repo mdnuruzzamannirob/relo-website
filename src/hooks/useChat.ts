@@ -20,7 +20,6 @@ import {
   resetChat,
 } from '@/store/slices/chatSlice';
 import type {
-  ChatUser,
   SendMessagePayload,
   ReceiveMessageEvent,
   UserStatusEvent,
