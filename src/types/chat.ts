@@ -27,6 +27,17 @@ export interface AuthenticateResponse {
   message: string;
 }
 
+export interface JoinRoomResponse {
+  message: string;
+  chatRoom: {
+    id: string;
+    senderId: string;
+    receiverId: string;
+    updatedAt: string;
+    createdAt: string;
+  };
+}
+
 // ─── Chat User / Conversation ───────────────────────────────────────────────
 
 export interface ChatUserInfo {

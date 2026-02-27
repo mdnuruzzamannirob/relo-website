@@ -30,6 +30,7 @@ export default function ChatContainer({ variant }: ChatContainerProps) {
     error,
     initializeChat,
     joinRoom,
+    createAndJoinRoom,
     loadMoreMessages,
     sendMessage,
     leaveRoom,
@@ -57,19 +58,54 @@ export default function ChatContainer({ variant }: ChatContainerProps) {
 
   // Auto-open conversation when ?userId= is present and chatUsers are loaded
   useEffect(() => {
-    if (!initialUserId || isLoadingUsers || !chatUsers.length || autoOpenedRef.current) return;
+    if (!initialUserId || isLoadingUsers || autoOpenedRef.current) return;
+
+    // If chatUsers are loaded, try to find matching user
     const match = chatUsers.find((u) => u.user.id === initialUserId);
     if (match) {
       autoOpenedRef.current = true;
       handleSelectUser(match);
+      return;
     }
-  }, [initialUserId, chatUsers, isLoadingUsers, handleSelectUser]);
+
+    // If chatUsers finished loading but no match found, create a new room
+    if (!isLoadingUsers && isAuthenticated) {
+      autoOpenedRef.current = true;
+      setShowChat(true);
+
+      // Create a temporary selected user for the UI while room is being created
+      const tempUser: ChatUser = {
+        roomId: '',
+        user: { id: initialUserId, name: 'Loading...' },
+        unreadMessageCount: 0,
+      };
+      setSelectedUser(tempUser);
+
+      createAndJoinRoom(initialUserId).then((response) => {
+        if (response?.chatRoom?.id) {
+          // Update selectedUser with the new roomId
+          setSelectedUser((prev) => (prev ? { ...prev, roomId: response.chatRoom.id } : prev));
+        }
+      });
+    }
+  }, [initialUserId, chatUsers, isLoadingUsers, isAuthenticated, handleSelectUser, createAndJoinRoom]);
 
   // Handle back navigation (mobile)
   const handleBack = useCallback(() => {
     setShowChat(false);
     leaveRoom();
   }, [leaveRoom]);
+
+  // Update selectedUser when chatUsers list refreshes (e.g. after creating a new room)
+  useEffect(() => {
+    if (!selectedUser || !chatUsers.length) return;
+    const updatedUser = chatUsers.find(
+      (u) => u.user.id === selectedUser.user.id || u.roomId === selectedUser.roomId,
+    );
+    if (updatedUser && updatedUser.user.name !== selectedUser.user.name) {
+      setSelectedUser(updatedUser);
+    }
+  }, [chatUsers, selectedUser]);
 
   // Handle send message
   const handleSendMessage = useCallback(

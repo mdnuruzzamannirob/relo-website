@@ -1,6 +1,22 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { ChatState, ChatUser, ChatMessage, UserStatusEvent } from '@/types/chat';
 
+const getMessageTimestamp = (createdAt: string) => {
+  if (!createdAt) return 0;
+  const numeric = Number(createdAt);
+  if (!Number.isNaN(numeric)) {
+    return numeric < 1_000_000_000_000 ? numeric * 1000 : numeric;
+  }
+  const parsed = Date.parse(createdAt);
+  return Number.isNaN(parsed) ? 0 : parsed;
+};
+
+const compareMessages = (a: ChatMessage, b: ChatMessage) => {
+  const timeDiff = getMessageTimestamp(a.createdAt) - getMessageTimestamp(b.createdAt);
+  if (timeDiff !== 0) return timeDiff;
+  return a.id.localeCompare(b.id);
+};
+
 const initialState: ChatState = {
   chatUsers: [],
   activeRoomId: null,
@@ -77,16 +93,12 @@ const chatSlice = createSlice({
 
       if (page === 1) {
         // Spread into new array so Immer tracks correctly, then sort oldest→newest
-        state.messages = [...messages].sort(
-          (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-        );
+        state.messages = [...messages].sort(compareMessages);
       } else {
         // Merge without duplicates
         const existingIds = new Set(state.messages.map((m) => m.id));
         const newMessages = messages.filter((m) => !existingIds.has(m.id));
-        state.messages = [...newMessages, ...state.messages].sort(
-          (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-        );
+        state.messages = [...newMessages, ...state.messages].sort(compareMessages);
       }
 
       state.currentPage = page;
@@ -100,9 +112,7 @@ const chatSlice = createSlice({
       const exists = state.messages.some((m) => m.id === msg.id);
       if (!exists) {
         // Spread into new sorted array so Immer tracks correctly
-        state.messages = [...state.messages, msg].sort(
-          (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-        );
+        state.messages = [...state.messages, msg].sort(compareMessages);
       }
 
       // Update last message in chat users list

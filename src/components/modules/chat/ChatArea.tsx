@@ -36,9 +36,21 @@ export default function ChatArea({
   onBack,
 }: ChatAreaProps) {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const prevMessagesLengthRef = useRef(0);
   const scrollHeightBeforeLoadRef = useRef(0);
   const wasLoadingRef = useRef(false);
+  const isLoadingOlderRef = useRef(false);
+
+  // Helper: scroll the messages container to the very bottom
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = 'auto') => {
+    requestAnimationFrame(() => {
+      const container = messagesContainerRef.current;
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
+    });
+  }, []);
 
   // Preserve scroll position when loading older messages (infinite scroll)
   useEffect(() => {
@@ -49,38 +61,58 @@ export default function ChatArea({
     if (isLoadingMessages && !wasLoadingRef.current) {
       scrollHeightBeforeLoadRef.current = container.scrollHeight;
       wasLoadingRef.current = true;
+      isLoadingOlderRef.current = messages.length > 0;
     }
 
     // After loading finishes, restore scroll position
     if (!isLoadingMessages && wasLoadingRef.current && scrollHeightBeforeLoadRef.current > 0) {
-      const newHeight = container.scrollHeight;
-      const heightDifference = newHeight - scrollHeightBeforeLoadRef.current;
-
-      // If new messages were added, scroll down by that amount to maintain view position
-      if (heightDifference > 0) {
-        container.scrollTop += heightDifference;
+      if (isLoadingOlderRef.current) {
+        // Loading older messages: preserve scroll position
+        requestAnimationFrame(() => {
+          const newHeight = container.scrollHeight;
+          const heightDifference = newHeight - scrollHeightBeforeLoadRef.current;
+          if (heightDifference > 0) {
+            container.scrollTop += heightDifference;
+          }
+          scrollHeightBeforeLoadRef.current = 0;
+          wasLoadingRef.current = false;
+          isLoadingOlderRef.current = false;
+        });
+      } else {
+        // Initial load: scroll to bottom
+        scrollToBottom();
+        scrollHeightBeforeLoadRef.current = 0;
+        wasLoadingRef.current = false;
+        isLoadingOlderRef.current = false;
       }
-
-      scrollHeightBeforeLoadRef.current = 0;
-      wasLoadingRef.current = false;
     }
-  }, [isLoadingMessages]);
+  }, [isLoadingMessages, messages.length, scrollToBottom]);
 
-  // Auto-scroll to bottom — scrolls only the messages container, NOT the page
+  // Auto-scroll to bottom when new messages arrive (sent or received)
   useEffect(() => {
     const container = messagesContainerRef.current;
-    if (!container || isLoadingMessages) return; // Don't auto-scroll while loading
+    if (!container || isLoadingMessages) return;
 
     if (messages.length > prevMessagesLengthRef.current) {
-      const isNearBottom =
-        container.scrollHeight - container.scrollTop - container.clientHeight < 150;
-      if (isNearBottom || prevMessagesLengthRef.current === 0) {
-        // Directly set scrollTop — never touches page-level scroll
-        container.scrollTop = container.scrollHeight;
+      if (prevMessagesLengthRef.current === 0) {
+        // First batch of messages loaded → always scroll to bottom
+        scrollToBottom();
+      } else {
+        // New message arrived → check if near bottom or if it's own message
+        const isNearBottom =
+          container.scrollHeight - container.scrollTop - container.clientHeight < 200;
+        if (isNearBottom) {
+          scrollToBottom();
+        }
       }
     }
     prevMessagesLengthRef.current = messages.length;
-  }, [messages.length, isLoadingMessages]);
+  }, [messages.length, isLoadingMessages, scrollToBottom]);
+
+  // Reset prevMessagesLength when activeUser changes (room switch)
+  useEffect(() => {
+    prevMessagesLengthRef.current = 0;
+  }, [activeUser?.roomId]);
 
   // Scroll handler for infinite scroll (load older messages)
   const handleScroll = useCallback(() => {
@@ -90,6 +122,16 @@ export default function ChatArea({
       onLoadMore();
     }
   }, [hasMoreMessages, isLoadingMessages, onLoadMore]);
+
+  // Wrap onSendMessage to also scroll to bottom after sending
+  const handleSend = useCallback(
+    (text?: string, images?: string[]) => {
+      onSendMessage(text, images);
+      // Scroll to bottom immediately on send
+      scrollToBottom();
+    },
+    [onSendMessage, scrollToBottom],
+  );
 
   // Group messages by date
   const groupedMessages = useMemo(() => {
@@ -271,10 +313,11 @@ export default function ChatArea({
             </div>
           ))
         )}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
-      <ChatInput onSend={onSendMessage} isSending={isSending} />
+      <ChatInput onSend={handleSend} isSending={isSending} />
     </div>
   );
 }

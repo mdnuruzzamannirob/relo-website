@@ -5,6 +5,7 @@ import type {
   SendMessagePayload,
   GetMessagesPayload,
   AuthenticateResponse,
+  JoinRoomResponse,
   ChatUser,
   ChatMessage,
   GetMessagesResponse,
@@ -139,8 +140,12 @@ class SocketService {
     this.socket.emit(SOCKET_EVENTS.AUTHENTICATE, payload);
   }
 
-  joinRoom(payload: JoinRoomPayload): void {
-    this.socket?.emit(SOCKET_EVENTS.JOIN_ROOM, payload);
+  joinRoom(payload: JoinRoomPayload, callback?: (response: JoinRoomResponse) => void): void {
+    if (!this.socket) return;
+    if (callback) {
+      this.socket.once(SOCKET_EVENTS.JOIN_ROOM, callback);
+    }
+    this.socket.emit(SOCKET_EVENTS.JOIN_ROOM, payload);
   }
 
   sendMessage(payload: SendMessagePayload): void {

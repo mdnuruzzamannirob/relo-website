@@ -26,6 +26,7 @@ import type {
   UserStatusEvent,
   AuthenticateResponse,
   GetMessagesResponse,
+  JoinRoomResponse,
 } from '@/types/chat';
 
 const MESSAGES_PER_PAGE = 10;
@@ -169,6 +170,48 @@ export function useChat() {
     [dispatch],
   );
 
+  // ── Create and Join Room (when no existing room) ────────────────────────
+
+  const createAndJoinRoom = useCallback(
+    (receiverId: string): Promise<JoinRoomResponse | null> => {
+      return new Promise((resolve) => {
+        dispatch(setLoadingMessages(true));
+
+        socketService.joinRoom({ receiverId }, (response: JoinRoomResponse) => {
+          if (response?.chatRoom?.id) {
+            const roomId = response.chatRoom.id;
+
+            dispatch(setActiveRoom({ roomId, receiverId }));
+
+            // Fetch initial messages for the new room
+            socketService.getMessages(
+              { roomId, page: 1, limit: MESSAGES_PER_PAGE },
+              (msgResponse: GetMessagesResponse) => {
+                if (msgResponse?.messages) {
+                  const msgs = Array.isArray(msgResponse.messages) ? msgResponse.messages : [];
+                  const hasMore = msgResponse.meta
+                    ? msgResponse.meta.page < msgResponse.meta.totalPage
+                    : msgs.length === MESSAGES_PER_PAGE;
+                  dispatch(setMessages({ messages: msgs, page: 1, hasMore }));
+                } else {
+                  dispatch(setMessages({ messages: [], page: 1, hasMore: false }));
+                }
+              },
+            );
+
+            // Refresh chat users list to include the new room
+            fetchChatUsers();
+            resolve(response);
+          } else {
+            dispatch(setLoadingMessages(false));
+            resolve(null);
+          }
+        });
+      });
+    },
+    [dispatch, fetchChatUsers],
+  );
+
   // ── Load More Messages ──────────────────────────────────────────────────
 
   const loadMoreMessages = useCallback(() => {
@@ -188,6 +231,22 @@ export function useChat() {
         clearTimeout(timeoutId);
         if (response?.messages) {
           const msgs = Array.isArray(response.messages) ? response.messages : [];
+          if (process.env.NODE_ENV !== 'production') {
+            const sample = msgs.slice(0, 2).map((m) => ({
+              id: m.id,
+              createdAt: m.createdAt,
+              message: m.message,
+            }));
+            console.debug('[chat:init] first2', sample);
+          }
+          if (process.env.NODE_ENV !== 'production') {
+            const sample = msgs.slice(0, 2).map((m) => ({
+              id: m.id,
+              createdAt: m.createdAt,
+              message: m.message,
+            }));
+            console.debug('[chat:load-more] first2', sample);
+          }
           const hasMore = response.meta
             ? response.meta.page < response.meta.totalPage
             : msgs.length === MESSAGES_PER_PAGE;
@@ -295,6 +354,7 @@ export function useChat() {
     initializeChat,
     fetchChatUsers,
     joinRoom,
+    createAndJoinRoom,
     loadMoreMessages,
     sendMessage,
     leaveRoom,
