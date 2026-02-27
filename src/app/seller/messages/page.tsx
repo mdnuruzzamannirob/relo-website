@@ -8,10 +8,12 @@ export const metadata = {
 
 const MessagesPage = () => {
   return (
-    <section className="space-y-6">
+    <div className="flex h-[calc(100vh-14rem)] flex-col lg:h-[calc(100vh-10rem)]">
       <HeaderBar title="Messages" description="Communicate with buyers" />
-      <Message />
-    </section>
+      <div className="mt-6 min-h-0 flex-1">
+        <Message />
+      </div>
+    </div>
   );
 };
 

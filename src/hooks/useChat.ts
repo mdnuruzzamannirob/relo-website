@@ -144,10 +144,16 @@ export function useChat() {
       // Emit joinRoom to tell the server we're in this room
       socketService.joinRoom({ receiverId });
 
+      // Safety timeout for initial message fetch
+      const timeoutId = setTimeout(() => {
+        dispatch(setLoadingMessages(false));
+      }, 10000);
+
       // Fetch initial messages
       socketService.getMessages(
         { roomId, page: 1, limit: MESSAGES_PER_PAGE },
         (response: GetMessagesResponse) => {
+          clearTimeout(timeoutId);
           if (response?.messages) {
             const msgs = Array.isArray(response.messages) ? response.messages : [];
             const hasMore = response.meta
@@ -171,9 +177,15 @@ export function useChat() {
     const nextPage = currentPage + 1;
     dispatch(setLoadingMessages(true));
 
+    // Safety timeout - reset loading state if socket doesn't respond
+    const timeoutId = setTimeout(() => {
+      dispatch(setLoadingMessages(false));
+    }, 10000);
+
     socketService.getMessages(
       { roomId: activeRoomId, page: nextPage, limit: MESSAGES_PER_PAGE },
       (response: GetMessagesResponse) => {
+        clearTimeout(timeoutId);
         if (response?.messages) {
           const msgs = Array.isArray(response.messages) ? response.messages : [];
           const hasMore = response.meta

@@ -74,7 +74,7 @@ export default function ChatContainer({ variant }: ChatContainerProps) {
 
   if (error && !isConnected) {
     return (
-      <div className="flex h-full w-full items-center justify-center bg-white">
+      <div className="border-brand-100 flex h-full w-full items-center justify-center overflow-hidden rounded-xl border bg-white">
         <div className="flex flex-col items-center gap-4 p-8 text-center">
           <div className="rounded-full bg-red-50 p-4">
             <WifiOff className="h-8 w-8 text-red-400" />
@@ -99,7 +99,7 @@ export default function ChatContainer({ variant }: ChatContainerProps) {
 
   if (!isAuthenticated && !error) {
     return (
-      <div className="flex h-full w-full items-center justify-center bg-white">
+      <div className="border-brand-100 flex h-full w-full items-center justify-center overflow-hidden rounded-xl border bg-white">
         <div className="flex flex-col items-center gap-3 p-8">
           <div className="bg-brand-50 animate-pulse rounded-full p-4">
             <MessageSquare className="text-brand-400 h-8 w-8" />
@@ -111,7 +111,7 @@ export default function ChatContainer({ variant }: ChatContainerProps) {
   }
 
   return (
-    <div className="border-brand-100 flex h-full w-full overflow-hidden border bg-white">
+    <div className="border-brand-100 flex h-full w-full overflow-hidden rounded-xl border bg-white">
       {/* Sidebar */}
       <aside
         className={`border-brand-100 h-full w-full shrink-0 border-r bg-white sm:w-80 lg:w-72 ${

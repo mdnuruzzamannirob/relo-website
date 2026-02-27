@@ -86,7 +86,7 @@ export default function ChatArea({
 
   if (!activeUser) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
+      <div className="flex h-full flex-col items-center justify-center p-8 text-center">
         <div className="bg-brand-50 mb-4 rounded-full p-4">
           <svg
             className="text-brand-400 h-10 w-10"
@@ -113,7 +113,7 @@ export default function ChatArea({
   const online = isUserOnline(activeUser.user.id);
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex h-full flex-col overflow-hidden">
       {/* Header */}
       <div className="border-brand-100 flex items-center gap-3 border-b bg-white px-3 py-3 sm:px-4">
         {/* Back button (mobile) */}
@@ -182,11 +182,22 @@ export default function ChatArea({
 
         {/* Loading State */}
         {isLoadingMessages && messages.length === 0 ? (
-          <div className="flex flex-1 items-center justify-center py-20">
-            <div className="flex flex-col items-center gap-3">
-              <Loader2 className="text-brand-500 h-8 w-8 animate-spin" />
-              <p className="text-sm text-slate-500">Loading messages...</p>
-            </div>
+          <div className="space-y-4 p-4">
+            {[...Array(6)].map((_, i) => (
+              <div
+                key={i}
+                className={`flex gap-2 ${i % 2 === 0 ? 'justify-start' : 'justify-end'}`}
+              >
+                {i % 2 === 0 && <div className="h-7 w-7 animate-pulse rounded-full bg-slate-200" />}
+                <div className={`space-y-1 ${i % 2 === 0 ? '' : 'flex flex-col items-end'}`}>
+                  <div
+                    className="h-9 animate-pulse rounded-2xl bg-slate-200"
+                    style={{ width: `${100 + Math.random() * 120}px` }}
+                  />
+                  <div className="h-3 w-10 animate-pulse rounded bg-slate-100" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : messages.length === 0 ? (
           <div className="flex flex-1 items-center justify-center py-20">
@@ -199,8 +210,8 @@ export default function ChatArea({
           </div>
         ) : (
           /* Message Groups */
-          groupedMessages.map((group) => (
-            <div key={group.date}>
+          groupedMessages.map((group, groupIdx) => (
+            <div key={`${group.date}-${groupIdx}`}>
               {/* Date Separator */}
               <div className="my-4 flex items-center gap-3">
                 <div className="h-px flex-1 bg-slate-200" />
@@ -211,16 +222,19 @@ export default function ChatArea({
               </div>
 
               {/* Messages */}
-              <div className="space-y-3">
+              <div className="space-y-1">
                 {group.messages.map((msg, idx) => {
                   const isOwn = msg.senderId === currentUserId;
 
                   // Show avatar for first message or if previous was from different sender
                   const prevMsg = group.messages[idx - 1];
-                  const showAvatar = !isOwn && msg.senderId !== prevMsg?.senderId;
+                  const isSameSenderAsPrev = prevMsg && msg.senderId === prevMsg.senderId;
+                  const showAvatar = !isOwn && !isSameSenderAsPrev;
 
                   return (
-                    <ChatMessage key={msg.id} message={msg} isOwn={isOwn} showAvatar={showAvatar} />
+                    <div key={msg.id} className={isSameSenderAsPrev ? '' : 'pt-2'}>
+                      <ChatMessage message={msg} isOwn={isOwn} showAvatar={showAvatar} />
+                    </div>
                   );
                 })}
               </div>
