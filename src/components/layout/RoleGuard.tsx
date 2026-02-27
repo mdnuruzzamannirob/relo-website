@@ -11,6 +11,7 @@ import { setUser } from '@/store/slices/userSlice';
 import { resetChat } from '@/store/slices/chatSlice';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/hooks/useAuth';
+import { dashboardApi } from '@/store/apis/dashboardApi';
 
 type RoleType = 'BUYER' | 'SELLER';
 
@@ -67,6 +68,7 @@ export default function RoleGuard({ requiredRole, redirectTo = '/', children }: 
       dispatch(productApi.util.invalidateTags(['Product', 'ProductList', 'FavoriteProducts']));
       dispatch(offerApi.util.invalidateTags(['OfferList']));
       dispatch(orderApi.util.invalidateTags(['BuyerOrders', 'SellerOrders', 'Reviews']));
+      dispatch(dashboardApi.util.invalidateTags(['DashboardStats', 'Notifications']));
       dispatch(resetChat()); // Reset chat state so it reconnects with correct role
 
       // 5. Check if the switch actually gave us the right role
