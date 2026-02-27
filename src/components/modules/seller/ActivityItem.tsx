@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils/cn';
-import { TrendingUp } from 'lucide-react';
+import { Activity } from 'lucide-react';
 
 function ActivityItem({
   title,
@@ -19,14 +19,14 @@ function ActivityItem({
   };
 
   return (
-    <div className={cn('flex gap-3 rounded-lg border p-3', colorMap[color])}>
+    <div className={cn('flex gap-3 rounded-lg border bg-white p-3')}>
       <div className="flex size-10 items-center justify-center rounded-lg bg-white">
-        <TrendingUp size={18} />
+        <Activity size={18} />
       </div>
       <div className="flex-1">
-        <p className="text-sm font-medium">{title}</p>
-        <p className="text-xs opacity-80">{description}</p>
-        <p className="mt-1 text-xs opacity-60">{time}</p>
+        <p className="text-primary text-sm font-medium">{title}</p>
+        <p className="text-xs text-slate-500">{description}</p>
+        <p className="mt-1 text-xs text-slate-500">{time}</p>
       </div>
     </div>
   );

@@ -91,7 +91,7 @@ function Notification({
   const Icon = config.icon;
 
   return (
-    <div className={cn('flex gap-3 rounded-lg border p-3', active ? 'bg-white' : 'bg-brand-50')}>
+    <div className={cn('flex gap-3 rounded-lg border p-3', active ? 'bg-brand-100' : 'bg-white')}>
       <div
         className={cn(
           'flex size-10 min-w-10 items-center justify-center rounded-lg border',

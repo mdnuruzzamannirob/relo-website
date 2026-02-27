@@ -121,7 +121,7 @@ const SellerOverviewPage = () => {
       </div>
 
       {/* Recent Activities */}
-      <div className="border-brand-100 rounded-xl border bg-white p-6">
+      <div className="border-brand-100 rounded-xl border bg-white p-4">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Activity className="text-primary" size={20} />

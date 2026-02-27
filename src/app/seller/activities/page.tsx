@@ -77,12 +77,12 @@ const ActivitiesPage = () => {
       <HeaderBar title="Your Activity" description="Track all your sales and activities" />
 
       {/* Toolbar */}
-      <div className="flex items-center justify-between">
+      {/* <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Activity className="text-primary" size={20} />
           <h3 className="text-lg font-semibold text-slate-900">All Activities</h3>
         </div>
-      </div>
+      </div> */}
 
       {/* Activities List */}
       <div className="space-y-3">

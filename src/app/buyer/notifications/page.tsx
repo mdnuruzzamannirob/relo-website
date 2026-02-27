@@ -36,13 +36,13 @@ const NotificationsPage = () => {
   // Transform notifications data
   const notifications = useMemo(() => {
     if (!notificationsData?.data.result) return [];
-    return notificationsData.data.result.map((notif) => ({
-      id: notif.id,
-      type: notif.type as any,
-      title: notif.title,
-      description: notif.body,
-      time: getRelativeTime(notif.createdAt),
-      isRead: notif.isRead,
+    return notificationsData.data.result.map((notification) => ({
+      id: notification.id,
+      type: notification.type as any,
+      title: notification.title,
+      description: notification.body,
+      time: getRelativeTime(notification.createdAt),
+      isRead: notification.isRead,
     }));
   }, [notificationsData]);
 
@@ -106,7 +106,7 @@ const NotificationsPage = () => {
       <HeaderBar title="Notifications" description="Stay updated with your orders and activities" />
 
       {/* Toolbar */}
-      <div className="flex items-center justify-between">
+      {/* <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Bell className="text-primary" size={20} />
           <h3 className="text-lg font-semibold text-slate-900">
@@ -118,7 +118,7 @@ const NotificationsPage = () => {
             )}
           </h3>
         </div>
-      </div>
+      </div> */}
 
       {/* Notifications List */}
       <div className="space-y-3">

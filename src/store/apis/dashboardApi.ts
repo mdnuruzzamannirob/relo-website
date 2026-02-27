@@ -54,7 +54,7 @@ export const dashboardApi = createApi({
     markNotificationAsRead: builder.mutation<{ success: boolean; message: string }, string>({
       query: (notificationId) => ({
         url: `/notifications/${notificationId}`,
-        method: 'PUT',
+        method: 'GET',
       }),
       async onQueryStarted(id, { dispatch, queryFulfilled }) {
         // Optimistic update
@@ -64,7 +64,7 @@ export const dashboardApi = createApi({
             if (notification) {
               notification.isRead = true;
             }
-          })
+          }),
         );
 
         try {
