@@ -88,7 +88,14 @@ export default function ChatContainer({ variant }: ChatContainerProps) {
         }
       });
     }
-  }, [initialUserId, chatUsers, isLoadingUsers, isAuthenticated, handleSelectUser, createAndJoinRoom]);
+  }, [
+    initialUserId,
+    chatUsers,
+    isLoadingUsers,
+    isAuthenticated,
+    handleSelectUser,
+    createAndJoinRoom,
+  ]);
 
   // Handle back navigation (mobile)
   const handleBack = useCallback(() => {
