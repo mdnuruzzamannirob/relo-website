@@ -199,12 +199,12 @@ export default function BuyerOfferCard({ offer }: { offer: Offer }) {
                 ) : canRespondToCounter ? (
                   <>
                     <CheckCircle2 className="mr-2 size-4" />
-                    Accept &amp; Pay (${(offer.counterAmount ?? offer.amount).toFixed(2)})
+                    Accept &amp; Pay
                   </>
                 ) : (
                   <>
                     <CreditCard className="mr-2 size-4" />
-                    Proceed to Payment (${offer.amount.toFixed(2)})
+                    Proceed to Payment
                   </>
                 )}
               </Button>
