@@ -27,6 +27,7 @@ export default function AutoRoleSwitch() {
   const [switchUser] = useSwitchUserMutation();
   const switchingRef = useRef(false);
   const lastRoleRef = useRef<string | null>(null);
+  const lastPathRef = useRef<string | null>(null);
 
   const performRoleSwitch = useCallback(
     async (targetRole: 'BUYER' | 'SELLER') => {
@@ -39,7 +40,7 @@ export default function AutoRoleSwitch() {
         return;
       }
 
-      // Don't switch if we just switched to this role
+      // Don't switch if we just switched to this role (local state check)
       if (lastRoleRef.current === targetRole) return;
 
       switchingRef.current = true;
@@ -57,7 +58,7 @@ export default function AutoRoleSwitch() {
         // 2. Update token in localStorage
         localStorage.setItem('authToken', newToken);
 
-        // 3. Fetch updated user data
+        // 3. Fetch updated user data with forced refresh
         const getMeResult = await dispatch(
           authApi.endpoints.getMe.initiate(undefined, { forceRefetch: true }),
         ).unwrap();
@@ -89,12 +90,14 @@ export default function AutoRoleSwitch() {
     const isSellerRoute = pathname?.startsWith('/seller');
     const requiredRole = isSellerRoute ? 'SELLER' : 'BUYER';
 
-    // Only switch if current role doesn't match required role
-    if (user.type !== requiredRole) {
-      performRoleSwitch(requiredRole);
-    } else {
-      // Update last role to prevent unnecessary switches
-      lastRoleRef.current = requiredRole;
+    // Only switch if path changed AND current role doesn't match required role
+    if (pathname !== lastPathRef.current) {
+      lastPathRef.current = pathname;
+      if (user.type !== requiredRole) {
+        performRoleSwitch(requiredRole);
+      } else {
+        lastRoleRef.current = requiredRole;
+      }
     }
   }, [pathname, user, isAuthenticated, isAuthLoading, performRoleSwitch]);
 
