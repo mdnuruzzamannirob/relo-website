@@ -1,50 +1,69 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
-import { useGetDashboardStatsQuery } from '@/store/apis/dashboardApi';
+import { useEffect, useRef, useMemo, useState } from 'react';
+import { useGetNotificationsQuery } from '@/store/apis/dashboardApi';
 import HeaderBar from '@/components/shared/HeaderBar';
 import ActivityItem from '@/components/modules/seller/ActivityItem';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { ActivityItemSkeleton } from '@/components/shared/SkeletonLoaders';
-import { Activity, RefreshCw } from 'lucide-react';
+import { Activity } from 'lucide-react';
 
 const ActivitiesPage = () => {
   const { user } = useAuth();
-  const [refreshKey, setRefreshKey] = useState(0);
+  const observerTarget = useRef<HTMLDivElement>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // Fetch overview data which includes recent activities
+  // Fetch activities with pagination
   const {
-    data: overviewData,
-    isLoading,
+    data: activitiesData,
+    isLoading: initialLoading,
     isFetching,
     error,
-    refetch,
-  } = useGetDashboardStatsQuery(undefined, {
-    skip: !user,
-  });
+  } = useGetNotificationsQuery(
+    { page: currentPage, limit: 10 },
+    {
+      // Skip initial load if no user
+      skip: !user,
+    },
+  );
 
+  // Transform activities data
   const activities = useMemo(() => {
-    // Recent activities not available in the overview endpoint
-    // This page shows activities data, which should be fetched from a dedicated endpoint
-    return [] as Array<{
-      color: 'green' | 'blue' | 'orange';
-      title: string;
-      description: string;
-      time: string;
-    }>;
-  }, [overviewData]);
+    if (!activitiesData?.data.result) return [];
+    return activitiesData.data.result.map((activity) => ({
+      id: activity.id,
+      title: activity.title,
+      description: activity.body,
+      time: getRelativeTime(activity.createdAt),
+      color: getActivityColor(activity.type) as 'green' | 'blue' | 'orange',
+    }));
+  }, [activitiesData]);
 
-  // Handle manual refresh
-  const handleRefresh = useCallback(async () => {
-    setRefreshKey((prev) => prev + 1);
-    await refetch();
-  }, [refetch]);
+  const hasMore =
+    (activitiesData?.data.meta.page ?? 1) < (activitiesData?.data.meta.totalPage ?? 1);
 
-  if (error) {
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    if (!observerTarget.current || initialLoading || isFetching || !hasMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isFetching) {
+          setCurrentPage((prev) => prev + 1);
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    observer.observe(observerTarget.current);
+    return () => observer.disconnect();
+  }, [hasMore, isFetching, initialLoading]);
+
+  if (error && currentPage === 1) {
     return (
       <section className="space-y-6">
-        <HeaderBar title="Recent Activity" description="Track all your sales and activities" />
+        <HeaderBar title="Your Activity" description="Track all your sales and activities" />
         <div className="border-brand-100 rounded-lg border bg-red-50 p-4 text-red-700">
           Failed to load activities. Please refresh the page.
         </div>
@@ -55,84 +74,99 @@ const ActivitiesPage = () => {
   return (
     <section className="space-y-6">
       {/* Header */}
-      <HeaderBar title="Recent Activity" description="Track all your sales and activities" />
+      <HeaderBar title="Your Activity" description="Track all your sales and activities" />
 
       {/* Toolbar */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Activity className="text-primary" size={20} />
-          <h3 className="text-lg font-semibold text-slate-900">
-            All Activities ({activities.length})
-          </h3>
+          <h3 className="text-lg font-semibold text-slate-900">All Activities</h3>
         </div>
-
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleRefresh}
-          disabled={isFetching}
-          className="text-primary"
-        >
-          <RefreshCw size={16} className={isFetching ? 'animate-spin' : ''} />
-          {isFetching ? 'Refreshing...' : 'Refresh'}
-        </Button>
       </div>
 
       {/* Activities List */}
       <div className="space-y-3">
-        {activities.length === 0 && !isLoading ? (
+        {activities.length === 0 && !isFetching && currentPage === 1 ? (
           <div className="border-brand-100 flex flex-col items-center justify-center rounded-lg border bg-slate-50 p-12 text-center">
             <Activity className="mb-3 text-slate-400" size={40} />
             <p className="font-medium text-slate-600">No activities yet</p>
-            <p className="mt-1 text-sm text-slate-500">Your recent activities will appear here</p>
+            <p className="mt-1 text-sm text-slate-500">
+              You&apos;ll see your sales and activities here
+            </p>
           </div>
         ) : (
           <>
-            {isLoading ? (
+            {activities.map((activity) => (
+              <ActivityItem
+                key={activity.id}
+                title={activity.title}
+                description={activity.description}
+                time={activity.time}
+                color={activity.color}
+              />
+            ))}
+
+            {/* Loading indicator for next batch */}
+            {isFetching && currentPage > 1 && (
+              <div className="space-y-2">
+                <ActivityItemSkeleton />
+                <ActivityItemSkeleton />
+                <ActivityItemSkeleton />
+              </div>
+            )}
+
+            {/* Initial loading */}
+            {initialLoading && currentPage === 1 && (
               <div className="space-y-2">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <ActivityItemSkeleton key={i} />
                 ))}
               </div>
-            ) : (
-              activities.map((activity, index) => (
-                <ActivityItem
-                  key={index}
-                  color={activity.color}
-                  title={activity.title}
-                  description={activity.description}
-                  time={activity.time}
-                />
-              ))
             )}
 
-            {isFetching && !isLoading && (
-              <div className="py-4 text-center text-sm text-slate-500">Updating activities...</div>
+            {/* Intersection observer target */}
+            {hasMore && (
+              <div ref={observerTarget} className="flex touch-none justify-center py-8">
+                {isFetching && <div className="text-sm text-slate-500">Loading more...</div>}
+              </div>
+            )}
+
+            {/* No more items message */}
+            {!hasMore && activities.length > 0 && currentPage > 1 && (
+              <div className="py-8 text-center text-sm text-slate-500">All activities loaded</div>
             )}
           </>
         )}
       </div>
 
-      {/* Footer info */}
+      {/* Footer actions */}
       {activities.length > 0 && (
-        <div className="border-t-brand-100 border-t py-6 text-center text-sm text-slate-500">
-          Showing {activities.length} activities
-          {activities.length >= 10 && ' (most recent)'}
+        <div className="border-t-brand-100 flex justify-center gap-3 border-t pt-6">
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-slate-600"
+            onClick={() => setCurrentPage(1)}
+          >
+            Refresh
+          </Button>
         </div>
       )}
     </section>
   );
 };
 
-function getActivityColor(type: string): 'green' | 'blue' | 'orange' | 'purple' | 'red' {
-  const colorMap: Record<string, 'green' | 'blue' | 'orange' | 'purple' | 'red'> = {
+function getActivityColor(type: string): string {
+  const colorMap: Record<string, 'green' | 'blue' | 'orange'> = {
     order: 'green',
     locker: 'blue',
     offer: 'orange',
-    payment: 'purple',
+    payment: 'green',
     listing: 'blue',
-    review: 'orange',
-    dispute: 'red',
+    order_placed: 'blue',
+    order_accepted: 'green',
+    order_completed: 'green',
+    order_cancelled: 'orange',
   };
   return colorMap[type] || 'blue';
 }

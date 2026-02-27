@@ -1,65 +1,76 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useGetDashboardStatsQuery } from '@/store/apis/dashboardApi';
+import Link from 'next/link';
+import { DollarSign, Boxes, Clock, Package, Activity, ArrowRight } from 'lucide-react';
+
+import { useGetDashboardStatsQuery, useGetNotificationsQuery } from '@/store/apis/dashboardApi';
+import HeaderBar from '@/components/shared/HeaderBar';
 import StatCard from '@/components/shared/StatCard';
 import ActivityItem from '@/components/modules/seller/ActivityItem';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/useAuth';
-import HeaderBar from '@/components/shared/HeaderBar';
 import { SellerOverviewPageSkeleton } from '@/components/shared/SkeletonLoaders';
-import { DollarSign, Package, Clock, Boxes, Activity, ArrowRight } from 'lucide-react';
-import Link from 'next/link';
+import { useAuth } from '@/hooks/useAuth';
+
+type ActivityColor = 'green' | 'blue' | 'orange';
 
 const SellerOverviewPage = () => {
   const { user } = useAuth();
 
-  // Fetch overview data - RTK Query handles caching automatically
+  // Overview stats
   const {
     data: overviewData,
     isLoading: overviewLoading,
     isFetching: overviewFetching,
     error: overviewError,
   } = useGetDashboardStatsQuery(undefined, {
-    pollingInterval: 300000, // Refetch every 5 minutes
+    pollingInterval: 300000, // 5 min
   });
 
-  // Extract seller data from the overview response
-  const stats = useMemo(() => {
-    if (!overviewData?.data.sellerResponse) return null;
+  // Notifications / activities
+  const { data: activitiesData, isLoading: activitiesLoading } = useGetNotificationsQuery(
+    { page: 1, limit: 5 },
+    {
+      // Don’t block on overviewData — activities are independent.
+      // If your API truly depends on overview, put skip back.
+      skip: false,
+    },
+  );
 
-    const seller = overviewData.data.sellerResponse;
+  const stats = useMemo(() => {
+    const seller = overviewData?.data?.sellerResponse;
+    if (!seller) return null;
+
     return {
-      totalEarning: `$${seller.totalEarning.toFixed(2)}`,
-      activeProducts: seller.activeProducts.toString(),
-      pendingOrders: seller.pendingOrders.toString(),
-      productSold: seller.productSold.toString(),
-      availableWithdrawal: `$${seller.availableWithdrawal.toFixed(2)}`,
+      totalEarning: formatMoney(seller.totalEarning),
+      activeProducts: String(seller.activeProducts ?? 0),
+      pendingOrders: String(seller.pendingOrders ?? 0),
+      productSold: String(seller.productSold ?? 0),
+      availableWithdrawal: formatMoney(seller.availableWithdrawal),
     };
   }, [overviewData]);
 
-  const recentOrders = useMemo(() => {
-    // Recent orders not available in overview, return empty
-    return [];
-  }, []);
-
   const recentActivities = useMemo(() => {
-    // Recent activities not available in overview, return empty
-    return [];
-  }, []);
+    const list = activitiesData?.data?.result ?? [];
+    return list.map((activity: any) => ({
+      id: activity.id,
+      title: activity.title,
+      description: activity.body,
+      time: getRelativeTime(activity.createdAt),
+      color: getActivityColor(activity.type),
+    }));
+  }, [activitiesData]);
 
-  if (overviewLoading) {
-    return <SellerOverviewPageSkeleton />;
-  }
+  if (overviewLoading) return <SellerOverviewPageSkeleton />;
 
   if (overviewError) {
     return (
       <section className="space-y-6">
         <HeaderBar
-          title={`Welcome back, ${user?.name}!`}
+          title={`Welcome back, ${user?.name ?? ''}!`}
           description="Track your sales and manage your listings"
         />
-        <div className="border-brand-100 rounded-lg border bg-red-50 p-4 text-red-700">
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
           Failed to load dashboard data. Please refresh the page.
         </div>
       </section>
@@ -70,7 +81,7 @@ const SellerOverviewPage = () => {
     <section className="bg-brand-50 space-y-6">
       {/* Header */}
       <HeaderBar
-        title={`Welcome back, ${user?.name}!`}
+        title={`Welcome back, ${user?.name ?? ''}!`}
         description="Track your sales and manage your listings"
       />
 
@@ -80,7 +91,7 @@ const SellerOverviewPage = () => {
           icon={<DollarSign className="text-green-600" />}
           iconClassname="bg-green-50"
           label="Total Earnings"
-          value={stats?.totalEarning || '$0.00'}
+          value={stats?.totalEarning ?? '$0.00'}
           isLoading={overviewFetching}
         />
 
@@ -88,7 +99,7 @@ const SellerOverviewPage = () => {
           icon={<Boxes className="text-blue-600" />}
           iconClassname="bg-blue-50"
           label="Active Products"
-          value={stats?.activeProducts || '0'}
+          value={stats?.activeProducts ?? '0'}
           isLoading={overviewFetching}
         />
 
@@ -96,7 +107,7 @@ const SellerOverviewPage = () => {
           icon={<Clock className="text-orange-600" />}
           iconClassname="bg-orange-50"
           label="Pending Orders"
-          value={stats?.pendingOrders || '0'}
+          value={stats?.pendingOrders ?? '0'}
           isLoading={overviewFetching}
         />
 
@@ -104,20 +115,63 @@ const SellerOverviewPage = () => {
           icon={<Package className="text-purple-600" />}
           iconClassname="bg-purple-50"
           label="Items Sold"
-          value={stats?.productSold || '0'}
+          value={stats?.productSold ?? '0'}
           isLoading={overviewFetching}
         />
       </div>
 
-      {/* Bottom Cards */}
+      {/* Recent Activities */}
+      <div className="border-brand-100 rounded-xl border bg-white p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Activity className="text-primary" size={20} />
+            <h3 className="text-lg font-semibold text-slate-900">Recent Activity</h3>
+          </div>
+
+          <Link href="/seller/activities" className="inline-block">
+            <Button variant="ghost" size="sm" className="text-primary gap-1">
+              View All
+              <ArrowRight size={16} />
+            </Button>
+          </Link>
+        </div>
+
+        <div className="space-y-2">
+          {activitiesLoading ? (
+            <div className="space-y-2">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-20 animate-pulse rounded-lg bg-slate-100" />
+              ))}
+            </div>
+          ) : recentActivities.length > 0 ? (
+            recentActivities.map((a) => (
+              <ActivityItem
+                key={a.id}
+                title={a.title}
+                description={a.description}
+                time={a.time}
+                color={a.color}
+              />
+            ))
+          ) : (
+            <div className="rounded-lg bg-slate-50 py-8 text-center">
+              <Activity className="mx-auto mb-2 text-slate-400" size={32} />
+              <p className="text-sm text-slate-600">No recent activities yet</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Bottom: CTA + Payout */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {/* CTA */}
         <div className="bg-primary rounded-xl p-6 text-white">
           <h4 className="text-lg font-semibold">Ready to sell more?</h4>
-          <p className="mt-1 text-sm text-slate-300">
+          <p className="mt-1 text-sm text-slate-200">
             List a new item and reach thousands of buyers
           </p>
-          <Link href="/seller/my-listings">
+
+          <Link href="/seller/my-listings" className="inline-block">
             <Button className="mt-4 bg-white text-slate-900 hover:bg-slate-100">
               Create New Listing
             </Button>
@@ -128,43 +182,48 @@ const SellerOverviewPage = () => {
         <div className="border-brand-100 rounded-xl border bg-white p-6">
           <p className="text-sm text-slate-500">Available to Withdraw</p>
           <p className="text-primary mt-2 text-2xl font-semibold">
-            {stats?.availableWithdrawal || '$0.00'}
+            {stats?.availableWithdrawal ?? '$0.00'}
           </p>
-          <Button className="mt-4 w-full bg-green-600 hover:bg-green-700">Request Payout</Button>
+          <Button className="mt-4 bg-green-600 hover:bg-green-700">Request Payout</Button>
         </div>
       </div>
     </section>
   );
 };
 
-// Helper functions
-function getActivityColor(type: string): 'green' | 'blue' | 'orange' | 'purple' | 'red' {
-  const colorMap: Record<string, 'green' | 'blue' | 'orange' | 'purple' | 'red'> = {
-    order: 'green',
-    locker: 'blue',
-    offer: 'orange',
-    payment: 'purple',
-    listing: 'blue',
-  };
-  return colorMap[type] || 'blue';
+// Helpers
+
+function formatMoney(value: unknown) {
+  const n = typeof value === 'number' ? value : Number(value ?? 0);
+  const safe = Number.isFinite(n) ? n : 0;
+  return `$${safe.toFixed(2)}`;
 }
 
-function getOrderStatusBadgeColor(status: string): string {
-  const colorMap: Record<string, string> = {
-    PENDING: 'bg-blue-50 text-blue-700',
-    ACCEPT: 'bg-green-50 text-green-700',
-    CONFIRM: 'bg-purple-50 text-purple-700',
-    PICKUP: 'bg-orange-50 text-orange-700',
-    COMPLETE: 'bg-green-100 text-green-800',
-    DECLINE: 'bg-red-50 text-red-700',
+function getActivityColor(type: string): ActivityColor {
+  // Keep this strictly aligned with ActivityItem props
+  const colorMap: Record<string, ActivityColor> = {
+    order: 'green',
+    order_accepted: 'green',
+    order_completed: 'green',
+    payment: 'green',
+
+    listing: 'blue',
+    order_placed: 'blue',
+    locker: 'blue',
+
+    offer: 'orange',
+    order_cancelled: 'orange',
   };
-  return colorMap[status] || 'bg-slate-50 text-slate-700';
+
+  return colorMap[type] ?? 'blue';
 }
 
 function getRelativeTime(dateString: string): string {
   const now = new Date();
   const date = new Date(dateString);
   const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (!Number.isFinite(seconds)) return '';
 
   if (seconds < 60) return 'just now';
   if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`;
