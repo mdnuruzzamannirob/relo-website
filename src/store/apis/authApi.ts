@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { clearUser, setUser } from '../slices/userSlice';
 import { baseQuery } from '../baseQuery';
 import { orderApi } from './orderApi';
+import { dashboardApi } from './dashboardApi';
 
 export const authApi = createApi({
   reducerPath: 'authApi',
@@ -320,8 +321,9 @@ export const authApi = createApi({
           // Clear user cache
           dispatch(authApi.util.resetApiState());
 
-          // Invalidate order-related tags
+          // Invalidate order and dashboard-related tags
           dispatch(orderApi.util.invalidateTags(['BuyerOrders', 'SellerOrders', 'Reviews']));
+          dispatch(dashboardApi.util.invalidateTags(['Notifications', 'DashboardStats']));
 
           toast.success('Logged out successfully');
         } catch (error: any) {
@@ -332,6 +334,7 @@ export const authApi = createApi({
           sessionStorage.clear();
           dispatch(authApi.util.resetApiState());
           dispatch(orderApi.util.invalidateTags(['BuyerOrders', 'SellerOrders', 'Reviews']));
+          dispatch(dashboardApi.util.invalidateTags(['Notifications', 'DashboardStats']));
 
           const errorMessage = error?.error?.data?.message || 'Logged out successfully';
           toast.success(errorMessage);

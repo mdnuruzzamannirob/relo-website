@@ -1,86 +1,85 @@
 'use client';
 
-import Notification from '@/components/modules/buyer/Notification';
-import OrderItem, { type OrderItemData } from '@/components/modules/buyer/OrderItem';
+import { useMemo } from 'react';
+import { useGetDashboardStatsQuery } from '@/store/apis/dashboardApi';
+import { useGetNotificationsQuery } from '@/store/apis/dashboardApi';
 import HeaderBar from '@/components/shared/HeaderBar';
 import StatCard from '@/components/shared/StatCard';
+import OrderItem from '@/components/modules/buyer/OrderItem';
+import Notification from '@/components/modules/buyer/Notification';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
+import { BuyerOverviewPageSkeleton } from '@/components/shared/SkeletonLoaders';
 import { ArrowRight, Bell, CheckCircle, Clock, Package } from 'lucide-react';
+import Link from 'next/link';
 
-// This data can come from API/Backend
-const notifications = [
-  {
-    id: 1,
-    type: 'pickup' as const,
-    title: 'Order ready for pickup',
-    description: 'Ray-Ban Aviator Sunglasses is ready at Locker L-15. Pickup code: QR-9283',
-    time: '2 hours ago',
-    isRead: false,
-  },
-  {
-    id: 2,
-    type: 'order_placed' as const,
-    title: 'New order placed',
-    description: 'Your order for Nike Air Max has been confirmed and is being processed',
-    time: '5 hours ago',
-    isRead: true,
-  },
-  {
-    id: 3,
-    type: 'shipping' as const,
-    title: 'Order shipped',
-    description: 'Your Adidas Sports Watch is on the way to the pickup location',
-    time: '1 day ago',
-    isRead: false,
-  },
-  {
-    id: 4,
-    type: 'completed' as const,
-    title: 'Order completed',
-    description: 'Thank you for your purchase! Please leave a review',
-    time: '2 days ago',
-    isRead: true,
-  },
-  {
-    id: 5,
-    type: 'reminder' as const,
-    title: 'Payment reminder',
-    description: 'Your payment for Apple AirPods Pro is pending. Complete it within 24 hours',
-    time: '3 days ago',
-    isRead: true,
-  },
-];
-
-const orders: OrderItemData[] = [
-  {
-    title: 'Woman Bag',
-    price: '$89.99',
-    status: 'Completed',
-    color: 'green',
-    seller: 'Sarah Johnson',
-    orderDate: '2025-01-02',
-  },
-  {
-    title: 'Woman Shirt',
-    price: '$36.00',
-    status: 'Ready for Pickup',
-    color: 'orange',
-    seller: 'Michael Brown',
-    orderDate: '2025-01-03',
-  },
-  {
-    title: 'Men t-shirt',
-    price: '$30.00',
-    status: 'Processing',
-    color: 'blue',
-    seller: 'David Smith',
-    orderDate: '2025-01-04',
-  },
-];
-
-const OverviewPage = () => {
+const BuyerOverviewPage = () => {
   const { user } = useAuth();
+
+  // Fetch overview data
+  const {
+    data: overviewData,
+    isLoading: overviewLoading,
+    isFetching: overviewFetching,
+    error: overviewError,
+  } = useGetDashboardStatsQuery(undefined, {
+    pollingInterval: 300000, // Refetch every 5 minutes
+  });
+
+  // Fetch notifications for display
+  const { data: notificationsData, isLoading: notificationsLoading } = useGetNotificationsQuery(
+    { page: 1, limit: 5 },
+    {
+      skip: !overviewData, // Skip until overview data is loaded
+    },
+  );
+
+  // Extract buyer data from the overview response
+  const buyerStats = useMemo(() => {
+    if (!overviewData?.data.buyerResponse) return null;
+
+    const buyer = overviewData.data.buyerResponse;
+    return {
+      activeOrders: buyer.activeOrders,
+      completedOrders: buyer.completedOrders,
+      awaitOrders: buyer.awaitOrders,
+    };
+  }, [overviewData]);
+
+  const recentOrders = useMemo(() => {
+    // Recent orders not available in overview, return empty
+    return [];
+  }, []);
+
+  const notifications = useMemo(() => {
+    if (!notificationsData?.data.result) return [];
+    return notificationsData.data.result.map((notification) => ({
+      id: notification.id,
+      type: notification.type as any,
+      title: notification.title,
+      description: notification.body,
+      time: getRelativeTime(notification.createdAt),
+      isRead: notification.isRead,
+    }));
+  }, [notificationsData]);
+
+  if (overviewLoading) {
+    return <BuyerOverviewPageSkeleton />;
+  }
+
+  if (overviewError) {
+    return (
+      <section className="space-y-6">
+        <HeaderBar
+          title={`Welcome back, ${user?.name}!`}
+          description="Track your orders and manage your purchases"
+        />
+        <div className="border-brand-100 rounded-lg border bg-red-50 p-4 text-red-700">
+          Failed to load dashboard data. Please refresh the page.
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="space-y-6">
@@ -96,66 +95,124 @@ const OverviewPage = () => {
           icon={<Package className="text-blue-600" />}
           iconClassname="bg-blue-50"
           label="Active Orders"
-          value="2"
+          value={buyerStats?.activeOrders?.toString() || '0'}
+          isLoading={overviewFetching}
         />
         <StatCard
           icon={<CheckCircle className="text-green-600" />}
           iconClassname="bg-green-50"
-          label="Completed"
-          value="1"
+          label="Completed Orders"
+          value={buyerStats?.completedOrders?.toString() || '0'}
+          isLoading={overviewFetching}
         />
         <StatCard
-          icon={<Clock className="text-orange-500" />}
-          iconClassname="bg-orange-50"
-          label="Awaiting Pickup"
-          value="1"
+          icon={<Clock className="text-purple-600" />}
+          iconClassname="bg-purple-50"
+          label="Awaiting Orders"
+          value={buyerStats?.awaitOrders?.toString() || '0'}
+          isLoading={overviewFetching}
         />
       </div>
 
-      {/* Notifications */}
+      {/* Notifications Section */}
       <div className="border-brand-100 space-y-3 rounded-xl border bg-white p-4">
-        <div className="mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Bell size={18} className="text-primary" />
-            <h3 className="text-primary font-medium">Recent Notification</h3>
-            {notifications.filter((n) => !n.isRead).length > 0 && (
-              <span className="rounded-full bg-blue-600 px-1.5 py-0.5 text-[10px] font-medium text-white">
-                {notifications.filter((n) => !n.isRead).length} New
-              </span>
-            )}
+        <div className="flex items-center justify-between">
+          <h3 className="text-primary mb-2 flex items-center gap-2 font-medium">
+            <Bell size={18} className="text-primary" /> Latest Notifications
+          </h3>
+          <Link href="/buyer/notifications">
+            <Button variant="ghost" size="sm" className="text-primary">
+              View All <ArrowRight size={14} className="ml-1" />
+            </Button>
+          </Link>
+        </div>
+
+        {notificationsLoading ? (
+          <div className="space-y-2">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-brand-50 h-16 animate-pulse rounded-lg" />
+            ))}
           </div>
-          <Button size="sm" variant="link">
-            View All <ArrowRight />
-          </Button>
-        </div>
-
-        {notifications.slice(0, 3).map((notification) => (
-          <Notification
-            key={notification.id}
-            active={!notification.isRead}
-            type={notification.type}
-            title={notification.title}
-            description={notification.description}
-            time={notification.time}
-          />
-        ))}
+        ) : notifications.length > 0 ? (
+          notifications
+            .slice(0, 3)
+            .map((notification) => (
+              <Notification
+                key={notification.id}
+                active={!notification.isRead}
+                type={notification.type}
+                title={notification.title}
+                description={notification.description}
+                time={notification.time}
+              />
+            ))
+        ) : (
+          <p className="py-4 text-sm text-slate-500">No notifications yet</p>
+        )}
       </div>
 
-      {/* Recent Orders */}
+      {/* Recent Orders Section */}
       <div className="border-brand-100 space-y-3 rounded-xl border bg-white p-4">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-primary font-medium">Recent Orders</h3>
-          <Button size="sm" variant="link">
-            View All <ArrowRight />
-          </Button>
+        <div className="flex items-center justify-between">
+          <h3 className="text-primary mb-2 flex items-center gap-2 font-medium">
+            <Package size={18} className="text-primary" /> Recent Orders
+          </h3>
+          <Link href="/buyer/my-orders">
+            <Button variant="ghost" size="sm" className="text-primary">
+              View All <ArrowRight size={14} className="ml-1" />
+            </Button>
+          </Link>
         </div>
 
-        {orders.map((order) => (
-          <OrderItem key={order.title} order={order} />
-        ))}
+        {overviewFetching ? (
+          <div className="space-y-2">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-brand-50 h-20 animate-pulse rounded-lg" />
+            ))}
+          </div>
+        ) : recentOrders.length > 0 ? (
+          recentOrders.map((order, index) => <OrderItem key={index} order={order} />)
+        ) : (
+          <p className="py-4 text-sm text-slate-500">No orders yet</p>
+        )}
       </div>
+
+      {/* CTA Section */}
+      {recentOrders.length === 0 && (
+        <div className="bg-brand-50 border-brand-100 rounded-xl border p-6 text-center">
+          <p className="mb-4 text-slate-600">Ready to find your next item?</p>
+          <Link href="/products">
+            <Button className="bg-primary hover:bg-primary/90">Start Shopping</Button>
+          </Link>
+        </div>
+      )}
     </section>
   );
 };
 
-export default OverviewPage;
+// Helper functions
+function getOrderStatusColor(status: string): 'green' | 'orange' | 'blue' | 'purple' | 'red' {
+  const statusMap: Record<string, 'green' | 'orange' | 'blue' | 'purple' | 'red'> = {
+    COMPLETE: 'green',
+    PICKUP: 'orange',
+    PENDING: 'blue',
+    ACCEPT: 'blue',
+    CONFIRM: 'purple',
+  };
+  return statusMap[status] || 'blue';
+}
+
+function getRelativeTime(dateString: string): string {
+  const now = new Date();
+  const date = new Date(dateString);
+  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (seconds < 60) return 'just now';
+  if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+  if (seconds < 604800) return `${Math.floor(seconds / 86400)} days ago`;
+
+  return date.toLocaleDateString();
+}
+
+export default BuyerOverviewPage;

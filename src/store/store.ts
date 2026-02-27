@@ -6,6 +6,7 @@ import { cmsApi } from './apis/cmsApi';
 import { productApi } from './apis/productApi';
 import { offerApi } from './apis/offerApi';
 import { orderApi } from './apis/orderApi';
+import { dashboardApi } from './apis/dashboardApi';
 
 export const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
     [productApi.reducerPath]: productApi.reducer,
     [offerApi.reducerPath]: offerApi.reducer,
     [orderApi.reducerPath]: orderApi.reducer,
+    [dashboardApi.reducerPath]: dashboardApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -24,6 +26,7 @@ export const store = configureStore({
       productApi.middleware,
       offerApi.middleware,
       orderApi.middleware,
+      dashboardApi.middleware,
     ),
 });
 

@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils/cn';
+import { Skeleton } from '@/components/ui/skeleton';
 
 function StatCard({
   icon,
@@ -6,13 +7,32 @@ function StatCard({
   label,
   value,
   classname,
+  isLoading,
 }: {
   icon: React.ReactNode;
   iconClassname?: string;
   label: string;
   value: string;
   classname?: string;
+  isLoading?: boolean;
 }) {
+  if (isLoading) {
+    return (
+      <div
+        className={cn(
+          'border-brand-100 flex items-center gap-4 rounded-xl border bg-white p-4',
+          classname,
+        )}
+      >
+        <Skeleton className="h-10 w-10 rounded-lg" />
+        <div className="flex-1">
+          <Skeleton className="mb-2 h-4 w-20" />
+          <Skeleton className="h-6 w-16" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className={cn(
