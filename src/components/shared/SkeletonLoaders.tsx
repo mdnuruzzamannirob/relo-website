@@ -136,3 +136,95 @@ export function SellerOverviewPageSkeleton() {
     </section>
   );
 }
+
+// ── Earnings page skeletons ───────────────────────────────────────────────────
+
+export function EarningsSummaryCardSkeleton() {
+  return (
+    <div className="space-y-3 rounded-xl border bg-white p-4">
+      <div className="flex items-center gap-2">
+        <Skeleton className="h-4 w-4 rounded-full" />
+        <Skeleton className="h-4 w-28" />
+      </div>
+      <Skeleton className="h-8 w-24" />
+      <Skeleton className="h-9 w-full rounded-md" />
+    </div>
+  );
+}
+
+export function EarningsTableRowSkeleton() {
+  return (
+    <tr>
+      <td className="px-4 py-3">
+        <Skeleton className="h-4 w-32" />
+      </td>
+      <td className="px-4 py-3">
+        <Skeleton className="h-4 w-24" />
+      </td>
+      <td className="px-4 py-3">
+        <Skeleton className="h-4 w-20" />
+      </td>
+      <td className="px-4 py-3">
+        <Skeleton className="h-5 w-16 rounded-full" />
+      </td>
+      <td className="px-4 py-3 text-right">
+        <Skeleton className="ml-auto h-4 w-14" />
+      </td>
+    </tr>
+  );
+}
+
+export function PayoutHistoryRowSkeleton() {
+  return (
+    <tr>
+      <td className="px-4 py-3">
+        <Skeleton className="h-4 w-24" />
+      </td>
+      <td className="px-4 py-3">
+        <Skeleton className="h-4 w-16" />
+      </td>
+      <td className="px-4 py-3">
+        <Skeleton className="h-4 w-20" />
+      </td>
+      <td className="px-4 py-3">
+        <Skeleton className="h-5 w-16 rounded-full" />
+      </td>
+    </tr>
+  );
+}
+
+export function EarningsPageSkeleton() {
+  return (
+    <section className="space-y-6">
+      <div>
+        <Skeleton className="mb-2 h-8 w-56" />
+        <Skeleton className="h-4 w-80" />
+      </div>
+      <div className="grid gap-4 md:grid-cols-3">
+        <EarningsSummaryCardSkeleton />
+        <EarningsSummaryCardSkeleton />
+        <EarningsSummaryCardSkeleton />
+      </div>
+      <div className="rounded-xl border bg-white p-4">
+        <Skeleton className="mb-4 h-6 w-40" />
+        <table className="w-full">
+          <tbody>
+            <EarningsTableRowSkeleton />
+            <EarningsTableRowSkeleton />
+            <EarningsTableRowSkeleton />
+          </tbody>
+        </table>
+      </div>
+      <div className="rounded-xl border bg-white p-4">
+        <Skeleton className="mb-4 h-6 w-36" />
+        <table className="w-full">
+          <tbody>
+            <PayoutHistoryRowSkeleton />
+            <PayoutHistoryRowSkeleton />
+            <PayoutHistoryRowSkeleton />
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}

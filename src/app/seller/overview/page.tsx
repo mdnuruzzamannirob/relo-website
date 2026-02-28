@@ -11,11 +11,15 @@ import ActivityItem from '@/components/modules/seller/ActivityItem';
 import { Button } from '@/components/ui/button';
 import { SellerOverviewPageSkeleton } from '@/components/shared/SkeletonLoaders';
 import { useAuth } from '@/hooks/useAuth';
+import { useRequestPayoutMutation } from '@/store/apis/earningsApi';
+import ButtonComp from '@/components/shared/ButtonComp';
 
 type ActivityColor = 'green' | 'blue' | 'orange';
 
 const SellerOverviewPage = () => {
   const { user } = useAuth();
+
+  const [requestPayout, { isLoading: payoutLoading }] = useRequestPayoutMutation();
 
   // Overview stats
   const {
@@ -184,7 +188,15 @@ const SellerOverviewPage = () => {
           <p className="text-primary mt-2 text-2xl font-semibold">
             {stats?.availableWithdrawal ?? '$0.00'}
           </p>
-          <Button className="mt-4 bg-green-600 hover:bg-green-700">Request Payout</Button>
+          <ButtonComp
+            className="mt-4 bg-green-600 hover:bg-green-700"
+            loading={payoutLoading}
+            disabled={payoutLoading || Number(stats?.availableWithdrawal ?? 0) <= 0}
+            loadingText="Requesting..."
+            onClick={() => requestPayout()}
+          >
+            Request Payout
+          </ButtonComp>
         </div>
       </div>
     </section>
