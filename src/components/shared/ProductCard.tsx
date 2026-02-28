@@ -115,7 +115,7 @@ const ProductCard = ({
         </p>
 
         {showBuy && (
-          <Link href={`/products/${product.id}`} className="mt-auto pt-2">
+          <Link href={`/checkout?productId=${product.id}`} className="mt-auto pt-2">
             <Button size="lg" className="w-full" disabled={product.isSold}>
               {product.isSold ? 'Sold Out' : 'Buy Now'}
             </Button>

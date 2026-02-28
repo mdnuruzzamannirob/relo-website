@@ -382,7 +382,7 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
 
       if (type === 'create') {
         await createProduct(formData).unwrap();
-        toast.success('Listing published successfully.');
+        // toast.success('Listing published successfully.');
         router.push('/seller/my-listings');
         return;
       }
@@ -612,7 +612,7 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
 
         <div className="md:col-span-2">
           <label htmlFor="location" className="mb-1 block text-sm font-medium text-slate-500">
-            Location <span className="text-red-500">*</span>
+            Locker Address Name<span className="text-red-500">*</span>
           </label>
 
           <Select
@@ -628,7 +628,7 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
               {isLockersLoading && (
                 <div className="flex items-center justify-center gap-2 px-3 py-6 text-sm text-slate-500">
                   <Loader2 size={18} className="animate-spin" />
-                  Loading locations...
+                  Loading lockers...
                 </div>
               )}
 
@@ -644,9 +644,7 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
                 ))}
 
               {!isLockersLoading && !hasLockers && (
-                <div className="px-3 py-3 text-center text-sm text-slate-500">
-                  No locations found
-                </div>
+                <div className="px-3 py-3 text-center text-sm text-slate-500">No lockers found</div>
               )}
             </SelectContent>
           </Select>

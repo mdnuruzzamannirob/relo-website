@@ -109,7 +109,7 @@ const Sidebar = ({
       {/* User */}
       <div className="border-brand-50 mb-5 flex items-center gap-3 border-b pb-5">
         <Avatar className="border-brand-100 size-10 border shadow-sm">
-          <AvatarImage src={user?.profileImage} />
+          <AvatarImage src={user?.profileImage} className="object-cover" />
 
           <AvatarFallback className="bg-slate-100 text-xs font-semibold">
             {getInitials(user?.name)}

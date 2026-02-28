@@ -20,7 +20,7 @@ function ActivityItem({
 
   return (
     <div className={cn('flex gap-3 rounded-lg border bg-white p-3')}>
-      <div className="flex size-10 items-center justify-center rounded-lg bg-white">
+      <div className="bg-brand-50 flex size-10 items-center justify-center rounded-lg border">
         <Activity size={18} />
       </div>
       <div className="flex-1">

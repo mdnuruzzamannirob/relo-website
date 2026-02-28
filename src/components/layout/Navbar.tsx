@@ -177,7 +177,7 @@ export default function Navbar() {
                 <PopoverTrigger asChild>
                   <button className="rounded-full">
                     <Avatar className="border-brand-100 h-10 w-10 border shadow-sm">
-                      <AvatarImage src={user?.profileImage} />
+                      <AvatarImage src={user?.profileImage} className="object-cover" />
 
                       <AvatarFallback className="bg-slate-100 text-xs font-semibold">
                         {getInitials(user?.name)}
@@ -191,7 +191,7 @@ export default function Navbar() {
                   {/* User Info */}
                   <div className="flex items-center gap-2 border-b p-3">
                     <Avatar className="border-brand-100 size-10 border shadow-sm">
-                      <AvatarImage src={user?.profileImage} />
+                      <AvatarImage src={user?.profileImage} className="object-cover" />
 
                       <AvatarFallback className="bg-slate-100 text-xs font-semibold">
                         {getInitials(user?.name)}

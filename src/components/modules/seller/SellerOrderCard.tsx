@@ -165,7 +165,11 @@ export default function SellerOrderCard({ order }: { order: Order }) {
               <CheckCircle2 className="size-5 shrink-0 text-purple-600" />
               <div>
                 <p className="mb-1 font-medium text-purple-600">Deposited</p>
-                <p className="text-xs text-purple-500">Locker: {order.lockerNumber}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  {' '}
+                  <p className="text-xs text-purple-500">Locker: {order.lockerNumber}</p>
+                  <p className="text-xs text-purple-500">Deposit Code: {order.depositCode}</p>
+                </div>
               </div>
             </div>
           )}

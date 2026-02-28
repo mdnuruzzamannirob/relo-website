@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, Loader2 } from 'lucide-react';
@@ -18,38 +18,70 @@ export default function CheckoutOrder() {
 
   const { isAuthenticated } = useAuth();
   const [buyNow, { isLoading: isBuyingNow }] = useBuyNowMutation();
+
   const [orderData, setOrderData] = useState<BuyNowCheckoutResponse | null>(null);
   const [isLoadingOrder, setIsLoadingOrder] = useState(false);
   const [error, setError] = useState('');
 
+  // ✅ Guards to prevent duplicate calls (StrictMode/dev + param/auth jitter)
+  const lastFetchedProductIdRef = useRef<string | null>(null);
+  const inFlightRef = useRef(false);
+  const redirectedRef = useRef(false);
+
+  const extractErrorMessage = (err: any) => {
+    // RTK Query unwrap error commonly: err?.data?.message
+    return (
+      err?.data?.message || err?.error?.data?.message || err?.message || 'Failed to load order'
+    );
+  };
+
+  const fetchOrder = useCallback(
+    async (pid: string, { force }: { force?: boolean } = {}) => {
+      // Prevent parallel calls
+      if (inFlightRef.current) return;
+
+      // Prevent re-fetching same productId unless forced (Try again)
+      if (!force && lastFetchedProductIdRef.current === pid) return;
+
+      inFlightRef.current = true;
+      lastFetchedProductIdRef.current = pid;
+
+      setIsLoadingOrder(true);
+      setError('');
+
+      try {
+        const res = await buyNow({ productId: pid }).unwrap();
+        setOrderData(res.data);
+      } catch (err: any) {
+        setError(extractErrorMessage(err));
+      } finally {
+        setIsLoadingOrder(false);
+        inFlightRef.current = false;
+      }
+    },
+    [buyNow],
+  );
+
   // ── Fetch order on mount ──
   useEffect(() => {
+    // Auth gate: redirect only once (avoid loops)
     if (!isAuthenticated) {
-      router.push('/sign-in');
+      if (!redirectedRef.current) {
+        redirectedRef.current = true;
+        router.push('/sign-in');
+      }
       return;
     }
 
+    // Param gate
     if (!productId) {
       setError('Product not found.');
       return;
     }
 
-    const fetchOrder = async () => {
-      setIsLoadingOrder(true);
-      setError('');
-      try {
-        const res = await buyNow({ productId }).unwrap();
-        setOrderData(res.data);
-      } catch (err: any) {
-        const msg = err?.error?.data?.message || 'Failed to load order';
-        setError(msg);
-      } finally {
-        setIsLoadingOrder(false);
-      }
-    };
-
-    fetchOrder();
-  }, [productId, isAuthenticated, buyNow, router]);
+    // Normal fetch (deduped by guards)
+    fetchOrder(productId);
+  }, [productId, isAuthenticated, fetchOrder, router]);
 
   // ── Handle payment ──
   const handlePayment = () => {
@@ -78,17 +110,8 @@ export default function CheckoutOrder() {
           <button
             onClick={() => {
               if (productId) {
-                setError('');
-                setIsLoadingOrder(true);
-                buyNow({ productId })
-                  .unwrap()
-                  .then((res) => {
-                    setOrderData(res.data);
-                    setIsLoadingOrder(false);
-                  })
-                  .catch(() => {
-                    setIsLoadingOrder(false);
-                  });
+                // Force refetch for retry
+                fetchOrder(productId, { force: true });
               }
             }}
             className="rounded-md bg-red-100 px-4 py-2 text-xs font-medium text-red-700 hover:bg-red-200"

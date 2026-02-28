@@ -11,6 +11,7 @@ import type { ColorType } from '@/components/shared/StatusBadge';
 import { useOrderReceivedMutation, useCancelOrderMutation } from '@/store/apis/orderApi';
 import type { Order } from '@/types/order';
 import ReviewModal from './ReviewModal';
+import { cn } from '@/lib/utils/cn';
 
 // ── Status badge config ──
 const statusConfig: Record<string, { label: string; color: ColorType }> = {
@@ -23,13 +24,17 @@ const statusConfig: Record<string, { label: string; color: ColorType }> = {
 };
 
 // ── Determine which actions to show ──
-type BuyerAction = 'cancel' | 'confirm' | 'contact' | 'review';
+type BuyerAction = 'cancel' | 'confirm' | 'contact' | 'review' | 'make-payment'; // | 'qr';
 // QR code action commented out for now
 // type BuyerAction = 'cancel' | 'confirm' | 'contact' | 'qr';
 
 function getBuyerActions(order: Order): BuyerAction[] {
   const s = order.status;
 
+  // Pending
+  if (s === 'PENDING') {
+    return ['cancel', 'make-payment', 'contact'];
+  }
   // Completed → contact + review (if not reviewed)
   if (s === 'COMPLETE') {
     return order.isReviewed === false ? ['review', 'contact'] : ['contact'];
@@ -51,6 +56,7 @@ const actionLabel: Record<BuyerAction, string> = {
   confirm: 'Confirm Receipt',
   contact: 'Contact Seller',
   review: 'Write Review',
+  'make-payment': 'Make Payment',
   // qr: 'View QR Code',
 };
 
@@ -131,12 +137,19 @@ export default function BuyerOrderCard({ order }: { order: Order }) {
               <p className="text-xs text-slate-500">Order Date</p>
               <p className="text-primary text-sm font-medium">{formattedDate}</p>
             </div>
-            {order.isPayment && (
-              <div>
-                <p className="text-xs text-slate-500">Payment</p>
-                <p className="text-sm font-medium text-green-600">Paid</p>
-              </div>
-            )}
+
+            <div>
+              <p className="text-xs text-slate-500">Payment</p>
+              <p
+                className={cn(
+                  'text-sm font-medium text-green-600',
+                  !order.isPayment && 'text-red-600',
+                )}
+              >
+                {' '}
+                {order.isPayment ? 'Paid' : 'Unpaid'}
+              </p>
+            </div>
           </div>
 
           {/* Actions */}
@@ -144,15 +157,17 @@ export default function BuyerOrderCard({ order }: { order: Order }) {
             {actions.map((action) => (
               <Button
                 key={action}
-                variant={action === 'confirm' ? 'default' : 'outline'}
+                variant={action === 'confirm' || action === 'make-payment' ? 'default' : 'outline'}
                 className={
                   action === 'confirm'
                     ? 'w-full bg-green-600 text-white hover:bg-green-700'
                     : action === 'cancel'
                       ? 'w-full border-red-600 text-red-600 hover:bg-red-50'
-                      : action === 'review'
-                        ? 'w-full border-blue-600 text-blue-600 hover:bg-blue-50'
-                        : 'w-full'
+                      : action === 'make-payment'
+                        ? 'w-full bg-amber-600 text-white hover:bg-amber-700'
+                        : action === 'review'
+                          ? 'w-full border-blue-600 text-blue-600 hover:bg-blue-50'
+                          : 'w-full'
                 }
                 onClick={() => {
                   if (action === 'contact') {
@@ -161,6 +176,8 @@ export default function BuyerOrderCard({ order }: { order: Order }) {
                     );
                   } else if (action === 'review') {
                     setOpenReviewModal(true);
+                  } else if (action === 'make-payment') {
+                    router.push(`/checkout?productId=${order?.products?.id}`);
                   } else {
                     setOpenModal(action);
                   }
