@@ -147,7 +147,13 @@ const BuyerOverviewPage = () => {
               />
             ))
         ) : (
-          <p className="py-4 text-sm text-slate-500">No notifications yet</p>
+          <div className="flex flex-col items-center justify-center p-12 text-center">
+            <Bell className="mb-3 text-slate-400" size={40} />
+            <p className="font-medium text-slate-600">No notifications yet</p>
+            <p className="mt-1 text-sm text-slate-500">
+              You&apos;ll receive notifications about your orders and activities
+            </p>
+          </div>
         )}
       </div>
 
@@ -173,7 +179,11 @@ const BuyerOverviewPage = () => {
         ) : recentOrders.length > 0 ? (
           recentOrders.map((order, index) => <OrderItem key={index} order={order} />)
         ) : (
-          <p className="py-4 text-sm text-slate-500">No orders yet</p>
+          <div className="flex flex-col items-center justify-center p-12 text-center">
+            <Package className="mb-3 text-slate-400" size={40} />
+            <p className="font-medium text-slate-600">No recent orders</p>
+            <p className="mt-1 text-sm text-slate-500">You haven&apos;t placed any orders yet</p>
+          </div>
         )}
       </div>
 

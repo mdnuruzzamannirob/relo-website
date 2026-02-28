@@ -63,7 +63,7 @@ export default function Reviews() {
         </div>
         <h3 className="mb-2 text-lg font-semibold text-slate-900">No Reviews Yet</h3>
         <p className="text-sm text-slate-600">
-          You haven't written any reviews yet. Complete orders to leave reviews!
+          You haven&apos;t written any reviews yet. Complete orders to leave reviews!
         </p>
       </div>
     );

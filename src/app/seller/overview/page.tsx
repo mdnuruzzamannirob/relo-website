@@ -158,9 +158,10 @@ const SellerOverviewPage = () => {
               />
             ))
           ) : (
-            <div className="rounded-lg bg-slate-50 py-8 text-center">
-              <Activity className="mx-auto mb-2 text-slate-400" size={32} />
-              <p className="text-sm text-slate-600">No recent activities yet</p>
+            <div className="flex flex-col items-center justify-center p-12 text-center">
+              <Activity className="mb-3 text-slate-400" size={40} />
+              <p className="font-medium text-slate-600">No activity yet</p>
+              <p className="mt-1 text-sm text-slate-500">You don&apos;t have any recent activity</p>
             </div>
           )}
         </div>
@@ -175,7 +176,7 @@ const SellerOverviewPage = () => {
             List a new item and reach thousands of buyers
           </p>
 
-          <Link href="/seller/my-listings" className="inline-block">
+          <Link href="/seller/my-listings/new-listing" className="inline-block">
             <Button className="mt-4 bg-white text-slate-900 hover:bg-slate-100">
               Create New Listing
             </Button>
@@ -191,7 +192,7 @@ const SellerOverviewPage = () => {
           <ButtonComp
             className="mt-4 bg-green-600 hover:bg-green-700"
             loading={payoutLoading}
-            disabled={payoutLoading || Number(stats?.availableWithdrawal ?? 0) <= 0}
+            disabled={payoutLoading || !Number(stats?.availableWithdrawal)}
             loadingText="Requesting..."
             onClick={() => requestPayout()}
           >

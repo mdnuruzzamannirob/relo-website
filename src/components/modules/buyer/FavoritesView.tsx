@@ -5,6 +5,7 @@ import HeaderBar from '@/components/shared/HeaderBar';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useGetMyFavoriteProductsQuery, useToggleFavoriteMutation } from '@/store/apis/productApi';
+import { Heart } from 'lucide-react';
 
 const FavoritesView = () => {
   const { data, isLoading, isError, refetch } = useGetMyFavoriteProductsQuery();
@@ -55,6 +56,18 @@ const FavoritesView = () => {
               }
             }}
           />
+        )}
+
+        {!isLoading && !isError && favorites.length === 0 && (
+          <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-slate-50 p-12 text-center">
+            <div className="mb-4 rounded-full bg-slate-100 p-4">
+              <Heart className="size-8 text-slate-400" />
+            </div>
+            <h3 className="mb-2 text-lg font-semibold text-slate-900">No Favorites Yet</h3>
+            <p className="text-sm text-slate-600">
+              You haven&apos;t saved any items yet. Start adding items to your favorites!
+            </p>
+          </div>
         )}
       </div>
     </section>
