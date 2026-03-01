@@ -13,6 +13,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm, useController, useWatch } from 'react-hook-form';
 import { AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { getGoogleSignInUrl } from '@/lib/utils/authClient';
 
 const SignUpForm = () => {
   const router = useRouter();
@@ -63,6 +64,11 @@ const SignUpForm = () => {
     };
 
     signUp(payload);
+  };
+
+  const handleGoogleSignIn = () => {
+    if (isLoading) return;
+    window.location.href = getGoogleSignInUrl();
   };
 
   return (
@@ -276,7 +282,13 @@ const SignUpForm = () => {
         </div>
 
         {/* Google */}
-        <Button variant="outline" className="h-11 w-full gap-2" disabled={isLoading}>
+        <Button
+          type="button"
+          variant="outline"
+          className="h-11 w-full gap-2"
+          disabled={isLoading}
+          onClick={handleGoogleSignIn}
+        >
           <Image
             src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
             alt="Google"

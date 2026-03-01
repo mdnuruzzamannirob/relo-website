@@ -7,6 +7,8 @@ const API_URL =
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: API_URL,
   prepareHeaders: (headers, { getState }) => {
+    headers.set('ngrok-skip-browser-warning', 'true');
+
     // Get token from localStorage dynamically
     const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
 
