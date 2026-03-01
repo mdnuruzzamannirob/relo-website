@@ -148,6 +148,7 @@ export default function ProductDetails() {
                   }
                   router.push(`/checkout?productId=${product.id}`);
                 }}
+                disabled={product.User?.id === user?.id}
                 className="h-11 w-full"
               >
                 Buy Now
@@ -158,6 +159,7 @@ export default function ProductDetails() {
                   variant="outline"
                   className="h-11 w-full"
                   onClick={() => setShowOffer(true)}
+                  disabled={product.User?.id === user?.id}
                 >
                   Make an offer
                 </Button>
