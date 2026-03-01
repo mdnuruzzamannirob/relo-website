@@ -10,9 +10,10 @@ import type { ChatUser } from '@/types/chat';
 
 interface ChatContainerProps {
   variant: 'buyer' | 'seller';
+  adminOnly?: boolean;
 }
 
-export default function ChatContainer({ variant }: ChatContainerProps) {
+export default function ChatContainer({ variant, adminOnly = false }: ChatContainerProps) {
   const searchParams = useSearchParams();
   const initialUserId = searchParams.get('userId');
 
@@ -37,7 +38,7 @@ export default function ChatContainer({ variant }: ChatContainerProps) {
     isUserOnline,
   } = useChat();
 
-  const [showChat, setShowChat] = useState(false);
+  const [showChat, setShowChat] = useState(adminOnly);
   const [selectedUser, setSelectedUser] = useState<ChatUser | null>(null);
   const autoOpenedRef = useRef(false);
 
@@ -170,23 +171,29 @@ export default function ChatContainer({ variant }: ChatContainerProps) {
 
   return (
     <div className="border-brand-100 flex h-full w-full overflow-hidden rounded-xl border bg-white">
-      {/* Sidebar */}
-      <aside
-        className={`border-brand-100 h-full w-full shrink-0 border-r bg-white sm:w-80 lg:w-72 ${
-          showChat ? 'hidden sm:block' : 'block'
-        }`}
-      >
-        <ChatSidebar
-          chatUsers={chatUsers}
-          activeRoomId={activeRoomId}
-          isLoading={isLoadingUsers}
-          onSelectUser={handleSelectUser}
-          isUserOnline={isUserOnline}
-        />
-      </aside>
+      {/* Sidebar — hidden in adminOnly mode */}
+      {!adminOnly && (
+        <aside
+          className={`border-brand-100 h-full w-full shrink-0 border-r bg-white sm:w-80 lg:w-72 ${
+            showChat ? 'hidden sm:block' : 'block'
+          }`}
+        >
+          <ChatSidebar
+            chatUsers={chatUsers}
+            activeRoomId={activeRoomId}
+            isLoading={isLoadingUsers}
+            onSelectUser={handleSelectUser}
+            isUserOnline={isUserOnline}
+          />
+        </aside>
+      )}
 
       {/* Chat Area */}
-      <main className={`flex h-full flex-1 flex-col ${showChat ? 'flex' : 'hidden sm:flex'}`}>
+      <main
+        className={`flex h-full flex-1 flex-col ${
+          adminOnly ? 'flex' : showChat ? 'flex' : 'hidden sm:flex'
+        }`}
+      >
         <ChatArea
           activeUser={activeUser}
           messages={messages}
@@ -198,6 +205,7 @@ export default function ChatContainer({ variant }: ChatContainerProps) {
           onSendMessage={handleSendMessage}
           onLoadMore={loadMoreMessages}
           onBack={handleBack}
+          hideBackButton={adminOnly}
         />
       </main>
     </div>

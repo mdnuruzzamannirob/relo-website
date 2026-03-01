@@ -108,11 +108,13 @@ const chatSlice = createSlice({
 
     addMessage: (state, action: PayloadAction<ChatMessage>) => {
       const msg = action.payload;
-      // Avoid duplicate messages
-      const exists = state.messages.some((m) => m.id === msg.id);
-      if (!exists) {
-        // Spread into new sorted array so Immer tracks correctly
-        state.messages = [...state.messages, msg].sort(compareMessages);
+
+      // Only add to messages array if it belongs to the active room
+      if (msg.roomId === state.activeRoomId) {
+        const exists = state.messages.some((m) => m.id === msg.id);
+        if (!exists) {
+          state.messages = [...state.messages, msg].sort(compareMessages);
+        }
       }
 
       // Update last message in chat users list
