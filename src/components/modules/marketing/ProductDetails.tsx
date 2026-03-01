@@ -25,7 +25,7 @@ export default function ProductDetails() {
   const params = useParams();
   const productId = typeof params?.id === 'string' ? params.id : '';
 
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   const { data, isLoading, isError, refetch } = useGetProductDetailsQuery(productId, {
     skip: !productId,
@@ -37,6 +37,7 @@ export default function ProductDetails() {
   const [toggleFavorite, { isLoading: isToggling }] = useToggleFavoriteMutation();
 
   const product = data?.data;
+
   const images = product?.photos?.length ? product.photos : ['/images/banner.png'];
   const favoriteIds = useMemo(
     () => new Set(favoritesData?.data?.map((item) => item.product.id) || []),
@@ -223,20 +224,21 @@ export default function ProductDetails() {
                 />
                 <div>
                   <p className="text-primary text-sm font-medium">
-                    {product?.User?.name || 'Seller'}
+                    {product?.User?.name || 'Seller'} {product?.User?.id === user?.id && '(You)'}
                   </p>
                 </div>
               </div>
-
-              <Link
-                href={`/buyer/messages${product?.User?.id ? `?userId=${product.User.id}` : ''}`}
-                passHref
-              >
-                <Button className="w-full">
-                  <MessageSquare className="mr-2 h-4 w-4" />
-                  Message seller
-                </Button>
-              </Link>
+              {product?.User?.id !== user?.id && (
+                <Link
+                  href={`/buyer/messages${product?.User?.id ? `?userId=${product.User.id}` : ''}`}
+                  passHref
+                >
+                  <Button className="w-full">
+                    <MessageSquare className="mr-2 h-4 w-4" />
+                    Message seller
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         </div>
