@@ -5,6 +5,14 @@ export const metadata = {
   description: 'Help Center',
 };
 
+const ADMIN_ID = '69a256c5a7dcdce70a6fd733';
+
 export default function HelpCenterPage() {
-  return <CmsInfoPage title="Help Center" pageKey="help-center" />;
+  return (
+    <CmsInfoPage
+      title="Help Center"
+      pageKey="help-center"
+      contactSupportHref={`/chat?userId=${ADMIN_ID}`}
+    />
+  );
 }

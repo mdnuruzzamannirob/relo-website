@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { dateFormatter } from '@/lib/utils/dateFormatter';
 import { useGetCmsPageQuery, type CmsPageKey } from '@/store/apis/cmsApi';
-import { ArrowLeft, RefreshCcw } from 'lucide-react';
+import { ArrowLeft, MessageSquare, RefreshCcw } from 'lucide-react';
 import Link from 'next/link';
 
 type CmsInfoPageProps = {
@@ -12,9 +12,16 @@ type CmsInfoPageProps = {
   pageKey: CmsPageKey;
   backHref?: string;
   backLabel?: string;
+  contactSupportHref?: string;
 };
 
-const CmsInfoPage = ({ title, pageKey, backHref = '/', backLabel = 'Back' }: CmsInfoPageProps) => {
+const CmsInfoPage = ({
+  title,
+  pageKey,
+  backHref = '/',
+  backLabel = 'Back',
+  contactSupportHref,
+}: CmsInfoPageProps) => {
   const { data, isLoading, isError, isFetching, refetch } = useGetCmsPageQuery(pageKey);
 
   const content = data?.data?.content?.trim();
@@ -85,6 +92,21 @@ const CmsInfoPage = ({ title, pageKey, backHref = '/', backLabel = 'Back' }: Cms
           <article className="Prose" dangerouslySetInnerHTML={{ __html: content }} />
         )}
       </div>
+
+      {contactSupportHref && (
+        <div className="border-brand-100 bg-brand-50/50 mt-6 flex flex-col items-center gap-3 rounded-xl border p-8 text-center">
+          <h3 className="text-lg font-semibold text-slate-800">Still need help?</h3>
+          <p className="max-w-md text-sm text-slate-500">
+            Can&apos;t find what you&apos;re looking for? Our support team is here to help.
+          </p>
+          <Link href={contactSupportHref}>
+            <Button className="mt-1">
+              <MessageSquare className="mr-2 size-4" />
+              Contact Support
+            </Button>
+          </Link>
+        </div>
+      )}
     </div>
   );
 };

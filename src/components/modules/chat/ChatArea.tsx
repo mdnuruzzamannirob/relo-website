@@ -21,6 +21,7 @@ interface ChatAreaProps {
   onSendMessage: (text?: string, images?: string[]) => void;
   onLoadMore: () => void;
   onBack: () => void;
+  hideBackButton?: boolean;
 }
 
 export default function ChatArea({
@@ -34,6 +35,7 @@ export default function ChatArea({
   onSendMessage,
   onLoadMore,
   onBack,
+  hideBackButton = false,
 }: ChatAreaProps) {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -189,16 +191,18 @@ export default function ChatArea({
       {/* Header */}
       <div className="border-brand-100 flex items-center gap-3 border-b bg-white px-3 py-3 sm:px-4">
         {/* Back button (mobile) */}
-        <button onClick={onBack} className="text-slate-600 sm:hidden" aria-label="Back">
-          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-        </button>
+        {!hideBackButton && (
+          <button onClick={onBack} className="text-slate-600 sm:hidden" aria-label="Back">
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
+        )}
 
         {/* User Info */}
         <div className="relative shrink-0">
