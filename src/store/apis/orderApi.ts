@@ -104,10 +104,9 @@ export const orderApi = createApi({
     // ── Cancel Order (demo — API not yet built on backend) ──
     cancelOrder: builder.mutation<{ success: boolean; message: string }, { orderId: string }>({
       query: ({ orderId }) => ({
-        // TODO: Replace with real endpoint when backend is ready
-        url: '/orders/order-received-for-buyer',
-        method: 'POST',
-        body: { orderId, status: 'DECLINE' },
+        url: '/orders/order-cancel',
+        method: 'PUT',
+        body: { orderId },
       }),
       async onQueryStarted(_args, { queryFulfilled }) {
         try {

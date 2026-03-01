@@ -31,10 +31,12 @@ const CmsInfoPage = ({ title, pageKey, backHref = '/', backLabel = 'Back' }: Cms
 
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-primary text-2xl font-semibold">{title}</h1>
-        <p className="text-end text-sm font-medium text-slate-500">
-          {' '}
-          Updated on {dateFormatter(data?.data?.updatedAt as string, { showTime: true })}
-        </p>
+        {data?.data?.updatedAt && (
+          <p className="text-end text-sm font-medium text-slate-500">
+            {data?.data?.updatedAt}
+            Updated on {dateFormatter(data?.data?.updatedAt as string, { showTime: true })}
+          </p>
+        )}
       </div>
 
       <div className="border-brand-100 rounded-xl border p-8">
