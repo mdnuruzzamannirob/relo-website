@@ -50,7 +50,7 @@ const SignUpForm = () => {
 
   useEffect(() => {
     if (isSuccess) {
-      router.push('/sign-in');
+      router.push('/verify-otp');
     }
   }, [isSuccess, router]);
 

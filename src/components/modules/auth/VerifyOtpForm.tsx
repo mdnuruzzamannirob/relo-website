@@ -11,6 +11,7 @@ const VerifyOtpForm = () => {
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
 
   const [email, setEmail] = useState<string>('');
+  const [flow, setFlow] = useState<'forgot' | 'signup' | null>(null);
   const [resendTimer, setResendTimer] = useState(0);
   const [otpValues, setOtpValues] = useState<string[]>(Array(6).fill(''));
 
@@ -18,19 +19,35 @@ const VerifyOtpForm = () => {
   const [resend, { isLoading: isResending }] = useResendOtpMutation();
 
   useEffect(() => {
-    if (isSuccess) {
+    if (!isSuccess || !flow) return;
+
+    if (flow === 'forgot') {
       router.push('/reset-password');
+    } else {
+      sessionStorage.removeItem('signupEmail');
+      router.push('/sign-in');
     }
-  }, [isSuccess, router]);
+  }, [flow, isSuccess, router]);
 
   useEffect(() => {
-    const storedEmail = sessionStorage.getItem('forgotPasswordEmail');
-    if (!storedEmail) {
-      router.push('/forgot-password');
+    const forgotEmail = sessionStorage.getItem('forgotPasswordEmail');
+    const signupEmail = sessionStorage.getItem('signupEmail');
+
+    if (forgotEmail) {
+      setEmail(forgotEmail);
+      setFlow('forgot');
+      inputsRef.current[0]?.focus();
       return;
     }
-    setEmail(storedEmail);
-    inputsRef.current[0]?.focus();
+
+    if (signupEmail) {
+      setEmail(signupEmail);
+      setFlow('signup');
+      inputsRef.current[0]?.focus();
+      return;
+    }
+
+    router.push('/sign-up');
   }, [router]);
 
   useEffect(() => {
@@ -95,6 +112,13 @@ const VerifyOtpForm = () => {
 
     resend({ email });
     setResendTimer(60);
+
+    if (flow === 'signup') {
+      sessionStorage.setItem('signupEmail', email);
+      sessionStorage.removeItem('forgotPasswordEmail');
+    } else if (flow === 'forgot') {
+      sessionStorage.setItem('forgotPasswordEmail', email);
+    }
   };
 
   return (

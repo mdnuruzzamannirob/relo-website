@@ -38,6 +38,7 @@ export interface Order {
   status: OrderStatus;
   isPayment: boolean;
   isReviewed?: boolean;
+  isRefunded?: boolean;
   products: OrderProduct;
   seller?: OrderUser;
   buyer?: OrderUser;

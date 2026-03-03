@@ -30,7 +30,9 @@ export const authApi = createApi({
       async onQueryStarted(args, { queryFulfilled }) {
         try {
           await queryFulfilled;
-          toast.success('Registration successful! Please sign in.');
+          sessionStorage.setItem('signupEmail', args.email);
+
+          toast.success('OTP sent to your email');
         } catch (error: any) {
           const errorMessage = error?.error?.data?.message || 'Something went wrong';
           toast.error(errorMessage);

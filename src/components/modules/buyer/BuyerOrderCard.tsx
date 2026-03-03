@@ -142,12 +142,13 @@ export default function BuyerOrderCard({ order }: { order: Order }) {
               <p className="text-xs text-slate-500">Payment</p>
               <p
                 className={cn(
-                  'text-sm font-medium text-green-600',
+                  'text-sm font-medium',
+                  order.isPayment && 'text-green-600',
                   !order.isPayment && 'text-red-600',
+                  order.isRefunded && 'text-purple-600',
                 )}
               >
-                {' '}
-                {order.isPayment ? 'Paid' : 'Unpaid'}
+                {order.isRefunded ? 'Refunded' : order.isPayment ? 'Paid' : 'Unpaid'}
               </p>
             </div>
           </div>

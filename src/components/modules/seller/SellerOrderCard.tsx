@@ -12,6 +12,7 @@ import { useOrderDepositMutation, useCancelOrderMutation } from '@/store/apis/or
 import type { Order } from '@/types/order';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils/cn';
 
 // ── Status badge config ──
 const statusConfig: Record<string, { label: string; color: ColorType }> = {
@@ -151,12 +152,20 @@ export default function SellerOrderCard({ order }: { order: Order }) {
               <p className="text-xs text-slate-500">Order Date</p>
               <p className="text-primary text-sm font-medium">{formattedDate}</p>
             </div>
-            {order.isPayment && (
-              <div>
-                <p className="text-xs text-slate-500">Payment</p>
-                <p className="text-sm font-medium text-green-600">Received</p>
-              </div>
-            )}
+
+            <div>
+              <p className="text-xs text-slate-500">Payment</p>
+              <p
+                className={cn(
+                  'text-sm font-medium',
+                  order.isPayment && 'text-green-600',
+                  !order.isPayment && 'text-red-600',
+                  order.isRefunded && 'text-purple-600',
+                )}
+              >
+                {order.isRefunded ? 'Refunded' : order.isPayment ? 'Received' : 'Not Received'}
+              </p>
+            </div>
           </div>
 
           {/* Locker info if deposited */}
