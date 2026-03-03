@@ -98,7 +98,7 @@ export default function BuyerOfferCard({ offer }: { offer: Offer }) {
   return (
     <>
       {/* CARD */}
-      <div className="border-brand-100 flex flex-col gap-4 rounded-xl border bg-white p-4 shadow-sm transition-shadow hover:shadow-md md:flex-row md:gap-5 md:p-5">
+      <div className="border-brand-100 flex flex-col gap-4 rounded-xl border bg-white p-4 md:flex-row md:gap-5 md:p-5">
         <Image
           src={productImage}
           alt={product?.title || 'Product'}
@@ -193,20 +193,26 @@ export default function BuyerOfferCard({ offer }: { offer: Offer }) {
               >
                 {isAccepting ? (
                   <>
-                    <Loader2 className="mr-2 size-4 animate-spin" />
+                    <Loader2 className="size-4 animate-spin" />
                     Processing&hellip;
                   </>
                 ) : canRespondToCounter ? (
                   <>
-                    <CheckCircle2 className="mr-2 size-4" />
+                    <CheckCircle2 className="size-4" />
                     Accept &amp; Pay
                   </>
                 ) : (
                   <>
-                    <CreditCard className="mr-2 size-4" />
+                    <CreditCard className="size-4" />
                     Proceed to Payment
                   </>
                 )}
+              </Button>
+
+              {/* Decline */}
+              <Button variant="destructive" onClick={() => setModal('decline')}>
+                <XCircle className="size-4" />
+                Decline
               </Button>
 
               {/* Message Seller */}
@@ -218,20 +224,10 @@ export default function BuyerOfferCard({ offer }: { offer: Offer }) {
                   variant="outline"
                   className="w-full border-slate-200 text-slate-600 transition-all hover:border-slate-300 hover:bg-slate-50"
                 >
-                  <MessageSquare className="mr-2 size-4" />
+                  <MessageSquare className="size-4" />
                   Message Seller
                 </Button>
               </Link>
-
-              {/* Decline */}
-              <Button
-                variant="outline"
-                className="flex-1 border-red-200 text-red-600 transition-all hover:border-red-300 hover:bg-red-50 hover:text-red-700"
-                onClick={() => setModal('decline')}
-              >
-                <XCircle className="mr-2 size-4" />
-                Decline
-              </Button>
             </div>
           )}
 
@@ -247,7 +243,7 @@ export default function BuyerOfferCard({ offer }: { offer: Offer }) {
                   variant="outline"
                   className="w-full border-slate-200 text-slate-600 transition-all hover:border-slate-300 hover:bg-slate-50"
                 >
-                  <MessageSquare className="mr-2 size-4" />
+                  <MessageSquare className="size-4" />
                   Message Seller
                 </Button>
               </Link>
@@ -384,12 +380,12 @@ export default function BuyerOfferCard({ offer }: { offer: Offer }) {
               >
                 {isRedirecting ? (
                   <>
-                    <Loader2 className="mr-2 size-4 animate-spin" />
+                    <Loader2 className="size-4 animate-spin" />
                     Redirecting&hellip;
                   </>
                 ) : (
                   <>
-                    <ExternalLink className="mr-2 size-4" />
+                    <ExternalLink className="size-4" />
                     Proceed to Payment
                   </>
                 )}

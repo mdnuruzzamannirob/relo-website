@@ -65,7 +65,7 @@ export default function SellerOfferCard({ offer }: { offer: Offer }) {
   return (
     <>
       {/* ================= CARD ================= */}
-      <div className="border-brand-100 flex flex-col gap-4 rounded-xl border bg-white p-4 shadow-sm transition-shadow hover:shadow-md md:flex-row md:gap-5 md:p-5">
+      <div className="border-brand-100 flex flex-col gap-4 rounded-xl border bg-white p-4 md:flex-row md:gap-5 md:p-5">
         <Image
           src={productImage}
           alt={product?.title || 'Product'}
