@@ -189,7 +189,7 @@ const BuyerOverviewPage = () => {
 
       {/* CTA Section */}
       {recentOrders.length === 0 && (
-        <div className="bg-brand-50 border-brand-100 rounded-xl border p-6 text-center">
+        <div className="border-brand-200/50 bg-brand-100 rounded-xl border p-6 text-center">
           <p className="mb-4 text-slate-600">Ready to find your next item?</p>
           <Link href="/products">
             <Button className="bg-primary hover:bg-primary/90">Start Shopping</Button>
@@ -201,16 +201,16 @@ const BuyerOverviewPage = () => {
 };
 
 // Helper functions
-function getOrderStatusColor(status: string): 'green' | 'orange' | 'blue' | 'purple' | 'red' {
-  const statusMap: Record<string, 'green' | 'orange' | 'blue' | 'purple' | 'red'> = {
-    COMPLETE: 'green',
-    PICKUP: 'orange',
-    PENDING: 'blue',
-    ACCEPT: 'blue',
-    CONFIRM: 'purple',
-  };
-  return statusMap[status] || 'blue';
-}
+// function getOrderStatusColor(status: string): 'green' | 'orange' | 'blue' | 'purple' | 'red' {
+//   const statusMap: Record<string, 'green' | 'orange' | 'blue' | 'purple' | 'red'> = {
+//     COMPLETE: 'green',
+//     PICKUP: 'orange',
+//     PENDING: 'blue',
+//     ACCEPT: 'blue',
+//     CONFIRM: 'purple',
+//   };
+//   return statusMap[status] || 'blue';
+// }
 
 function getRelativeTime(dateString: string): string {
   const now = new Date();

@@ -40,7 +40,6 @@ const CmsInfoPage = ({
         <h1 className="text-primary text-2xl font-semibold">{title}</h1>
         {data?.data?.updatedAt && (
           <p className="text-end text-sm font-medium text-slate-500">
-            {data?.data?.updatedAt}
             Updated on {dateFormatter(data?.data?.updatedAt as string, { showTime: true })}
           </p>
         )}

@@ -5,9 +5,7 @@ export const nav = [
   { label: 'Men', href: '/products?category=men', slug: 'men' },
   { label: 'Kids', href: '/products?category=kids', slug: 'kids' },
   { label: 'Electronics', href: '/products?category=electronics', slug: 'electronics' },
-  { label: 'Products', href: '/products' },
   { label: 'About Us', href: '/about-us' },
-  // { label: 'Contact Us', href: '/contact-us' },
 ];
 
 export const userNav = [

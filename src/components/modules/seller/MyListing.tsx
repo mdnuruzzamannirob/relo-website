@@ -2,9 +2,11 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { Trash2 } from 'lucide-react';
 import ScrollableTabs from '@/components/shared/ScrollableTabs';
 import TabPanel from '@/components/shared/TabPanel';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import ProductRowCard, { ProductRowData, ProductRowSkeleton } from './ProductRowCard';
 import { useDeleteProductMutation, useGetMyProductsQuery } from '@/store/apis/productApi';
 
@@ -28,6 +30,7 @@ const formatDate = (value?: string) => {
 const MyListing = () => {
   const [active, setActive] = React.useState<string>('all');
   const [deletingId, setDeletingId] = React.useState<string | null>(null);
+  const [deleteModal, setDeleteModal] = React.useState<string | null>(null);
   const { data, isLoading, isError, refetch } = useGetMyProductsQuery({
     page: 1,
     limit: 10,
@@ -58,15 +61,20 @@ const MyListing = () => {
     { value: 'sold', label: `Sold (${soldProducts.length})` },
   ];
 
-  const handleDelete = async (id: string) => {
-    const confirmDelete = window.confirm('Delete this listing? This action cannot be undone.');
-    if (!confirmDelete) {
-      return;
-    }
+  const handleDelete = (id: string) => {
+    setDeleteModal(id);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteModal) return;
 
     try {
-      setDeletingId(id);
-      await deleteProduct(id).unwrap();
+      setDeletingId(deleteModal);
+      const result = await deleteProduct(deleteModal);
+      if ('error' in result) {
+        return;
+      }
+      setDeleteModal(null);
     } finally {
       setDeletingId(null);
     }
@@ -149,6 +157,31 @@ const MyListing = () => {
           />
         ))}
       </TabPanel>
+
+      {/* DELETE MODAL */}
+      <Dialog open={!!deleteModal} onOpenChange={() => setDeleteModal(null)}>
+        <DialogContent className="w-[95vw] max-w-md rounded-2xl p-4 text-center sm:p-6">
+          <Trash2 className="mx-auto size-12 text-red-600" />
+          <DialogTitle className="mt-3 text-lg font-semibold">Delete listing?</DialogTitle>
+
+          <p className="mt-2 text-sm text-slate-500">
+            This listing will be permanently deleted. This action cannot be undone.
+          </p>
+
+          <div className="mt-4 flex gap-3">
+            <Button variant="outline" className="flex-1" onClick={() => setDeleteModal(null)}>
+              Keep Listing
+            </Button>
+            <Button
+              onClick={confirmDelete}
+              disabled={deletingId === deleteModal}
+              className="flex-1 bg-red-600 hover:bg-red-700"
+            >
+              {deletingId === deleteModal ? 'Deleting...' : 'Delete'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

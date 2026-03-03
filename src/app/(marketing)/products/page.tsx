@@ -472,13 +472,13 @@ function ProductPageContent() {
           )}
 
           {!showInitialProductSkeleton && showEmptyProducts && (
-            <div className="flex min-h-64 flex-col items-center justify-center rounded-2xl border border-dashed bg-white p-8 text-center">
+            <div className="bg-brand-50/50 border-brand-100 flex min-h-64 flex-col items-center justify-center rounded-xl border p-8 text-center">
               <div className="mb-2 text-lg font-semibold">No products found</div>
               <p className="text-muted-foreground mb-4 max-w-md text-sm">
                 We couldn’t find any product for your current search/filter. Try changing the search
                 text, category, or sort order.
               </p>
-              <Button variant="outline" onClick={handleClearFilters}>
+              <Button variant="destructive" onClick={handleClearFilters}>
                 Clear filters
               </Button>
             </div>

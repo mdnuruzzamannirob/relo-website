@@ -31,7 +31,7 @@ const ProductCard = ({
   const sellerName = product.User?.name || 'Unknown Seller';
 
   return (
-    <div className="border-brand-100 flex h-full flex-col overflow-hidden rounded-xl border bg-white transition-shadow hover:shadow-md">
+    <div className="border-brand-100 flex h-full flex-col overflow-hidden rounded-xl border bg-white">
       <Link
         href={`/products/${product.id}`}
         className="bg-brand-50 relative block h-64 w-full overflow-hidden rounded-t-xl"
@@ -41,7 +41,7 @@ const ProductCard = ({
           alt={product.title}
           width={300}
           height={300}
-          className="size-full object-cover transition-transform duration-300 hover:scale-105"
+          className="bg-brand-50 size-full object-cover transition-transform duration-300 hover:scale-105"
         />
 
         {/* Sold Badge */}
