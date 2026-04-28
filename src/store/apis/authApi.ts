@@ -1,10 +1,10 @@
+import { OTPResponse, ResetPasswordRequest, User } from '@/types/auth';
 import { createApi } from '@reduxjs/toolkit/query/react';
-import { User, OTPResponse, ResetPasswordRequest } from '@/types/auth';
 import { toast } from 'sonner';
-import { clearUser, setUser } from '../slices/userSlice';
 import { baseQuery } from '../baseQuery';
-import { orderApi } from './orderApi';
+import { clearUser, setUser } from '../slices/userSlice';
 import { dashboardApi } from './dashboardApi';
+import { orderApi } from './orderApi';
 
 export const authApi = createApi({
   reducerPath: 'authApi',
@@ -280,13 +280,14 @@ export const authApi = createApi({
       }),
     }),
 
-    connectStripeAccount: builder.mutation<
+    connectPaypalAccount: builder.mutation<
       { success: boolean; message: string; data: { accountLinkUrl: string } },
-      void
+      { paypalEmail: string }
     >({
-      query: () => ({
-        url: '/users/stripe-connect',
+      query: (body) => ({
+        url: '/users/paypal-connect',
         method: 'POST',
+        body,
       }),
       async onQueryStarted(args, { queryFulfilled }) {
         try {
@@ -294,10 +295,10 @@ export const authApi = createApi({
             data: { data },
           } = await queryFulfilled;
           if (data?.accountLinkUrl) {
-            window.location.href = data.accountLinkUrl; // Redirect to Stripe onboarding
+            window.location.href = data.accountLinkUrl; // Redirect to Paypal onboarding
           }
         } catch (error: any) {
-          const errorMessage = error?.error?.data?.message || 'Failed to connect Stripe account';
+          const errorMessage = error?.error?.data?.message || 'Failed to connect Paypal account';
           toast.error(errorMessage);
         }
       },
@@ -360,5 +361,5 @@ export const {
   useSwitchUserMutation,
   useProfileImageMutation,
   useProfileUpdateMutation,
-  useConnectStripeAccountMutation,
+  useConnectPaypalAccountMutation,
 } = authApi;

@@ -13,7 +13,7 @@ export interface MyEarningsData {
   pendingPayment: number;
   totalPayment: number;
   availableWithdrawal: number;
-  isStripeAccountActive: boolean;
+  isPaypalAccountActive: boolean;
   pendingEarnings: PendingEarning[];
 }
 

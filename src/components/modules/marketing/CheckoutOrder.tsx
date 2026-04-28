@@ -220,7 +220,7 @@ export default function CheckoutOrder() {
             <div className="flex items-center gap-2 rounded-lg border border-blue-100 bg-blue-50 p-3 text-sm">
               <span className="text-blue-600">ℹ</span>
               <span className="text-blue-600">
-                You will be redirected to Stripe for secure payment
+                You will be redirected to PayPal for secure payment
               </span>
             </div>
 

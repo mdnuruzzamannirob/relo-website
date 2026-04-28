@@ -1,9 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import PayoutMethod from '@/components/modules/seller/PayoutMethod';
+import ButtonComp from '@/components/shared/ButtonComp';
 import HeaderBar from '@/components/shared/HeaderBar';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { EarningsPageSkeleton } from '@/components/shared/SkeletonLoaders';
+import StatusBadge from '@/components/shared/StatusBadge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -12,16 +15,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Wallet, Clock, TrendingUp, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
-import PayoutMethod from '@/components/modules/seller/PayoutMethod';
-import StatusBadge from '@/components/shared/StatusBadge';
-import ButtonComp from '@/components/shared/ButtonComp';
-import { EarningsPageSkeleton } from '@/components/shared/SkeletonLoaders';
 import {
   useGetMyEarningsQuery,
-  useRequestPayoutMutation,
   useGetPayoutHistoryQuery,
+  useRequestPayoutMutation,
 } from '@/store/apis/earningsApi';
+import { AlertCircle, ChevronLeft, ChevronRight, Clock, TrendingUp, Wallet } from 'lucide-react';
+import { useState } from 'react';
 
 const fmt = (amount: number, currency = 'usd') =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: currency.toUpperCase() }).format(

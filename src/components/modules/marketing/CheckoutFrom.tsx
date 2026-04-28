@@ -54,17 +54,17 @@ export default function CheckoutFrom() {
               <h2 className="text-primary font-semibold">Payment Method</h2>
             </div>
 
-            {/* Stripe */}
+            {/* Paypal */}
             <div className="border-brand-100 mb-4 flex items-center justify-between rounded-lg border p-3">
               <span className="text-primary flex items-center gap-2 text-sm font-medium">
                 <Image
-                  alt="stripe icon"
-                  src="/icons/stripe.png"
+                  alt="paypal icon"
+                  src="/icons/PayPal.png"
                   width={50}
                   height={25}
                   className="w-auto"
                 />{' '}
-                Stripe Payment
+                Paypal Payment
               </span>
               <input type="radio" checked readOnly />
             </div>

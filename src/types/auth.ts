@@ -10,7 +10,7 @@ export interface User {
   location?: string | null;
   createdAt: string;
   updatedAt: string;
-  isStripeAccountActive: boolean;
+  isPaypalAccountActive: boolean;
 }
 
 export interface AuthResponse {

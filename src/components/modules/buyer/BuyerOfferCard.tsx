@@ -83,7 +83,7 @@ export default function BuyerOfferCard({ offer }: { offer: Offer }) {
     setModal(null);
   };
 
-  // Redirect to Stripe payment URL from server response
+  // Redirect to checkout payment URL from server response
   const handlePayment = () => {
     if (checkoutData?.paymentUrl) {
       setIsRedirecting(true);
