@@ -8,7 +8,7 @@ export const listingMultiSchema = z
     price: z.string().min(1, 'Price is required'),
     category: z.string().min(1, 'Select a category'),
     brand: z.string().min(1, 'Brand is required'),
-    size: z.string().min(1, 'Size is required').optional(),
+    size: z.coerce.number().optional().default(1),
     condition: z.string().min(1, 'Select condition'),
     lockerSize: z.string().min(1, 'Select locker size'),
     location: z.string().min(1, 'Select locker address name '),

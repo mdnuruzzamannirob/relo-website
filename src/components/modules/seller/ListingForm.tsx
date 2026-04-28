@@ -1,12 +1,5 @@
 'use client';
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { useController, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertCircle, ImagePlus, Loader2, X } from 'lucide-react';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -15,13 +8,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { listingMultiSchema, type ListingMultiValues } from '@/lib/schema/product';
 import {
   useCreateProductMutation,
   useGetCategoriesQuery,
   useGetLockerAddressesQuery,
   useUpdateProductMutation,
 } from '@/store/apis/productApi';
-import { listingMultiSchema, type ListingMultiValues } from '@/lib/schema/product';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { AlertCircle, ImagePlus, Loader2, X } from 'lucide-react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useController, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 interface ListingFormProps {
   type: 'create' | 'edit';
@@ -100,7 +100,7 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
       price: initialData?.price ?? '',
       category: initialData?.category ?? '',
       brand: initialData?.brand ?? '',
-      size: initialData?.size ?? '',
+      size: initialData?.size ? Number(initialData.size) : 1,
       condition: initialData?.condition ?? '',
       lockerSize: initialData?.lockerSize ?? '',
       location: initialData?.location ?? '',
@@ -120,7 +120,7 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
     setValue,
     setError,
   } = useForm<ListingMultiValues>({
-    resolver: zodResolver(listingMultiSchema),
+    resolver: zodResolver(listingMultiSchema) as any,
     defaultValues,
   });
 
@@ -366,7 +366,7 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
         title: data.title,
         price: Number(data.price),
         brandName: data.brand,
-        size: Number(data.size),
+        size: data.size ?? 1,
         condition: data.condition,
         description: data.description,
         lockerSize: data.lockerSize ? data.lockerSize.toUpperCase() : data.lockerSize,
@@ -536,14 +536,14 @@ export default function ListingForm({ type, initialData, productId }: ListingFor
 
         <div className="md:col-span-2">
           <label htmlFor="size" className="mb-1 block text-sm font-medium text-slate-500">
-            Size <span className="text-red-500">*</span>
+            Size
           </label>
           <input
             id="size"
             type="number"
-            placeholder="Size"
+            placeholder="Size (optional, default: 1)"
             disabled={isSaving}
-            {...register('size')}
+            {...register('size', { valueAsNumber: true })}
             className="border-brand-100 focus:bg-brand-50/50 h-11 w-full rounded-md border px-4 text-sm transition-all outline-none placeholder:text-slate-400 focus:ring-1 focus:ring-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
           />
           {errors.size && (
